@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Rol extends Model
 {
+    use HasFactory;
+
     protected $table = 'rol';
 
     protected $fillable = [
@@ -15,8 +17,8 @@ class Rol extends Model
         'descripcion',
     ];
 
-    public function usuarios(): BelongsToMany
+    public function usuarios()
     {
-        return $this->belongsToMany(Usuario::class, 'usuario_rol', 'rol_id', 'usuario_id');
+        return $this->belongsToMany(Usuario::class, 'usuario_rol');
     }
 }
