@@ -17,6 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
+
 --
 -- Base de datos: `sistemarenta`
 --
@@ -60,6 +61,7 @@ CREATE TABLE `categoria_subcategoria` (
 CREATE TABLE `cliente` (
   `id` int(11) NOT NULL,
   `nombre` varchar(200) NOT NULL,
+  `apellido` varchar(200) NOT NULL,
   `rfc` varchar(13) DEFAULT NULL,
   `telefono_principal` varchar(20) DEFAULT NULL,
   `correo_electronico` varchar(100) DEFAULT NULL,
@@ -430,6 +432,7 @@ CREATE TABLE `subcategoria` (
 CREATE TABLE `usuario` (
   `id` int(11) NOT NULL,
   `nombre_usuario` varchar(100) NOT NULL,
+  `apellido_usuario` varchar(100) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `nombre_completo` varchar(200) DEFAULT NULL,
   `email` varchar(100) NOT NULL,
