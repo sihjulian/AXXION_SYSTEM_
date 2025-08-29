@@ -38,7 +38,6 @@ class UsuarioController extends Controller
             'departamento' => 'required',
             'estado' => 'required',
             'roles' => 'required'
-            
             ]);
             
             if ($validator->fails()) {
