@@ -9,7 +9,7 @@ use App\Http\Resources\UsuarioResource;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Validator;
 class UsuarioController extends Controller
 {
     /**
@@ -24,23 +24,54 @@ class UsuarioController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreUsuarioRequest $request)
+    public function store(Request $request)
     {
-        $data = $request->validated();
-        $data['password_hash'] = Hash::make($data['password']);
+        $validator = Validator :: make($request->all(), [
+            'nombre_usuario' => 'required',
+            'nombre' => 'required',
+            'nombre2' => 'required',
+            'apellido1' => 'required',
+            'apellido2' => 'required',
+            'password' => 'required',
+            'email' => 'required|email',
+            'telefono' => 'required',
+            'departamento' => 'required',
+            'estado' => 'required',
+            'roles' => 'required'
+            
+            ]);
+            
+            if ($validator->fails()) {
+            $data = [
+            'message' => 'Error en la validacion de los datos',
+            'errors' => $validator->errors(),
+            'status' => 400
+            ];
 
-        $roles = $data['roles'] ?? [];
-        unset($data['roles'], $data['password']);
-
-        $usuario = Usuario::create($data);
-
-        if (!empty($roles)) {
-            $usuario->roles()->sync($roles);
+            return response()->json($data, 400);    
         }
 
-        return (new UsuarioResource($usuario->load('roles')))
-            ->response()
-            ->setStatusCode(201);
+    $usuario = Usuario::create([
+        'nombre_usuario' => $request->nombre_usuario,
+        'nombre' => $request->nombre,
+        'nombre2' => $request->nombre2,
+        'apellido1' => $request->apellido1,
+        'apellido2' => $request->apellido2,
+        'password_hash' => Hash::make($request->password),
+        'email' => $request->email,
+        'telefono' => $request->telefono,
+        'departamento' => $request->departamento,
+    ]);
+        
+        if ($request->has('roles')) {
+            $usuario->roles()->sync($request->roles);
+        }
+
+
+        return response()->json([
+            'message' => 'Usuario creado correctamente',
+            'data' => $usuario
+        ], 201);
     }
 
     /**
@@ -54,26 +85,6 @@ class UsuarioController extends Controller
 
     /**
      * Update the specified resource in storage.
-     */
-    public function update(UpdateUsuarioRequest $request, string $id)
-    {
-        $usuario = Usuario::findOrFail($id);
-        $data = $request->validated();
-
-        if (isset($data['password'])) {
-            $usuario->password_hash = Hash::make($data['password']);
-            unset($data['password']);
-        }
-
-        if (array_key_exists('roles', $data)) {
-            $usuario->roles()->sync($data['roles'] ?? []);
-            unset($data['roles']);
-        }
-
-        $usuario->update($data);
-
-        return new UsuarioResource($usuario->load('roles'));
-    }
 
     /**
      * Remove the specified resource from storage.
