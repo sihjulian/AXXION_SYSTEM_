@@ -17,7 +17,10 @@ class UsuarioResource extends JsonResource
         return [
             'id' => $this->id,
             'nombre_usuario' => $this->nombre_usuario,
-            'nombre_completo' => $this->nombre_completo,
+            'nombre' => $this->nombre,
+            'nombre2' => $this->nombre2,
+            'apellido1' => $this->apellido1,
+            'apellido2' => $this->apellido2,
             'email' => $this->email,
             'telefono' => $this->telefono,
             'departamento' => $this->departamento,
