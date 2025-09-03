@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\categoriaController;
 use Illuminate\Support\Facades\Route;
 use app\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\rolController;
@@ -19,3 +20,8 @@ Route::get('/rol/{id}', [rolController::class, 'show']);
 Route::delete('/rol/{id}', [rolController::class, 'destroy']);
 Route::put('/rol/{id}', [rolController::class, 'update']);
 Route::patch('/rol/{id}', [rolController::class, 'updatePartial']);
+
+// CATEGORIA
+
+Route::get('/categoria', [categoriaController::class, 'index']);
+Route::post('/categoria', [categoriaController::class, 'store']);
