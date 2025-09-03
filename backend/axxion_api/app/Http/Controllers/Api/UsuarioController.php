@@ -10,6 +10,10 @@ use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+
+
 class UsuarioController extends Controller
 {
     /**
@@ -32,12 +36,12 @@ class UsuarioController extends Controller
             'nombre2' => 'required',
             'apellido1' => 'required',
             'apellido2' => 'required',
-            'password' => 'required',
-            'email' => 'required|email',
+            'password' => 'required|min:6',
+            'email' => 'required|email|unique:usuario,email',
             'telefono' => 'required',
             'departamento' => 'required',
             'estado' => 'required',
-            'roles' => 'required'
+            'roles' => 'required|array'
             ]);
             
             if ($validator->fails()) {
@@ -56,6 +60,7 @@ class UsuarioController extends Controller
         'nombre2' => $request->nombre2,
         'apellido1' => $request->apellido1,
         'apellido2' => $request->apellido2,
+        // store hashed password in password_hash column
         'password_hash' => Hash::make($request->password),
         'email' => $request->email,
         'telefono' => $request->telefono,
@@ -81,9 +86,56 @@ class UsuarioController extends Controller
         $usuario = Usuario::with('roles')->findOrFail($id);
         return new UsuarioResource($usuario);
     }
+     
+
+    public function login(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email',
+            'password' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+            // Intentar autenticar con las credenciales
+            if (!$token = auth('api')->attempt([
+                'email' => $request->email,
+                'password' => $request->password
+            ])) {
+                // Verificar si el usuario existe
+                $user = Usuario::where('email', $request->email)->first();
+                if (!$user) {
+                    return response()->json(['error' => 'Usuario no encontrado'], 401);
+                }
+                
+                return response()->json(['error' => 'Contraseña incorrecta'], 401);
+            }
+
+            // Si llegamos aquí, la autenticación fue exitosa
+            $user = auth('api')->user();
+            return response()->json([
+                'token' => $token,
+                'user' => [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    'roles' => $user->roles()->pluck('codigo')->toArray()
+                ]
+            ], 200);
+
+        } catch (JWTException $e) {
+            return response()->json([
+                'error' => 'No se pudo crear el token',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+
+    }
 
     /**
      * Update the specified resource in storage.
+     */
 
     /**
      * Remove the specified resource from storage.
@@ -94,5 +146,11 @@ class UsuarioController extends Controller
         $usuario->roles()->detach();
         $usuario->delete();
         return response()->json(status: 204);
+    }
+
+    public function logout(){
+        JWTAuth::invalidate(JWTAuth::getToken());
+        return response()->json(['message' => 'Logged out successfully'], 200);
+
     }
 }
