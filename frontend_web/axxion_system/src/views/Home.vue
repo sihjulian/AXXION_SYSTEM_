@@ -10,7 +10,9 @@
       <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-xl p-8 h-full flex flex-col">
         <!-- Encabezado del contenido - REUTILIZADO -->
         <headerP></headerP>
-
+        <fwb-alert type="success">
+    Success! You can now use Flowbite Vue in your Vue application 🎉
+  </fwb-alert>
         <!-- Contenido del Panel de Inicio -->
         <div class="flex-grow flex justify-center">
           <div class="w-full max-w-5xl">
@@ -222,12 +224,41 @@
         </div>
       </div>
     </main>
+
   </div>
+  <fwb-footer>
+    <fwb-footer-copyright
+      by="Flowbite™"
+      href="https://flowbite.com/"
+      copyright-message="All Rights Reserved."
+    />
+    <fwb-footer-link-group>
+      <fwb-footer-link href="#">
+        About
+      </fwb-footer-link>
+      <fwb-footer-link href="#">
+        Privacy Policy
+      </fwb-footer-link>
+      <fwb-footer-link href="#">
+        Licensing
+      </fwb-footer-link>
+      <fwb-footer-link href="#">
+        Contact
+      </fwb-footer-link>
+    </fwb-footer-link-group>
+  </fwb-footer>
 </template>
 
 <script setup>
 import { RouterLink } from 'vue-router';
 import SideBar from '@/components/SideBar.vue'
 import headerP from '@/components/headerP.vue'
+import { FwbAlert } from 'flowbite-vue'
+import {
+  FwbFooter,
+  FwbFooterCopyright,
+  FwbFooterLink,
+  FwbFooterLinkGroup,
+} from 'flowbite-vue'
 </script>
 <style></style>
