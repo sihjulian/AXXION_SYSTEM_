@@ -41,4 +41,5 @@ class Cotizacion extends Model
     {
         return $this->hasOne(Renta::class);
     }
+    
 }

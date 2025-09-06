@@ -71,14 +71,13 @@ DESCRIBE cliente;
 DESCRIBE producto;
 DESCRIBE renta;
 
-SELECT * FROM producto;
 -- ------------------------------------------------------------------------------------- --
 -- 06. Agregar Columna. ---------------------------------------------------------------- --
 --     ALTER TABLE __ ADD __ __ : ------------------------------------------------------ --
 -- ------------------------------------------------------------------------------------- --
 -- Agregamos una columna para el peso en la tabla de productos.
 ALTER TABLE producto ADD peso_kg DECIMAL(7,2) NULL;
-
+ALTER TABLE cliente ADD apellido varchar(200) NOT NULL;
 -- ------------------------------------------------------------------------------------- --
 -- 07. Renombrar Columna. -------------------------------------------------------------- --
 --     ALTER TABLE __ CHANGE __ __ : --------------------------------------------------- --
@@ -118,8 +117,7 @@ SHOW CREATE TABLE cotizacion;
 -- 12. Eliminar Restricción. ----------------------------------------------------------- --
 --     ALTER TABLE __ DROP CONSTRAINT __ / DROP FOREIGN KEY __ : ----------------------- --
 -- ------------------------------------------------------------------------------------- --
--- Nota: MySQL a menudo autogenera nombres de constraints si no se especifican.
--- Usa SHOW CREATE TABLE [tabla] para ver el nombre real de la constraint.
+
 ALTER TABLE renta DROP FOREIGN KEY fk_renta_cliente;
 ALTER TABLE detalle_cotizacion DROP FOREIGN KEY fk_detalle_cotizacion;
 
@@ -158,7 +156,7 @@ DROP TABLE detalle_renta;
 -- 17. Crear Tabla. -------------------------------------------------------------------- --
 --     CREATE TABLE __ ( __ , __ ) : --------------------------------------------------- --
 -- ------------------------------------------------------------------------------------- --
--- Re-creamos una de las tablas para el ejemplo (copiada de tu esquema).
+
 CREATE TABLE `proveedor` (
   `id` int(11) NOT NULL,
   `nombre_empresa` varchar(200) NOT NULL,

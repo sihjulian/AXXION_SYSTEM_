@@ -22,8 +22,8 @@ SET estado_item = 'EnMantenimiento',
     updated_at = CURRENT_TIMESTAMP
 WHERE estado_item = 'Disponible'
 AND id IN (SELECT inventario_item_id 
-          FROM mantenimiento 
-          WHERE estado_mantenimiento = 'Programado');
+        FROM mantenimiento 
+        WHERE estado_mantenimiento = 'Programado');
 
 -- Actualizar precios de renta
 UPDATE producto
