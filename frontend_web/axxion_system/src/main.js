@@ -8,10 +8,12 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-
+import axios from 'axios'
+import { createPinia } from 'pinia'
 library.add(fas, far, fab)
 
 const app = createApp(App)
+app.use(createPinia())
 app. component ('font-awesome-icon' , FontAwesomeIcon)
 
 app.use(router)

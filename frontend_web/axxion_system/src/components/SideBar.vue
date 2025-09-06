@@ -1,5 +1,5 @@
 <template>
-  <aside class="w-70 h-500 bg-gray-800 text-white flex-shrink-0">
+  <aside class="w-70 h-screen bg-gray-800 text-white flex-shrink-0">
     <div
       class="p-10 flex h-18 items-center justify-center text-2xl font-bold border-b border-gray-700"
     >
@@ -7,6 +7,9 @@
     </div>
     <nav class="mt-6">
       <ul>
+        <li>
+      <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/home">Inicio</RouterLink>
+        </li>
          <li>
       <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/User">Usuarios</RouterLink>
         </li>
