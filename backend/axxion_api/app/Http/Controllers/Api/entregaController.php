@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Entrega;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class entregaController extends Controller
 {
@@ -17,15 +19,17 @@ class entregaController extends Controller
         ];
         return response()->json($data, 200);
         }
-        public function store(Request $request){
+        public function store(Request $request)
+        {
+            try {
             $validator = Validator::make($request->all(),[
-                'renta_id' => 'required',
-                'direccion_id' => 'required',
-                'fecha_envio' => 'required',
-                'compania_envio' => 'required',
-                'numero_guia' => 'required',
-                'estado_entrega' => 'required',
-                'notas' => 'required',
+                'renta_id' => ['required', Rule::exists('renta', 'id')],
+                'direccion_id' => ['required', Rule::exists('direccion', 'id')],
+                'fecha_envio' => ['required', 'date'],
+                'compania_envio' => ['required', 'string'],
+                'numero_guia' => ['required', 'string'],
+                'estado_entrega' => ['required', Rule::in(['Programada','EnTransito','Entregada','Fallida'])],
+                'notas' => ['required', 'string']
             ]);
             if($validator->fails()){
                 $data = [
@@ -51,12 +55,23 @@ class entregaController extends Controller
                 ];
                 return response()->json($data, 500);
             }
+            $entrega->load('renta', 'direccion');
             $data = [
                 'entrega' => $entrega,
                 'status' => 200
             ];
             return response()->json($data, 200);
+
+            } catch (\Exception $e) {
+                Log::error('Error al crear Entrega: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Error interno al crear la entrega',
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }
         }
+    
         public function show($id){
             $entrega = Entrega::find($id);
             if(!$entrega){
@@ -89,30 +104,31 @@ class entregaController extends Controller
             return response()->json($data, 200);
         }
         public function update(Request $request, $id){
-            $entrega = Entrega::find($id);
-            if(!$entrega){
-                $data = [
-                    'message' => 'Entrega no encontrada',
-                    'status' => 404
+            try {
+                $entrega = Entrega::find($id);
+                if(!$entrega){
+                    $data = [
+                        'message' => 'Entrega no encontrada',
+                        'status' => 404
                 ];
                 return response()->json($data, 404);
             }
-            $validator = Validator::make($request->all(), [
-                'renta_id' => 'required',
-                'direccion_id' => 'required',
-                'fecha_envio' => 'required',
-                'compania_envio' => 'required',
-                'numero_guia' => 'required',
-                'estado_entrega' => 'required',
-                'notas' => 'required',
+            $validator = Validator::make($request->all(),[
+                'renta_id' => ['required', Rule::exists('renta', 'id')],
+                'direccion_id' => ['required', Rule::exists('direccion', 'id')],
+                'fecha_envio' => ['required', 'date'],
+                'compania_envio' => ['required', 'string'],
+                'numero_guia' => ['required', 'string'],
+                'estado_entrega' => ['required', Rule::in(['Programada','EnTransito','Entregada','Fallida'])],
+                'notas' => ['required', 'string']
             ]);
             if($validator->fails()){
                 $data = [
                     'message' => 'Validator failed',
                     'errors' => $validator->errors(),
-                    'status' => 400
+                    'status' => 201
                 ];
-                return response()->json($data, 400);
+                return response()->json($data, 201);
             }
             $entrega->renta_id = $request->renta_id;
             $entrega->direccion_id = $request->direccion_id;
@@ -122,14 +138,26 @@ class entregaController extends Controller
             $entrega->estado_entrega = $request->estado_entrega;
             $entrega->notas = $request->notas;
             $entrega->save();
+            $entrega->load('renta', 'direccion');
             $data = [
                 'message' => 'entrega actualizado',
                 'entrega' => $entrega,
                 'status' => 200
             ];
             return response()->json($data, 200);
+            
+            } catch (\Exception $e) {
+                Log::error('Error al actualizar Entrega: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Error interno al actualizar la entrega',
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }
         }
-        public function updatePartial(Request $request, $id){
+        public function updatePartial(Request $request, $id)
+        {
+            try {
             $entrega = Entrega::find($id);
             if(!$entrega){
                 $data = [
@@ -139,22 +167,22 @@ class entregaController extends Controller
                 return response()->json($data, 404);
             }
             $validator = Validator::make($request->all(),[
-                'renta_id' => 'string',
-                'direccion_id' => 'string',
-                'fecha_envio' => 'string',
-                'compania_envio' => 'string',
-                'numero_guia' => 'string',
-                'estado_entrega' => 'string',
-                'notas' => 'string'
+                'renta_id' => [ Rule::exists('renta','id')],
+                'direccion_id' => [ Rule::exists('direccion','id')],
+                'fecha_envio' => ['date'],
+                'compania_envio' => ['string'],
+                'numero_guia' => ['string'],
+                'estado_entrega' => ['string', Rule::in(['Programada','EnTransito','Entregada','Fallida'])],
+                'notas' => ['string']
             ]);
             
             if($validator->fails()){
                 $data = [
                     'message' => 'Error en la Validacion',
                     'errors' => $validator->errors(),
-                    'status' => 400
+                    'status' => 201
                 ];
-                return response()->json($data, 400);
+                return response()->json($data, 201);
             }
             
             if($request->has('renta_id')){
@@ -179,11 +207,20 @@ class entregaController extends Controller
                 $entrega->notas = $request->notas;
             }
             $entrega->save();
+            $entrega->load('renta', 'direccion');
             $data = [
                 'message' => 'entrega actualizado',
                 'entrega' => $entrega,
                 'status' => 200
             ];
             return response()->json($data, 200);
+            } catch (\Exception $e) {
+                Log::error('Error al actualizar Entrega: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Error interno al actualizar la entrega',
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }
         }
     }

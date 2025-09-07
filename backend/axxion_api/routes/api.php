@@ -14,13 +14,16 @@ use App\Http\Controllers\Api\entregaController;
 // Rutas públicas (sin autenticación)
 Route::post('/usuarios', [UsuarioController::class, 'store']);
 Route::post('/login', [UsuarioController::class, 'login']);
- DEV_julian
+
  Route::get('/usuarios', [UsuarioController::class, 'index']);
  Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
 
 Route::get('/usuarios', [UsuarioController::class, 'index']);
 Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
- main
+
+Route::get('/usuarios', [UsuarioController::class, 'index']);
+Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
+
 
 // Rutas protegidas (requieren autenticación)
 Route::middleware(['jwt.auth'])->group(function () {
@@ -113,4 +116,4 @@ Route::get('/entrega/{id}', [entregaController::class, 'show']);
 Route::delete('/entrega/{id}', [entregaController::class, 'destroy']);
 Route::put('/entrega/{id}', [entregaController::class, 'update']);
 Route::patch('/entrega/{id}', [entregaController::class, 'updatePartial']);
- main
+
