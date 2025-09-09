@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '/src/views/Home.vue'
 import User from '@/views/User.vue'
 import Login from '@/views/login.vue'
+import Inventory from '@/views/Inventory.vue'
 
 
 const routes = [
@@ -22,6 +23,12 @@ const routes = [
     path: '/User',
     name: 'usuarios',
     component: User,
+    meta: { requiresAuth: false },
+  },
+    {
+    path: '/Inventory',
+    name: 'Inventory',
+    component: Inventory,
     meta: { requiresAuth: false },
   },
 ]

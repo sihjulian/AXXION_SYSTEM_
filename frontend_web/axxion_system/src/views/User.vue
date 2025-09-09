@@ -5,9 +5,29 @@
 
     <RouterView></RouterView>
 
-  <main class="container">
+  <main class="container h-screen">
+
   <div class="rounded-lg flex-col">
     <headerP></headerP>
+      <div class="p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-800 rounded-lg h-full">
+        <div class="mb-4">
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Usuarios</h1>
+          <p class="text-gray-500 dark:text-gray-400">Administra los usuarios del sistema</p>
+        </div>
+
+        <div class="flex  mb-4">
+         <FwbAlert
+            v-if="userStore.error"
+            :color="'red'"
+            :dismissible="true"
+            class="w-full"
+          >
+            {{ userStore.error }}
+          </FwbAlert>
+        </div>
+        
+        </div>  
+
      <div class=" flex-col h-30 m-auto  w-1/2  justify-start md:justify-between " >
           <!-- Botón Agregar -->
      

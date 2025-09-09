@@ -1,5 +1,5 @@
 <template>
-  <aside class="w-70 h-screen bg-gray-800 text-white flex-shrink-0">
+  <aside class="w-70 h-auto  bg-gray-800 text-white flex-shrink-0">
     <div
       class="p-10 flex h-18 items-center justify-center text-2xl font-bold border-b border-gray-700"
     >
@@ -29,12 +29,7 @@
           >
         </li>
         <li>
-          <a
-            href="inventario.html"
-            class="sidebar-item flex items-center py-3 px-6 "
-            
-            >Inventario</a
-          >
+         <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Inventory">Inventario</RouterLink>
         </li>
         <li>
           <a href="reportes.html" class="sidebar-item flex items-center py-3 px-6 "
