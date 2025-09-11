@@ -4,6 +4,7 @@ import Home from '/src/views/Home.vue'
 import User from '@/views/User.vue'
 import Login from '@/views/login.vue'
 import Inventory from '@/views/Inventory.vue'
+import Category from '@/views/Category.vue'
 
 
 const routes = [
@@ -29,6 +30,12 @@ const routes = [
     path: '/Inventory',
     name: 'Inventory',
     component: Inventory,
+    meta: { requiresAuth: false },
+  },
+    {
+    path: '/Category',
+    name: 'Category',
+    component: Category,
     meta: { requiresAuth: false },
   },
 ]

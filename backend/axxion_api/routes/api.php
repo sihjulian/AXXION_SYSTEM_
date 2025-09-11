@@ -3,7 +3,7 @@
 use App\Http\Controllers\Api\categoriaController;
 use App\Http\Controllers\Api\clienteController;
 use Illuminate\Support\Facades\Route;
-use app\Http\Controllers\Api\UsuarioController;
+use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\rolController;
 use App\Http\Controllers\Api\cotizacionController;
 use App\Http\Controllers\Api\detalleCotizacionController;
@@ -17,12 +17,6 @@ Route::post('/login', [UsuarioController::class, 'login']);
 
  Route::get('/usuarios', [UsuarioController::class, 'index']);
  Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
-
-Route::get('/usuarios', [UsuarioController::class, 'index']);
-Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
-
-Route::get('/usuarios', [UsuarioController::class, 'index']);
-Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
 
 
 // Rutas protegidas (requieren autenticación)

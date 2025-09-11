@@ -14,11 +14,7 @@
       <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/User">Usuarios</RouterLink>
         </li>
         <li>
-          <a
-            href="categorias.html"
-            class="sidebar-item flex items-center py-3 px-6 "
-            >Categorias</a
-          >
+          <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Category">Categorias</RouterLink>
         </li>
         <li>
           <a
