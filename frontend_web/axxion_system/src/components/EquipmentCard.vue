@@ -224,3 +224,4 @@ const handleImageError = (event) => {
   margin-top: auto;
 }
 </style>
+

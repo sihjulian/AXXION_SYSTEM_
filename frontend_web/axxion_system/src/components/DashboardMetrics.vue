@@ -372,3 +372,4 @@ onMounted(() => {
 <style scoped>
 /* Estilos adicionales si son necesarios */
 </style>
+

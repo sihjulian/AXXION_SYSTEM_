@@ -121,13 +121,13 @@ import headerP from '@/components/headerP.vue';
 import Modal from '@/components/modal.vue';
 import UserCard from '@/components/UserCard.vue';
 import UserForm from '@/components/UserForm.vue';
-import { FwbAlert } from 'flowbite-vue';
 import {
+  FwbAlert,
   FwbFooter,
   FwbFooterCopyright,
   FwbFooterLink,
   FwbFooterLinkGroup,
-} from 'flowbite-vue'
+} from 'flowbite-vue';
 import { FwbButton } from 'flowbite-vue';
 import { FwbModal } from 'flowbite-vue';
 // Store
@@ -164,10 +164,11 @@ function showDeleteModal (user) {
 const getuserdata = async () => {
   try {
     await userStore.fetchUsers();
+    console.log(users.value);
     
     // Clear displayedUsers and then reveal each user with a small delay
     displayedUsers.value = [];
-    const delayPerCard = 1000; // ms per card reveal
+    const delayPerCard = 500; // ms per card reveal
 
     for (let i = 0; i < users.value.length; i++) {
       // wait before pushing the next user so UI updates between pushes

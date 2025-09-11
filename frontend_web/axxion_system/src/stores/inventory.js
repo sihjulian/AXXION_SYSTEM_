@@ -297,3 +297,4 @@ export const useInventoryStore = defineStore('inventory', () => {
     clearSelectedEquipment
   };
 });
+

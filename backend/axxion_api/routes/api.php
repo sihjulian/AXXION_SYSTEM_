@@ -3,25 +3,21 @@
 use App\Http\Controllers\Api\categoriaController;
 use App\Http\Controllers\Api\clienteController;
 use Illuminate\Support\Facades\Route;
-use app\Http\Controllers\Api\UsuarioController;
+use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\rolController;
 use App\Http\Controllers\Api\cotizacionController;
 use App\Http\Controllers\Api\detalleCotizacionController;
 use App\Http\Controllers\Api\devolucionController;
 use App\Http\Controllers\Api\direccionController;
+
 use App\Http\Controllers\Api\entregaController;
 
 // Rutas públicas (sin autenticación)
 Route::post('/usuarios', [UsuarioController::class, 'store']);
-Route::post('/login', [UsuarioController::class, 'login']);
- DEV_julian
- Route::get('/usuarios', [UsuarioController::class, 'index']);
- Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
 
-Route::get('/usuarios', [UsuarioController::class, 'index']);
+Route::post('/login',    [UsuarioController::class, 'login']);
+Route::get('/usuarios',  [UsuarioController::class, 'index']);
 Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
- main
-
 // Rutas protegidas (requieren autenticación)
 Route::middleware(['jwt.auth'])->group(function () {
     
@@ -113,4 +109,3 @@ Route::get('/entrega/{id}', [entregaController::class, 'show']);
 Route::delete('/entrega/{id}', [entregaController::class, 'destroy']);
 Route::put('/entrega/{id}', [entregaController::class, 'update']);
 Route::patch('/entrega/{id}', [entregaController::class, 'updatePartial']);
- main

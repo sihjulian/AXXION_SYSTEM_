@@ -12,7 +12,14 @@ interface User {
   email: string;
   telefono: string;
   estado: string;
-}
+};
+
+
+
+
+const test = () => {
+  console.log();
+};
 
 const props = defineProps<{
   user: User;
@@ -87,7 +94,7 @@ const fullName = computed(() => {
           <svg class="h-5 w-5 text-gray-500 fill-current mr-3 flex-shrink-0" viewBox="0 0 512 512">
             <path d="M437.332 80H74.668C51.199 80 32 99.198 32 122.667v266.666C32 412.802 51.199 432 74.668 432h362.664C460.801 432 480 412.802 480 389.333V122.667C480 99.198 460.801 80 437.332 80zM432 170.667L256 288 80 170.667V128l176 117.333L432 128v42.667z"/>
           </svg>
-          <span class="text-sm truncate">{{ props.user.email }}</span>
+          <span class="text-sm ">{{ props.user.email }}</span>
         </div>
 
         <!-- Teléfono -->

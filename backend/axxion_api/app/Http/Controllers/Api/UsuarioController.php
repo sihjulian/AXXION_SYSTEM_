@@ -16,9 +16,8 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UsuarioController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+
     public function index()
     {
         $usuarios = Usuario::all();
@@ -33,9 +32,10 @@ class UsuarioController extends Controller
         $validator = Validator :: make($request->all(), [
             'nombre_usuario' => 'required',
             'nombre' => 'required',
-            'nombre2' => 'required',
+            // second name and second surname can be optional
+            'nombre2' => 'nullable',
             'apellido1' => 'required',
-            'apellido2' => 'required',
+            'apellido2' => 'nullable',
             'password' => 'required|min:6',
             'email' => 'required|email|unique:usuario,email',
             'telefono' => 'required',
@@ -65,6 +65,7 @@ class UsuarioController extends Controller
         'email' => $request->email,
         'telefono' => $request->telefono,
         'departamento' => $request->departamento,
+        'estado' => $request->estado,
     ]);
         
         if ($request->has('roles')) {
