@@ -82,6 +82,7 @@
             </main>
         </div>
         </div>
+        
         <fwb-footer>
             <fwb-footer-copyright
             by="Flowbite™"

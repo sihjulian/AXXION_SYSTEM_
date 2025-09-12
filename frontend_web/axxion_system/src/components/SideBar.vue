@@ -10,19 +10,14 @@
         <li>
       <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/home">Inicio</RouterLink>
         </li>
-         <li>
+        <li>
       <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/User">Usuarios</RouterLink>
         </li>
         <li>
           <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Category">Categorias</RouterLink>
         </li>
         <li>
-          <a
-            href="subcategoria.html"
-            class="sidebar-item flex items-center py-3 px-6 "
-          
-            >Subcategorias</a
-          >
+          <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/SubCategory">Subcategorias</RouterLink>
         </li>
         <li>
          <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Inventory">Inventario</RouterLink>

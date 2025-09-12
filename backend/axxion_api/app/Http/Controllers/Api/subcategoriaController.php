@@ -1,0 +1,179 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Subcategoria;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+
+class subcategoriaController extends Controller
+    {
+        public function index(){
+        $subcategoria = Subcategoria::all();
+        $data = [
+            'categoria' => $subcategoria,
+            'status' => 200
+        ];
+        return response()->json($data, 200);
+        }
+        public function store(Request $request)
+        {
+            try {
+            $validator = Validator::make($request->all(),[
+                'nombre' => ['required', 'string'],
+                'descripcion' => ['required', 'string']
+            ]);
+            if($validator->fails()){
+                $data = [
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                    'status' => 400
+                ];
+                return response()->json($data, 400);
+            }
+            $subcategoria = Subcategoria::create([
+                'nombre' => $request->nombre,
+                'descripcion' => $request->descripcion
+            ]);
+            if(!$subcategoria){
+                $data = [
+                    'message' => 'Error al crear subcategoria',
+                    'status' => 500
+                ];
+                return response()->json($data, 500);
+            }
+            $data = [
+                'subcategoria' => $subcategoria,
+                'status' => 200
+            ];
+            return response()->json($data, 200);
+            } catch (\Exception $e) {
+                Log::error('Error al crear Entrega: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Error interno al crear la entrega',
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }
+        }
+        public function show($id){
+            $subcategoria = Subcategoria::find($id);
+            if(!$subcategoria){
+                $data = [
+                    'message' => 'subcategoria no encontrada',
+                    'status' => 404
+                ];
+                return response()->json($data, 404);
+            }
+            $data = [
+                'subcategoria' => $subcategoria,
+                'status' => 200
+            ];
+            return response()->json($data, 200);
+        }
+        public function destroy($id){
+            $subcategoria = Subcategoria::find($id);
+            if(!$subcategoria){
+                $data = [
+                    'message' => 'subCategoria no encontrada',
+                    'status' => 404
+                ];
+                return response()->json($data, 404);
+            }
+            $subcategoria->delete();
+            $data = [
+                'subcategoria' => $subcategoria,
+                'status' => 200
+            ];
+            return response()->json($data, 200);
+        }
+        public function update(Request $request, $id)
+        {
+            try {
+            $subcategoria = Subcategoria::find($id);
+            if(!$subcategoria){
+                $data = [
+                    'message' => 'subcategoria no encontrada',
+                    'status' => 200
+                ];
+                return response()->json($data, 200);
+            }
+            $validator = Validator::make($request->all(), [
+                'nombre' => ['required', 'string'],
+                'descripcion' => ['required', 'string']
+            ]);
+            if($validator->fails()){
+                $data = [
+                    'message' => 'Validator failed',
+                    'errors' => $validator->errors(),
+                    'status' => 400
+                ];
+                return response()->json($data, 400);
+            }
+            $subcategoria->nombre = $request->nombre;
+            $subcategoria->descripcion = $request->descripcion;
+            $subcategoria->save();
+            $data = [
+                'message' => 'subcategoria actualizada',
+                'subcategoria' => $subcategoria,
+                'status' => 200
+            ];
+            return response()->json($data, 200);
+            } catch (\Exception $e) {
+                Log::error('Error al crear Entrega: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Error interno al crear la entrega',
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }
+        }
+        public function updatePartial(Request $request, $id){
+            try {
+            $subcategoria = Subcategoria::find($id);
+            if(!$subcategoria){
+                $data = [
+                    'message' => 'subcategoria no encontrado',
+                    'status' => 404
+                ];
+                return response()->json($data, 404);
+            }
+            $validator = Validator::make($request->all(),[
+                'nombre' => ['string'],
+                'descripcion' => ['string']
+            ]);
+            
+            if($validator->fails()){
+                $data = [
+                    'message' => 'Error en la Validacion',
+                    'errors' => $validator->errors(),
+                    'status' => 400
+                ];
+                return response()->json($data, 400);
+            }
+            
+            if($request->has('nombre')){
+                $subcategoria->nombre = $request->nombre;
+            }
+            if($request->has('descripcion')){
+                $subcategoria->descripcion = $request->descripcion;
+            }
+            $subcategoria->save();
+            $data = [
+                'message' => 'subcategoria actualizado',
+                'subcategoria' => $subcategoria,
+                'status' => 200
+            ];
+            return response()->json($data, 200);
+            } catch (\Exception $e) {
+                Log::error('Error al crear subcategoria: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Error interno al crear la subcategoria',
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }
+        }
+    }
