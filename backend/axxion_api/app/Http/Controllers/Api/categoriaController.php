@@ -6,22 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class categoriaController extends Controller
     {
         public function index(){
-        $categoria = Categoria::all();
+        $categoria = Categoria::with('subcategorias')->get();
         $data = [
             'categoria' => $categoria,
             'status' => 200
         ];
         return response()->json($data, 200);
         }
-        public function store(Request $request){
+        public function store(Request $request)
+        {
+            try {
             $validator = Validator::make($request->all(),[
-                'nombre' => 'required',
-                'descripcion' => 'required',
-                'tipo_categoria' => 'required'
+                'nombre' => ['required', 'string'],
+                'descripcion' => ['required', 'string'],
+                'tipo_categoria' => ['required', 'string'],
+                'subcategorias' => ['array'],
             ]);
             if($validator->fails()){
                 $data = [
@@ -43,14 +47,25 @@ class categoriaController extends Controller
                 ];
                 return response()->json($data, 500);
             }
+            if($request->has('subcategorias')){
+                $categoria->subcategorias()->sync($request->subcategorias);
+            }
             $data = [
                 'categoria' => $categoria,
                 'status' => 200
             ];
             return response()->json($data, 200);
+            } catch (\Exception $e) {
+                Log::error('Error al crear Entrega: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Error interno al crear la entrega',
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }
         }
         public function show($id){
-            $categoria = Categoria::find($id);
+            $categoria = Categoria::with('subcategorias')->find($id);
             if(!$categoria){
                 $data = [
                     'message' => 'Categoria no encontrada',
@@ -65,7 +80,7 @@ class categoriaController extends Controller
             return response()->json($data, 200);
         }
         public function destroy($id){
-            $categoria = Categoria::find($id);
+            $categoria = Categoria::with('subcategorias')->find($id);
             if(!$categoria){
                 $data = [
                     'message' => 'Categoria no encontrada',
@@ -73,6 +88,7 @@ class categoriaController extends Controller
                 ];
                 return response()->json($data, 404);
             }
+            $categoria->subcategorias()->detach();
             $categoria->delete();
             $data = [
                 'categoria' => $categoria,
@@ -80,8 +96,10 @@ class categoriaController extends Controller
             ];
             return response()->json($data, 200);
         }
-        public function update(Request $request, $id){
-            $categoria = Categoria::find($id);
+        public function update(Request $request, $id)
+        {
+            try {
+            $categoria = Categoria::with('subcategorias')->find($id);
             if(!$categoria){
                 $data = [
                     'message' => 'categoria no encontrada',
@@ -90,9 +108,10 @@ class categoriaController extends Controller
                 return response()->json($data, 200);
             }
             $validator = Validator::make($request->all(), [
-                'nombre' => 'required',
-                'descripcion' => 'required',
-                'tipo_categoria' => 'required',
+                'nombre' => ['required', 'string'],
+                'descripcion' => ['required', 'string'],
+                'tipo_categoria' => ['required', 'string'],
+                'subcategorias' => ['array'],
             ]);
             if($validator->fails()){
                 $data = [
@@ -105,6 +124,9 @@ class categoriaController extends Controller
             $categoria->nombre = $request->nombre;
             $categoria->descripcion = $request->descripcion;
             $categoria->tipo_categoria = $request->tipo_categoria;
+            if($request->has('subcategorias')){
+                $categoria->subcategorias()->sync($request->subcategorias);
+            }
             $categoria->save();
             $data = [
                 'message' => 'categoria actualizada',
@@ -112,9 +134,19 @@ class categoriaController extends Controller
                 'status' => 200
             ];
             return response()->json($data, 200);
+            } catch (\Exception $e) {
+                Log::error('Error al crear Entrega: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Error interno al crear la entrega',
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }
         }
-        public function updatePartial(Request $request, $id){
-            $categoria = Categoria::find($id);
+        public function updatePartial(Request $request, $id)
+        {
+            try {
+            $categoria = Categoria::with('subcategorias')->find($id);
             if(!$categoria){
                 $data = [
                     'message' => 'categoria no encontrado',
@@ -123,9 +155,10 @@ class categoriaController extends Controller
                 return response()->json($data, 404);
             }
             $validator = Validator::make($request->all(),[
-                'nombre' => 'string',
-                'descripcion' => 'string',
-                'tipo_categoria' => 'string'
+                'nombre' => ['string'],
+                'descripcion' => ['string'],
+                'tipo_categoria' => ['string'],
+                'subcategorias' => ['array'],
             ]);
             
             if($validator->fails()){
@@ -146,6 +179,9 @@ class categoriaController extends Controller
             if($request->has('tipo_categoria')){
                 $categoria->tipo_categoria = $request->tipo_categoria;
             }
+            if($request->has('subcategorias')){
+                $categoria->subcategorias()->sync($request->subcategorias);
+            }
             $categoria->save();
             $data = [
                 'message' => 'categoria actualizado',
@@ -153,5 +189,13 @@ class categoriaController extends Controller
                 'status' => 200
             ];
             return response()->json($data, 200);
+            } catch (\Exception $e) {
+                Log::error('Error al crear Entrega: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Error interno al crear la entrega',
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }
         }
     }

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 class subcategoriaController extends Controller
     {
         public function index(){
-        $subcategoria = Subcategoria::all();
+        $subcategoria = Subcategoria::with('categorias')->get();
         $data = [
             'categoria' => $subcategoria,
             'status' => 200
@@ -23,7 +23,8 @@ class subcategoriaController extends Controller
             try {
             $validator = Validator::make($request->all(),[
                 'nombre' => ['required', 'string'],
-                'descripcion' => ['required', 'string']
+                'descripcion' => ['required', 'string'],
+                'categorias' => ['array']
             ]);
             if($validator->fails()){
                 $data = [
@@ -44,6 +45,9 @@ class subcategoriaController extends Controller
                 ];
                 return response()->json($data, 500);
             }
+            if($request->has('categorias')){
+                $subcategoria->categorias()->sync($request->categorias);
+            }
             $data = [
                 'subcategoria' => $subcategoria,
                 'status' => 200
@@ -59,7 +63,7 @@ class subcategoriaController extends Controller
             }
         }
         public function show($id){
-            $subcategoria = Subcategoria::find($id);
+            $subcategoria = Subcategoria::with('categorias')->find($id);
             if(!$subcategoria){
                 $data = [
                     'message' => 'subcategoria no encontrada',
@@ -74,7 +78,7 @@ class subcategoriaController extends Controller
             return response()->json($data, 200);
         }
         public function destroy($id){
-            $subcategoria = Subcategoria::find($id);
+            $subcategoria = Subcategoria::with('categorias')->find($id);
             if(!$subcategoria){
                 $data = [
                     'message' => 'subCategoria no encontrada',
@@ -82,6 +86,7 @@ class subcategoriaController extends Controller
                 ];
                 return response()->json($data, 404);
             }
+            $subcategoria->categorias()->detach();
             $subcategoria->delete();
             $data = [
                 'subcategoria' => $subcategoria,
@@ -92,7 +97,7 @@ class subcategoriaController extends Controller
         public function update(Request $request, $id)
         {
             try {
-            $subcategoria = Subcategoria::find($id);
+            $subcategoria = Subcategoria::with('categorias')->find($id);
             if(!$subcategoria){
                 $data = [
                     'message' => 'subcategoria no encontrada',
@@ -102,18 +107,22 @@ class subcategoriaController extends Controller
             }
             $validator = Validator::make($request->all(), [
                 'nombre' => ['required', 'string'],
-                'descripcion' => ['required', 'string']
+                'descripcion' => ['required', 'string'],
+                'categorias' => ['array']
             ]);
             if($validator->fails()){
                 $data = [
                     'message' => 'Validator failed',
                     'errors' => $validator->errors(),
-                    'status' => 400
+                    'status' => 201
                 ];
-                return response()->json($data, 400);
+                return response()->json($data, 201);
             }
             $subcategoria->nombre = $request->nombre;
             $subcategoria->descripcion = $request->descripcion;
+            if($request->has('categorias')){
+                $subcategoria->categorias()->sync($request->categorias);
+            }
             $subcategoria->save();
             $data = [
                 'message' => 'subcategoria actualizada',
@@ -132,7 +141,7 @@ class subcategoriaController extends Controller
         }
         public function updatePartial(Request $request, $id){
             try {
-            $subcategoria = Subcategoria::find($id);
+            $subcategoria = Subcategoria::with('categorias')->find($id);
             if(!$subcategoria){
                 $data = [
                     'message' => 'subcategoria no encontrado',
@@ -142,7 +151,8 @@ class subcategoriaController extends Controller
             }
             $validator = Validator::make($request->all(),[
                 'nombre' => ['string'],
-                'descripcion' => ['string']
+                'descripcion' => ['string'],
+                'categorias' => ['array']
             ]);
             
             if($validator->fails()){
@@ -159,6 +169,9 @@ class subcategoriaController extends Controller
             }
             if($request->has('descripcion')){
                 $subcategoria->descripcion = $request->descripcion;
+            }
+            if($request->has('categorias')){
+                $subcategoria->categorias()->sync($request->categorias);
             }
             $subcategoria->save();
             $data = [
