@@ -18,6 +18,12 @@ Route::post('/usuarios', [UsuarioController::class, 'store']);
 Route::post('/login',    [UsuarioController::class, 'login']);
 Route::get('/usuarios',  [UsuarioController::class, 'index']);
 Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
+Route::get('/usuario/{id}', [UsuarioController::class, 'show']);
+
+    // Rutas para actualizar usuario
+    Route::put('/usuario/{id}', [UsuarioController::class, 'update']);
+    Route::patch('/usuario/{id}', [UsuarioController::class, 'update']);
+    
 // Rutas protegidas (requieren autenticación)
 Route::middleware(['jwt.auth'])->group(function () {
     
@@ -25,11 +31,6 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::middleware(['check.role:ADMIN'])->group(function () {
 
     });
-    
-    // Rutas para usuarios autenticados (cualquier rol)
-
-    Route::get('/usuario/{id}', [UsuarioController::class, 'show']);
-    
     // Ruta de logout
     Route::post('/logout', [UsuarioController::class, 'logout']);
 });

@@ -56,6 +56,7 @@
                   :key="user.id" 
                   :user="user" 
                   @delete-user="showDeleteModal"
+                  @update-user="showUpdateModal"
                 />
             </div>
         </div>
@@ -72,10 +73,10 @@
     <template #header>
       <div class="flex items-center text-lg font-semibold text-gray-900 dark:text-white">
         <font-awesome-icon 
-          :icon="modalMode === 'add' ? 'fa-solid fa-user-plus' : 'fa-solid fa-user-minus'" 
-          :class="modalMode === 'add' ? 'mr-2 text-green-600' : 'mr-2 text-red-600'"
+          :icon="modalMode === 'add' ? 'fa-solid fa-user-plus' : (modalMode === 'update' ? 'fa-solid fa-user-pen' : 'fa-solid fa-user-minus')" 
+          :class="modalMode === 'add' ? 'mr-2 text-green-600' : (modalMode === 'update' ? 'mr-2 text-blue-600' : 'mr-2 text-red-600')"
         />
-        {{ modalMode === 'add' ? 'Agregar Nuevo Usuario' : 'Eliminar Usuario' }}
+        {{ modalMode === 'add' ? 'Agregar Nuevo Usuario' : (modalMode === 'update' ? 'Actualizar Usuario' : 'Eliminar Usuario') }}
       </div>
     </template>
     <template #body>
@@ -136,7 +137,7 @@ const userStore = useUserStore();
 // Estado local
 const displayedUsers = ref([]);
 const isShowModal = ref(false);
-const modalMode = ref('add'); // 'add' o 'delete'
+const modalMode = ref('add'); // 'add', 'delete' or 'update'
 const selectedUser = ref(null);
 
 // Computed del store
@@ -157,6 +158,12 @@ function showAddModal () {
 
 function showDeleteModal (user) {
   modalMode.value = 'delete';
+  selectedUser.value = user;
+  isShowModal.value = true;
+}
+
+function showUpdateModal (user) {
+  modalMode.value = 'update';
   selectedUser.value = user;
   isShowModal.value = true;
 }
