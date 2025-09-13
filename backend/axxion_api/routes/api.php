@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\categoriaController;
 use App\Http\Controllers\Api\clienteController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UsuarioController;
+use App\Http\Controllers\Api\ProductoController;
 use App\Http\Controllers\Api\rolController;
 use App\Http\Controllers\Api\cotizacionController;
 use App\Http\Controllers\Api\detalleCotizacionController;
@@ -35,7 +36,14 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::post('/logout', [UsuarioController::class, 'logout']);
 });
 
+// PRODUCTOS 
 
+Route::get('/producto', [ProductoController::class, 'index']);
+Route::post('/producto', [ProductoController::class, 'store']);
+Route::get('/producto/{id}', [ProductoController::class, 'show']);
+Route::delete('/producto/{id}', [ProductoController::class, 'destroy']);
+Route::put('/producto/{id}', [ProductoController::class, 'update']);
+Route::patch('/producto/{id}', [ProductoController::class, 'updatePartial']);
 
 
 // ROLES

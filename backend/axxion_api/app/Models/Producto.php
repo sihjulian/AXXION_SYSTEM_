@@ -18,6 +18,7 @@ class Producto extends Model
         'modelo',
         'precio_referencia_renta',
         'sku',
+        'estado',
     ];
 
     public function subcategorias()

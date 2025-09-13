@@ -1,300 +1,227 @@
-import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-import { inventoryService } from '@/services/InventoryService.js';
+import { defineStore } from 'pinia'
+import InventoryService from '@/services/InventoryService'
 
-export const useInventoryStore = defineStore('inventory', () => {
-  // Estado
-  const equipment = ref([]);
-  const isLoading = ref(false);
-  const error = ref(null);
-  const selectedEquipment = ref(null);
+export const useInventoryStore = defineStore('inventory', {
+  state: () => ({
+    // Lista de productos
+    productList: [],
+    
+    // Estado de carga
+    loading: false,
+    
+    // Errores
+    error: null,
+    
+    // Filtros activos
+    filters: {
+      category: '',
+      status: '',
+      brand: '',
+      location: '',
+      search: ''
+    },
+    
+    // Paginación
+    pagination: {
+      currentPage: 1,
+      itemsPerPage: 10,
+      totalItems: 0,
+      totalPages: 0
+    },
+    
+    // Ordenamiento
+    sorting: {
+      field: 'nombre',
+      direction: 'asc'
+    },
+    
+    // Producto seleccionado para detalles/edición
+    selectedProduct: null
+  }),
 
-  // Getters computados
-  const availableEquipment = computed(() => 
-    equipment.value.filter(item => item.status === 'available')
-  );
-
-  const rentedEquipment = computed(() => 
-    equipment.value.filter(item => item.status === 'rented')
-  );
-
-  const maintenanceEquipment = computed(() => 
-    equipment.value.filter(item => item.status === 'maintenance')
-  );
-
-  const outOfServiceEquipment = computed(() => 
-    equipment.value.filter(item => item.status === 'out_of_service')
-  );
-
-  const equipmentByCategory = computed(() => {
-    const categories = {};
-    equipment.value.forEach(item => {
-      if (!categories[item.category]) {
-        categories[item.category] = [];
+  getters: {
+    // Productos disponibles
+    availableProducts: (state) => 
+      state.productList.filter(item => item.estado === 'disponible'),
+    
+    // Productos alquilados
+    rentedProducts: (state) => 
+      state.productList.filter(item => item.estado === 'alquilado'),
+    
+    // Productos en mantenimiento
+    maintenanceProducts: (state) => 
+      state.productList.filter(item => item.estado === 'mantenimiento'),
+    
+    // Total de productos
+    totalProducts: (state) => state.productList.length,
+    
+    // Productos por categoría
+    productsByCategory: (state) => {
+      const categories = {};
+      state.productList.forEach(item => {
+        if (!categories[item.categoria]) {
+          categories[item.categoria] = [];
+        }
+        categories[item.categoria].push(item);
+      });
+      return categories;
+    },
+    
+    // Productos filtrados
+    filteredProducts: (state) => {
+      let filtered = [...state.productList];
+      
+      // Aplicar filtros
+      if (state.filters.category) {
+        filtered = filtered.filter(item => item.categoria === state.filters.category);
       }
-      categories[item.category].push(item);
-    });
-    return categories;
-  });
-
-  const totalEquipment = computed(() => equipment.value.length);
-
-  const utilizationRate = computed(() => {
-    if (totalEquipment.value === 0) return 0;
-    return Math.round((rentedEquipment.value.length / totalEquipment.value) * 100);
-  });
-
-  const monthlyRevenue = computed(() => {
-    return rentedEquipment.value.reduce((total, item) => {
-      return total + (item.dailyRate * 30); // Estimación mensual
-    }, 0);
-  });
-
-  // Acciones
-  const fetchEquipment = async () => {
-    isLoading.value = true;
-    error.value = null;
-    
-    try {
-      const data = await inventoryService.getEquipment();
-      equipment.value = data;
-    } catch (err) {
-      error.value = err.message;
-      console.error('Error al cargar equipos:', err);
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const addEquipment = async (equipmentData) => {
-    isLoading.value = true;
-    error.value = null;
-    
-    try {
-      const newEquipment = await inventoryService.createEquipment(equipmentData);
-      equipment.value.push(newEquipment);
-      return newEquipment;
-    } catch (err) {
-      error.value = err.message;
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const updateEquipment = async (id, equipmentData) => {
-    isLoading.value = true;
-    error.value = null;
-    
-    try {
-      const updatedEquipment = await inventoryService.updateEquipment(id, equipmentData);
-      const index = equipment.value.findIndex(item => item.id === id);
-      if (index !== -1) {
-        equipment.value[index] = updatedEquipment;
+      
+      if (state.filters.status) {
+        filtered = filtered.filter(item => item.estado === state.filters.status);
       }
-      return updatedEquipment;
-    } catch (err) {
-      error.value = err.message;
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const deleteEquipment = async (id) => {
-    isLoading.value = true;
-    error.value = null;
-    
-    try {
-      await inventoryService.deleteEquipment(id);
-      equipment.value = equipment.value.filter(item => item.id !== id);
-    } catch (err) {
-      error.value = err.message;
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const getEquipmentById = (id) => {
-    return equipment.value.find(item => item.id === id);
-  };
-
-  const getEquipmentByStatus = (status) => {
-    return equipment.value.filter(item => item.status === status);
-  };
-
-  const getEquipmentByCategory = (category) => {
-    return equipment.value.filter(item => item.category === category);
-  };
-
-  const searchEquipment = (query) => {
-    const searchTerm = query.toLowerCase();
-    return equipment.value.filter(item => 
-      item.name.toLowerCase().includes(searchTerm) ||
-      item.model.toLowerCase().includes(searchTerm) ||
-      item.serialNumber.toLowerCase().includes(searchTerm) ||
-      item.brand.toLowerCase().includes(searchTerm)
-    );
-  };
-
-  const rentEquipment = async (equipmentId, rentalData) => {
-    isLoading.value = true;
-    error.value = null;
-    
-    try {
-      const rental = await inventoryService.rentEquipment(equipmentId, rentalData);
-      // Actualizar el estado del equipo
-      const index = equipment.value.findIndex(item => item.id === equipmentId);
-      if (index !== -1) {
-        equipment.value[index].status = 'rented';
-        equipment.value[index].currentRental = rental;
+      
+      if (state.filters.brand) {
+        filtered = filtered.filter(item => item.marca === state.filters.brand);
       }
-      return rental;
-    } catch (err) {
-      error.value = err.message;
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const returnEquipment = async (equipmentId) => {
-    isLoading.value = true;
-    error.value = null;
-    
-    try {
-      await inventoryService.returnEquipment(equipmentId);
-      // Actualizar el estado del equipo
-      const index = equipment.value.findIndex(item => item.id === equipmentId);
-      if (index !== -1) {
-        equipment.value[index].status = 'available';
-        equipment.value[index].currentRental = null;
+      
+      if (state.filters.search) {
+        const searchTerm = state.filters.search.toLowerCase();
+        filtered = filtered.filter(item => 
+          item.nombre.toLowerCase().includes(searchTerm) ||
+          item.modelo.toLowerCase().includes(searchTerm) ||
+          item.numero_serie.toLowerCase().includes(searchTerm) ||
+          item.marca.toLowerCase().includes(searchTerm)
+        );
       }
-    } catch (err) {
-      error.value = err.message;
-      throw err;
-    } finally {
-      isLoading.value = false;
+      
+      return filtered;
     }
-  };
+  },
 
-  const scheduleMaintenance = async (equipmentId, maintenanceData) => {
-    isLoading.value = true;
-    error.value = null;
-    
-    try {
-      const maintenance = await inventoryService.scheduleMaintenance(equipmentId, maintenanceData);
-      // Actualizar el estado del equipo
-      const index = equipment.value.findIndex(item => item.id === equipmentId);
-      if (index !== -1) {
-        equipment.value[index].status = 'maintenance';
-        equipment.value[index].maintenanceSchedule = maintenance;
+  actions: {
+    // Obtener todos los productos
+    async fetchProducts() {
+      this.loading = true;
+      this.error = null;
+      
+      try {
+        const response = await InventoryService.getProducts();
+        console.log('Store: Products fetched:', response);
+        this.productList = response.data || response;
+        this.pagination.totalItems = this.productList.length;
+        this.pagination.totalPages = Math.ceil(this.pagination.totalItems / this.pagination.itemsPerPage);
+      } catch (err) {
+        this.error = err.message || 'Error al cargar productos';
+        console.error('Error al cargar productos:', err);
+      } finally {
+        this.loading = false;
       }
-      return maintenance;
-    } catch (err) {
-      error.value = err.message;
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
+    },
 
-  const completeMaintenance = async (equipmentId) => {
-    isLoading.value = true;
-    error.value = null;
-    
-    try {
-      await inventoryService.completeMaintenance(equipmentId);
-      // Actualizar el estado del equipo
-      const index = equipment.value.findIndex(item => item.id === equipmentId);
-      if (index !== -1) {
-        equipment.value[index].status = 'available';
-        equipment.value[index].maintenanceSchedule = null;
+    // Crear nuevo producto
+    async createProduct(productData) {
+      this.loading = true;
+      this.error = null;
+      
+      try {
+        const response = await InventoryService.createProduct(productData);
+        const newProduct = response.data || response;
+        this.productList.push(newProduct);
+        this.pagination.totalItems = this.productList.length;
+        return newProduct;
+      } catch (err) {
+        this.error = err.message || 'Error al crear producto';
+        throw err;
+      } finally {
+        this.loading = false;
       }
-    } catch (err) {
-      error.value = err.message;
-      throw err;
-    } finally {
-      isLoading.value = false;
+    },
+
+    // Actualizar producto
+    async updateProduct(id, productData) {
+      this.loading = true;
+      this.error = null;
+      
+      try {
+        const response = await InventoryService.updateProduct(id, productData);
+        const updatedProduct = response.data || response;
+        const index = this.productList.findIndex(item => item.id === id);
+        if (index !== -1) {
+          this.productList[index] = updatedProduct;
+        }
+        return updatedProduct;
+      } catch (err) {
+        this.error = err.message || 'Error al actualizar producto';
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Eliminar producto
+    async deleteProduct(id) {
+      this.loading = true;
+      this.error = null;
+      
+      try {
+        await InventoryService.deleteProduct(id);
+        this.productList = this.productList.filter(item => item.id !== id);
+        this.pagination.totalItems = this.productList.length;
+      } catch (err) {
+        this.error = err.message || 'Error al eliminar producto';
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Obtener producto por ID
+    getProductById(id) {
+      return this.productList.find(item => item.id === id);
+    },
+
+    // Seleccionar producto
+    selectProduct(product) {
+      this.selectedProduct = product;
+    },
+
+    // Limpiar producto seleccionado
+    clearSelectedProduct() {
+      this.selectedProduct = null;
+    },
+
+    // Aplicar filtros
+    setFilters(filters) {
+      this.filters = { ...this.filters, ...filters };
+      this.pagination.currentPage = 1; // Reset pagination
+    },
+
+    // Limpiar filtros
+    clearFilters() {
+      this.filters = {
+        category: '',
+        status: '',
+        brand: '',
+        location: '',
+        search: ''
+      };
+      this.pagination.currentPage = 1;
+    },
+
+    // Cambiar página
+    setCurrentPage(page) {
+      this.pagination.currentPage = page;
+    },
+
+    // Cambiar ordenamiento
+    setSorting(field, direction) {
+      this.sorting.field = field;
+      this.sorting.direction = direction;
+    },
+
+    // Limpiar errores
+    clearError() {
+      this.error = null;
     }
-  };
-
-  const getMaintenanceSchedule = async () => {
-    try {
-      return await inventoryService.getMaintenanceSchedule();
-    } catch (err) {
-      error.value = err.message;
-      throw err;
-    }
-  };
-
-  const getRentalHistory = async (equipmentId) => {
-    try {
-      return await inventoryService.getRentalHistory(equipmentId);
-    } catch (err) {
-      error.value = err.message;
-      throw err;
-    }
-  };
-
-  const generateReport = async (reportType, filters = {}) => {
-    try {
-      return await inventoryService.generateReport(reportType, filters);
-    } catch (err) {
-      error.value = err.message;
-      throw err;
-    }
-  };
-
-  const clearError = () => {
-    error.value = null;
-  };
-
-  const setSelectedEquipment = (equipment) => {
-    selectedEquipment.value = equipment;
-  };
-
-  const clearSelectedEquipment = () => {
-    selectedEquipment.value = null;
-  };
-
-  return {
-    // Estado
-    equipment,
-    isLoading,
-    error,
-    selectedEquipment,
-    
-    // Getters
-    availableEquipment,
-    rentedEquipment,
-    maintenanceEquipment,
-    outOfServiceEquipment,
-    equipmentByCategory,
-    totalEquipment,
-    utilizationRate,
-    monthlyRevenue,
-    
-    // Acciones
-    fetchEquipment,
-    addEquipment,
-    updateEquipment,
-    deleteEquipment,
-    getEquipmentById,
-    getEquipmentByStatus,
-    getEquipmentByCategory,
-    searchEquipment,
-    rentEquipment,
-    returnEquipment,
-    scheduleMaintenance,
-    completeMaintenance,
-    getMaintenanceSchedule,
-    getRentalHistory,
-    generateReport,
-    clearError,
-    setSelectedEquipment,
-    clearSelectedEquipment
-  };
-});
-
+  }
+})

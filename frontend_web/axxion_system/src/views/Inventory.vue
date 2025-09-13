@@ -177,16 +177,16 @@
           <span class="loader" aria-hidden="true"></span>
         </div>
         
-        <!-- Grid de Equipos -->
+        <!-- Grid de Productos -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <EquipmentCard 
-            v-for="equipment in paginatedEquipment" 
-            :key="equipment.id" 
-            :equipment="equipment" 
-            @view-details="viewEquipmentDetails"
-            @edit-equipment="editEquipment"
+            v-for="product in paginatedProducts" 
+            :key="product.id" 
+            :equipment="product" 
+            @view-details="viewProductDetails"
+            @edit-equipment="editProduct"
             @delete-equipment="showDeleteModal"
-            @rent-equipment="rentEquipment"
+            @rent-equipment="rentProduct"
           />
         </div>
 
@@ -217,8 +217,8 @@
         <EquipmentForm 
           v-if="modalMode !== 'delete'"
           :mode="modalMode"
-          :selectedEquipment="selectedEquipment"
-          @success="handleEquipmentSuccess"
+          :selectedEquipment="selectedProduct"
+          @success="handleProductSuccess"
           @cancel="closeModal"
         />
         <div v-else class="text-center">
@@ -228,7 +228,7 @@
           </h3>
           <p class="text-gray-600 dark:text-gray-400 mb-6">
             Esta acción no se puede deshacer. Se eliminará permanentemente:
-            <strong>{{ selectedEquipment?.name }} - {{ selectedEquipment?.model }}</strong>
+            <strong>{{ selectedProduct?.nombre }} - {{ selectedProduct?.modelo }}</strong>
           </p>
           <div class="flex justify-center gap-4">
             <fwb-button gradient="red-yellow" @click="confirmDelete">
@@ -310,11 +310,11 @@ import {
 const inventoryStore = useInventoryStore();
 
 // Estado local
-const displayedEquipment = ref([]);
+const displayedProducts = ref([]);
 const isShowModal = ref(false);
 const isShowDetailsModal = ref(false);
 const modalMode = ref('add'); // 'add', 'edit', 'delete'
-const selectedEquipment = ref(null);
+const selectedProduct = ref(null);
 const searchQuery = ref('');
 const statusFilter = ref('');
 const categoryFilter = ref('');
@@ -322,17 +322,17 @@ const currentPage = ref(1);
 const itemsPerPage = 12;
 
 // Computed del store
-const equipment = computed(() => inventoryStore.equipment);
-const isLoading = computed(() => inventoryStore.isLoading);
+const products = computed(() => inventoryStore.productList);
+const isLoading = computed(() => inventoryStore.loading);
 
 // Métricas del panel de control
 const metrics = computed(() => ({
-  available: equipment.value.filter(e => e.status === 'available').length,
-  rented: equipment.value.filter(e => e.status === 'rented').length,
-  maintenance: equipment.value.filter(e => e.status === 'maintenance').length,
-  monthlyRevenue: equipment.value
-    .filter(e => e.status === 'rented')
-    .reduce((sum, e) => sum + (e.dailyRate * 30), 0)
+  available: products.value.filter(p => p.estado === 'disponible').length,
+  rented: products.value.filter(p => p.estado === 'alquilado').length,
+  maintenance: products.value.filter(p => p.estado === 'mantenimiento').length,
+  monthlyRevenue: products.value
+    .filter(p => p.estado === 'alquilado')
+    .reduce((sum, p) => sum + (p.precio_alquiler_dia * 30), 0)
 }));
 
 // Alertas del sistema
@@ -354,27 +354,27 @@ const alerts = ref([
 ]);
 
 // Filtros y búsqueda
-const filteredEquipment = computed(() => {
-  let filtered = equipment.value;
+const filteredProducts = computed(() => {
+  let filtered = products.value;
 
   // Filtro de búsqueda
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(e => 
-      e.name.toLowerCase().includes(query) ||
-      e.model.toLowerCase().includes(query) ||
-      e.serialNumber.toLowerCase().includes(query)
+    filtered = filtered.filter(p => 
+      p.nombre.toLowerCase().includes(query) ||
+      p.modelo.toLowerCase().includes(query) ||
+      p.numero_serie.toLowerCase().includes(query)
     );
   }
 
   // Filtro de estado
   if (statusFilter.value) {
-    filtered = filtered.filter(e => e.status === statusFilter.value);
+    filtered = filtered.filter(p => p.estado === statusFilter.value);
   }
 
   // Filtro de categoría
   if (categoryFilter.value) {
-    filtered = filtered.filter(e => e.category === categoryFilter.value);
+    filtered = filtered.filter(p => p.categoria === categoryFilter.value);
   }
 
   return filtered;
@@ -382,47 +382,47 @@ const filteredEquipment = computed(() => {
 
 // Paginación
 const totalPages = computed(() => 
-  Math.ceil(filteredEquipment.value.length / itemsPerPage)
+  Math.ceil(filteredProducts.value.length / itemsPerPage)
 );
 
-const paginatedEquipment = computed(() => {
+const paginatedProducts = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
-  return filteredEquipment.value.slice(start, end);
+  return filteredProducts.value.slice(start, end);
 });
 
 // Funciones de modal
 function closeModal() {
   isShowModal.value = false;
   modalMode.value = 'add';
-  selectedEquipment.value = null;
+  selectedProduct.value = null;
 }
 
 function closeDetailsModal() {
   isShowDetailsModal.value = false;
-  selectedEquipment.value = null;
+  selectedProduct.value = null;
 }
 
 function showAddModal() {
   modalMode.value = 'add';
-  selectedEquipment.value = null;
+  selectedProduct.value = null;
   isShowModal.value = true;
 }
 
-function showDeleteModal(equipment) {
+function showDeleteModal(product) {
   modalMode.value = 'delete';
-  selectedEquipment.value = equipment;
+  selectedProduct.value = product;
   isShowModal.value = true;
 }
 
-function editEquipment(equipment) {
+function editProduct(product) {
   modalMode.value = 'edit';
-  selectedEquipment.value = equipment;
+  selectedProduct.value = product;
   isShowModal.value = true;
 }
 
-function viewEquipmentDetails(equipment) {
-  selectedEquipment.value = equipment;
+function viewProductDetails(product) {
+  selectedProduct.value = product;
   isShowDetailsModal.value = true;
 }
 
@@ -433,16 +433,16 @@ function showMaintenanceModal() {
 
 // Funciones de acción
 function confirmDelete() {
-  if (selectedEquipment.value) {
-    inventoryStore.deleteEquipment(selectedEquipment.value.id);
+  if (selectedProduct.value) {
+    inventoryStore.deleteProduct(selectedProduct.value.id);
     closeModal();
-    loadEquipment();
+    loadProducts();
   }
 }
 
-function rentEquipment(equipment) {
+function rentProduct(product) {
   // Implementar lógica de alquiler
-  console.log('Alquilar equipo:', equipment);
+  console.log('Alquilar producto:', product);
 }
 
 function exportReport() {
@@ -465,26 +465,26 @@ function handlePageChange(page) {
   currentPage.value = page;
 }
 
-function handleEquipmentSuccess() {
+function handleProductSuccess() {
   closeModal();
-  loadEquipment();
+  loadProducts();
 }
 
 // Cargar datos
-const loadEquipment = async () => {
+const loadProducts = async () => {
   try {
-    await inventoryStore.fetchEquipment();
+    await inventoryStore.fetchProducts();
     
     // Animación de carga progresiva
-    displayedEquipment.value = [];
+    displayedProducts.value = [];
     const delayPerCard = 200;
 
-    for (let i = 0; i < equipment.value.length; i++) {
+    for (let i = 0; i < products.value.length; i++) {
       await new Promise(resolve => setTimeout(resolve, delayPerCard));
-      displayedEquipment.value.push(equipment.value[i]);
+      displayedProducts.value.push(products.value[i]);
     }
   } catch (error) {
-    console.error('Error al cargar equipos:', error);
+    console.error('Error al cargar productos:', error);
   }
 };
 
@@ -495,7 +495,7 @@ watch([searchQuery, statusFilter, categoryFilter], () => {
 
 // Cargar datos al montar el componente
 onMounted(() => {
-  loadEquipment();
+  loadProducts();
 });
 </script>
 
