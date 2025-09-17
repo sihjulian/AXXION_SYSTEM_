@@ -1,52 +1,42 @@
 <template>
-  <FwbCard
-    class="w-sm"
-    img-alt="SubCategoria"
-    img-src="https://flowbite.com/docs/images/blog/image-4.jpg"
-    variant="horizontal"
-  >
-    <div class="p-5">
-      <div class="flex gap-2">
-        <!-- Botones editar / eliminar -->
-        <FwbButton class=" transition  duration-300 ease-in-out hover:-translate-y-1 hover:scale-110"
-          size="xs"
-          color="yellow"
-          @click="$emit('edit', subcategory)"
+  <div>
+        <button 
+          class="w-full text-left px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+          @click="toggleCategoria(categoria.id)"
         >
-          <font-awesome-icon icon="fa-solid fa-pen-to-square" />
-        </FwbButton>
-        <FwbButton class=" transition  duration-300 ease-in-out hover:-translate-y-1 hover:scale-110"
-          size="xs"
-          color="red"
-          @click="$emit('delete', subcategory)"
-        >
-          <font-awesome-icon icon="fa-solid fa-trash" />
-        </FwbButton>
-      </div>
-
-      <br />
-      <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-        {{ subcategory.nombre }}
-      </h5>
-      <p class="font-normal text-gray-700 dark:text-gray-400">
-        {{ subcategory.descripcion }}
-        <br />
-      </p>
-    </div>
-  </FwbCard>
+          {{ categoria.nombre }}
+        </button>
+  </div>
 </template>
 
 <script setup>
-import { FwbButton, FwbCard } from "flowbite-vue";
+import { FwbButton } from 'flowbite-vue'
+import SubCategoryService from '@/services/SubCategoryService';
+const fetchCategorias = async () => {
+  try {
+    const response = await CategoryService.getCategory();
+    categorias.value = response.categoria;
+  } catch (error) {
+    console.error("Error al cargar categorías:", error);
+  }
+};
 
-// Props: recibimos la categoría a mostrar
-const props = defineProps({
-    subcategory: {
-    type: Object,
-    required: true,
-  },
-});
+const categorias = ref([]);
+const selectedCategoria = ref(null);
 
-// Emitimos eventos al padre
-const emit = defineEmits(["edit", "delete"]);
+const toggleCategoria = (id) => {
+  if (selectedCategoria.value?.id === id) {
+    selectedCategoria.value = null;
+  } else {
+    selectedCategoria.value = categorias.value.find(cat => cat.id === id);
+  }
+};
+
+
+onMounted(fetchCategorias);
 </script>
+
+<style scoped>
+
+</style>>
+

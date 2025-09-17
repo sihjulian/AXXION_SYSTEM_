@@ -1,285 +1,215 @@
 <template>
-    <div>
-        <div class="app flex">
-            <SideBar />
-            <RouterView />
-            <main class="container h-screen p-4 flex-1 overflow-y-auto">
-                <headerP />
-                <!-- Botón agregar -->
-                <section class="my-4">
-                    <FwbButton class=" transition  duration-300 ease-in-out hover:-translate-y-1 hover:scale-110" @click="showAddModal" color="dark" gradient="green-blue" outline >
-                        <font-awesome-icon class="mr-1" icon="fa-solid fa-plus" size="xl" style="color: #ffffff;" /> Agregar Categoría
-                    </FwbButton>
-                </section>
-                    <!-- Lista de Categorías -->
-                    <article class="flex flex-wrap flex-row justify-center gap-10">
-                        <CategoryCard class=" transition  duration-300 ease-in-out hover:-translate-y-0.5 hover:scale-100 flex-basis-1/30 m-2"
-                            v-for="cat in displayedCategories"
-                            :key="cat.id"
-                            :category="cat"
-                            @edit="showEditModal"
-                            @delete="showDeleteModal"
-                        />
-                    </article>
-                    <!-- Modal (Agregar/Editar/Eliminar) -->
-                    <FwbModal v-if="isShowModal" @close="closeModal">
-                        <template #header>
-                            <div class="flex items-center text-lg text-amber-50">
-                                {{ modalMode === 'add' ? 'Agregar Categoría' :
-                                modalMode === 'edit' ? 'Editar Categoría' :
-                                'Eliminar Categoría' }}
-                            </div>
-                        </template>
-                        <template #body>
-                            <!-- Formulario -->
-                            <div v-if="modalMode !== 'delete'" class="text-amber-50">
-                                <fwb-input
-                                    v-model="form.nombre"
-                                    label="Nombre"
-                                    placeholder="Ej: Monitores"
-                                    required
-                                />
-                                <br />
-                                <fwb-input
-                                    v-model="form.descripcion"
-                                    label="Descripción"
-                                    placeholder="Ej: Pantallas de 24'' y 27''"
-                                    required
-                                    />
-                                    <br />
-                                    <fwb-input
-                                    v-model="form.tipo_categoria"
-                                    label="Tipo de Categoría"
-                                    placeholder="Ej: Hardware"
-                                    required
-                                />
-                            </div>
-                            <!-- Confirmación Eliminar -->
-                            <div v-else>
-                                <p class="text-amber-50">
-                                    ¿Seguro que deseas eliminar la categoría <b>{{ selectedCategory?.nombre }}</b>?
-                                </p>
-                            </div>
-                        </template>
-                        <template #footer>
-                            <div class="flex justify-between w-full">
-                                <FwbButton @click="closeModal" color="alternative">Cancelar</FwbButton>
-                                <FwbButton
-                                    v-if="modalMode === 'add' || modalMode === 'edit'"
-                                    @click="saveCategory"
-                                    color="green"
-                                    >Guardar
-                                </FwbButton>
-                                <FwbButton
-                                    v-if="modalMode === 'delete'"
-                                    @click="deleteCategory"
-                                    color="red"
-                                    >Eliminar
-                                </FwbButton>
-                            </div>
-                        </template>
-                    </FwbModal>
-            </main>
-        </div>
-        </div>
-        
-        <fwb-footer>
-            <fwb-footer-copyright
-            by="Flowbite™"
-            href="https://flowbite.com/"
-            />
-            <fwb-footer-link-group>
-            <fwb-footer-link href="#">
-                About
-            </fwb-footer-link>
-            <fwb-footer-link href="#">
-                Privacy Policy
-            </fwb-footer-link>
-            <fwb-footer-link href="#">
-                Licensing
-            </fwb-footer-link>
-            <fwb-footer-link href="#">
-                Contact
-            </fwb-footer-link>
-            </fwb-footer-link-group>
-        </fwb-footer>
-    
+  <div class="App flex">
+    <SideBar />
+    <main class="container h-screen p-4 flex-1 overflow-y-auto">
+      <headerP />
+
+      <div class="mb-4 flex gap-3">
+        <fwb-button gradient="cyan-blue" outline @click="openAddCategory">+ Agregar Categoria</fwb-button>
+        <fwb-button gradient="cyan-blue" outline @click="showAddSubModal">+ Agregar Subcategoria</fwb-button>
+      </div>
+
+      <section class="flex flex-row space-x-4">
+        <!-- categorias -->
+        <article class="basis-2/5 bg-black text-amber-50 rounded-md p-4">
+          <h2 class="font-bold text-2xl mb-4">Categorias</h2>
+          <ul>
+            <li v-for="cat in categorias" :key="cat.id"
+                @click="selectCategoria(cat)"
+                :class="['cursor-pointer p-2 rounded-md mb-2', selectedCategoria?.id === cat.id ? 'bg-amber-600 text-black' : 'bg-gray-800 hover:bg-indigo-700']">
+              {{ cat.nombre }}
+              <div class="float-right">
+                <fwb-button gradient="blue" pill square @click.stop="openEditCategory(cat)">✏️</fwb-button>
+                <fwb-button gradient="red" pill square @click.stop="openDeleteCategory(cat)">🗑️</fwb-button>
+              </div>
+            </li>
+          </ul>
+        </article>
+
+        <!-- subcategorias -->
+        <article class="basis-3/5 bg-black text-amber-50 rounded-md p-4">
+          <h2 class="font-bold text-2xl mb-4">Subcategorias</h2>
+
+          <div v-if="selectedCategoria">
+            <h3 class="text-xl font-semibold mb-2">{{ selectedCategoria.nombre }}</h3>
+            <p class="mb-2">{{ selectedCategoria.descripcion }}</p>
+            <p class="italic text-sm text-gray-400 mb-4">Tipo: {{ selectedCategoria.tipo_categoria }}</p>
+
+            <div class="mb-2">
+              <fwb-button @click="showAddSubModal" gradient="cyan-blue" outline>Agregar Subcategoría</fwb-button>
+            </div>
+
+            <h4 class="text-lg font-semibold">Lista de subcategorías:</h4>
+            <ul>
+              <li v-for="sub in selectedCategoria.subcategorias ?? []" :key="sub.id" class="bg-gray-800 p-2 rounded-md mb-2 flex justify-between items-center">
+                <div>{{ sub.nombre }} - <span class="text-gray-400">{{ sub.descripcion }}</span></div>
+                <div class="flex gap-2">
+                  <fwb-button gradient="blue" pill square @click.stop="showEditSubModal(sub)">✏️</fwb-button>
+                  <fwb-button gradient="red" pill square @click.stop="confirmDeleteSub(sub)">🗑️</fwb-button>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div v-else>
+            <p>Selecciona una categoría para ver sus subcategorías.</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- Modales -->
+      <CategoryModal v-if="showCategoryModal" :mode="categoryModalMode" :category="selectedCategoryForModal" @close="closeCategoryModal" @save="handleSaveCategory" @delete="handleDeleteCategory" />
+      <SubcategoryModal v-if="showSubModal" :mode="subModalMode" :subcategoria="selectedSubForModal" :categoria-id="selectedCategoria?.id" @close="closeSubModal" @save="handleSaveSub" @delete="handleDeleteSub" />
+    </main>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import SideBar from '@/components/SideBar.vue';
-import headerP from '@/components/headerP.vue';
-import CategoryService from '@/services/CategoryService';
-import { FwbButton, FwbModal, FwbAlert, FwbInput } from 'flowbite-vue';
-import { FwbCard } from 'flowbite-vue';
-import CategoryCard from "@/components/CategoryCard.vue";
-import {
-  FwbFooter,
-  FwbFooterCopyright,
-  FwbFooterLink,
-  FwbFooterLinkGroup,
-} from 'flowbite-vue';
+import { ref, onMounted } from 'vue'
+import SideBar from '@/components/SideBar.vue'
+import headerP from '@/components/headerP.vue'
+import CategoryModal from '@/components/CategoryModal.vue'
+import SubcategoryModal from '@/components/SubcategoryModal.vue'
+import CategoryService from '@/services/CategoryService'
+import SubCategoryService from '@/services/SubCategoryService'
+import { FwbButton } from 'flowbite-vue'
 
-// Estado local
-const displayedCategories = ref([]);
-const isShowModal = ref(false);
-const modalMode = ref('add'); // 'add' | 'delete' | 'edit'
-const selectedCategory = ref(null);
+// estado
+const categorias = ref([])
+const selectedCategoria = ref(null)
 
-// Formulario
-const nombre = ref('');
-const descripcion = ref('');
-const tipo_categoria = ref('');
+// modales categorias
+const showCategoryModal = ref(false)
+const categoryModalMode = ref('add')
+const selectedCategoryForModal = ref(null)
 
-// Estado general
-const categorias = ref([]);
-const isLoading = ref(false);
+// modales subcategorias
+const showSubModal = ref(false)
+const subModalMode = ref('add')
+const selectedSubForModal = ref(null)
 
-// Objeto del formulario
-const form = ref({
-  nombre: '',
-  descripcion: '',
-  tipo_categoria: ''
-})
-
-// ---- Funciones Modal ----
-function closeModal() {
-  isShowModal.value = false
-  modalMode.value = 'add'
-  selectedCategory.value = null
-  form.value = { nombre: '', descripcion: '', tipo_categoria: '' }
-}
-
-function showAddModal() {
-  modalMode.value = 'add'
-  form.value = { nombre: '', descripcion: '', tipo_categoria: '' }
-  isShowModal.value = true
-}
-
-function showEditModal(categoria) {
-  modalMode.value = 'edit'
-  selectedCategory.value = categoria
-  form.value = { ...categoria } // clona los datos
-  isShowModal.value = true
-}
-
-function showDeleteModal(categoria) {
-  modalMode.value = 'delete'
-  selectedCategory.value = categoria
-  isShowModal.value = true
-}
-
-// ---- CRUD ----
+// --- fetch initial
 async function fetchCategorias() {
   try {
-    isLoading.value = true;
-    const data = await CategoryService.getCategory();
-    categorias.value = data.data ?? data;
-
-    // Animación para mostrarlas poco a poco
-    displayedCategories.value = [];
-    const delayPerCard = 500;
-    for (let i = 0; i < categorias.value.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, delayPerCard));
-      displayedCategories.value.push(categorias.value[i]);
+    const data = await CategoryService.getAll()
+    categorias.value = data ?? []
+    // mantener selección si existe
+    if (selectedCategoria.value) {
+      selectedCategoria.value = categorias.value.find(c => c.id === selectedCategoria.value.id) ?? null
     }
-  } catch (error) {
-    console.error('Error al cargar categorías:', error);
+  } catch (err) {
+    console.error('fetchCategorias error', err)
+    alert('Error al cargar categorías. Revisa la consola.')
+  }
+}
+onMounted(fetchCategorias)
+
+// selección
+function selectCategoria(cat) { selectedCategoria.value = cat }
+
+// ---------- CATEGORÍA CRUD (padre maneja requests) ----------
+function openAddCategory() {
+  categoryModalMode.value = 'add'
+  selectedCategoryForModal.value = null
+  showCategoryModal.value = true
+}
+function openEditCategory(cat) {
+  categoryModalMode.value = 'edit'
+  selectedCategoryForModal.value = cat
+  showCategoryModal.value = true
+}
+function openDeleteCategory(cat) {
+  categoryModalMode.value = 'delete'
+  selectedCategoryForModal.value = cat
+  showCategoryModal.value = true
+}
+function closeCategoryModal() {
+  showCategoryModal.value = false
+  selectedCategoryForModal.value = null
+  categoryModalMode.value = 'add'
+}
+
+async function handleSaveCategory(payload) {
+  try {
+    if (categoryModalMode.value === 'add') await CategoryService.createCategory(payload)
+    else if (categoryModalMode.value === 'edit') await CategoryService.updateCategory(selectedCategoryForModal.value.id, payload)
+    await fetchCategorias()
+  } catch (err) {
+    console.error('handleSaveCategory', err)
+    alert('Error guardando categoría (ver consola)')
   } finally {
-    isLoading.value = false;
+    closeCategoryModal()
   }
 }
 
-async function saveCategory() {
+async function handleDeleteCategory(id) {
   try {
-    if (modalMode.value === 'add') {
-      await CategoryService.createCategory(form.value)
-      console.log('Categoría creada:', form.value)
-    } else if (modalMode.value === 'edit') {
-      await CategoryService.updateCategory(selectedCategory.value.id, form.value)
-      console.log('Categoría actualizada:', form.value)
-    }
-    closeModal()
-  } catch (error) {
-    console.error('Error en saveCategory:', error)
+    await CategoryService.deleteCategory(id)
+    await fetchCategorias()
+  } catch (err) {
+    console.error('handleDeleteCategory', err)
+    alert('Error eliminando categoría (ver consola)')
+  } finally {
+    closeCategoryModal()
   }
 }
 
-async function deleteCategory() {
+// ---------- SUBCATEGORÍA CRUD ----------
+function showAddSubModal() {
+  if (!selectedCategoria.value) { alert('Selecciona primero una categoría'); return }
+  subModalMode.value = 'add'
+  selectedSubForModal.value = null
+  showSubModal.value = true
+}
+function showEditSubModal(sub) {
+  subModalMode.value = 'edit'
+  selectedSubForModal.value = sub
+  showSubModal.value = true
+}
+function confirmDeleteSub(sub) {
+  if (!confirm(`¿Eliminar subcategoría "${sub.nombre}"?`)) return
+  handleDeleteSub(sub.id)
+}
+function closeSubModal() {
+  showSubModal.value = false
+  selectedSubForModal.value = null
+  subModalMode.value = 'add'
+}
+
+async function handleSaveSub(payload) {
   try {
-    if (selectedCategory.value) {
-      await CategoryService.deleteCategory(selectedCategory.value.id);
-      closeModal();
-      fetchCategorias();
+    if (payload.id) {
+      await SubCategoryService.update(payload.id, payload)
+    } else {
+      // ensure categoria_id present
+      payload.categoria_id = payload.categoria_id ?? selectedCategoria.value?.id
+      await SubCategoryService.create(payload)
     }
-  } catch (error) {
-    console.error('Error al eliminar categoría:', error);
+    await fetchCategorias()
+  } catch (err) {
+    console.error('handleSaveSub', err)
+    alert('Error guardando subcategoría (ver consola)')
+  } finally {
+    closeSubModal()
   }
 }
 
-// ---- Ciclo de vida ----
-onMounted(() => {
-  fetchCategorias();
-});
-
+async function handleDeleteSub(id) {
+  try {
+    await SubCategoryService.delete(id)
+    await fetchCategorias()
+  } catch (err) {
+    console.error('handleDeleteSub', err)
+    alert('Error eliminando subcategoría (ver consola)')
+  } finally {
+    closeSubModal()
+  }
+}
 </script>
 
 
 
-<style scoped>
 
-.loader {
-  width: 60px;
-  height: 40px;
-  position: relative;
-  display: inline-block;
-  --base-color: #263238; /*use your base color*/
-}
-.loader::before {
-  content: '';  
-  left: 0;
-  top: 0;
-  position: absolute;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: #FFF;
-  background-image: radial-gradient(circle 8px at 18px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 18px 0px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 0px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 36px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 18px 36px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 5px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 5px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 30px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 5px 30px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 5px 5px, var(--base-color) 100%, transparent 0);
-  background-repeat: no-repeat;
-  box-sizing: border-box;
-  animation: rotationBack 3s linear infinite;
-}
-.loader::after {
-  content: '';  
-  left: 35px;
-  top: 15px;
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: #FFF;
-  background-image: radial-gradient(circle 5px at 12px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 12px 0px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 0px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 24px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 12px 24px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 3px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 3px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 20px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 3px 20px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 3px 3px, var(--base-color) 100%, transparent 0);
-  background-repeat: no-repeat;
-  box-sizing: border-box;
-  animation: rotationBack 4s linear infinite reverse;
-}
-@keyframes rotationBack {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(-360deg);
-  }
-}  
-/* overlay to center the loader */
-.overlay {
-  position: relative;
-   top:100px; right:0; bottom:0; left:0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.7);
-  z-index: 10;
-}
-</style>
+
+
+

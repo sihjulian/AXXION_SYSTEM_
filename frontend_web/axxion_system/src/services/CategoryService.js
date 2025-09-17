@@ -1,60 +1,28 @@
-import axios from "axios";
+// src/services/CategoryService.js
+import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const api = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api',
+  headers: { 'Content-Type': 'application/json', Accept: 'application/json' }
+});
 
-class CategoryService {
-    constructor() {
-        this.api = axios.create({
-            baseURL: API_BASE_URL,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
-    }
-  // Obtener todos los categoria
-    async getCategory() {
-  try {
-    const response = await this.api.get('/categoria');
-    return response.data.categoria;
-  } catch (error) {
-    console.error('Error al obtener categoria:', error);
-    throw error;
-  }
-}
-
-  // Crear un nuevo categoria
-    async createCategory(categoriaData) {
-        try {
-        const response = await this.api.post('/categoria', categoriaData);
-        return response.data;
-    } catch (error) {
-        console.error('Error al crear categoria:', error);
-        throw error;
-    }
-    }
-
-  // Actualizar un categoria
-  async updateCategory(id, categoriaData) {
-    try {
-      const response = await this.api.put(`/categoria/${id}`, categoriaData);
-      return response.data;
-    } catch (error) {
-      console.error('Error al actualizar categoria:', error);
-      throw error;
-    }
-  }
-
-  // Eliminar un categoria
+export default {
+  async getAll() {
+    const res = await api.get('/categoria');
+    return res.data?.categoria ?? res.data;
+  },
+  async createCategory(payload) {
+    const res = await api.post('/categoria', payload);
+    return res.data;
+  },
+  async updateCategory(id, payload) {
+    const res = await api.put(`/categoria/${id}`, payload);
+    return res.data;
+  },
   async deleteCategory(id) {
-    try {
-      const response = await this.api.delete(`/categoria/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error('Error al eliminar categoria:', error);
-      throw error;
-    }
+    const res = await api.delete(`/categoria/${id}`);
+    return res.data;
   }
-}
+};
 
-export default new CategoryService();
+
