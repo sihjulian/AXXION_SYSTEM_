@@ -1,7 +1,7 @@
 <template>
   <div class=" app flex">
-
-    <SideBar/>
+    
+  <SideBar/>
 
     <RouterView></RouterView>
 

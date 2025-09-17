@@ -4,20 +4,20 @@
     <div class="relative">
       <img 
         :src="equipmentImage" 
-        :alt="equipment.name"
+        :alt="equipment.nombre || equipment.name"
         class="w-full h-48 object-cover rounded-t-lg"
         @error="handleImageError"
       />
       
       <!-- Badge de estado -->
       <div class="absolute top-3 right-3">
-        <StatusBadge :status="equipment.status" />
+        <StatusBadge :status="equipment.estado || equipment.status" />
       </div>
       
       <!-- Badge de categoría -->
       <div class="absolute top-3 left-3">
         <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-          {{ getCategoryLabel(equipment.category) }}
+          {{ getCategoryLabel(equipment.categoria || equipment.category) }}
         </span>
       </div>
     </div>
@@ -27,29 +27,29 @@
       <!-- Información principal -->
       <div class="mb-4">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-          {{ equipment.name }}
+          {{ equipment.nombre || equipment.name }}
         </h3>
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-          {{ equipment.brand }} {{ equipment.model }}
+          {{ equipment.marca || equipment.brand }} {{ equipment.modelo || equipment.model }}
         </p>
         <p class="text-xs text-gray-500 dark:text-gray-500">
-          Serie: {{ equipment.serialNumber }}
+          Serie: {{ equipment.numero_serie || equipment.serialNumber }}
         </p>
       </div>
 
       <!-- Especificaciones principales -->
       <div class="mb-4 space-y-2">
-        <div v-if="equipment.specifications?.processor" class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+        <div v-if="getSpecifications?.processor" class="flex items-center text-sm text-gray-600 dark:text-gray-400">
           <font-awesome-icon icon="fa-solid fa-microchip" class="w-4 h-4 mr-2 text-blue-500"/>
-          {{ equipment.specifications.processor }}
+          {{ getSpecifications.processor }}
         </div>
-        <div v-if="equipment.specifications?.ram" class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+        <div v-if="getSpecifications?.ram" class="flex items-center text-sm text-gray-600 dark:text-gray-400">
           <font-awesome-icon icon="fa-solid fa-memory" class="w-4 h-4 mr-2 text-green-500"/>
-          {{ equipment.specifications.ram }}
+          {{ getSpecifications.ram }}
         </div>
-        <div v-if="equipment.specifications?.storage" class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+        <div v-if="getSpecifications?.storage" class="flex items-center text-sm text-gray-600 dark:text-gray-400">
           <font-awesome-icon icon="fa-solid fa-hard-drive" class="w-4 h-4 mr-2 text-purple-500"/>
-          {{ equipment.specifications.storage }}
+          {{ getSpecifications.storage }}
         </div>
       </div>
 
@@ -57,11 +57,11 @@
       <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
         <div class="flex justify-between items-center mb-2">
           <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Tarifa Diaria</span>
-          <span class="text-lg font-bold text-green-600">${{ equipment.dailyRate }}</span>
+          <span class="text-lg font-bold text-green-600">${{ equipment.precio_alquiler_dia || equipment.dailyRate || 0 }}</span>
         </div>
         <div class="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
-          <span>Alquileres:</span>
-          <span>{{ equipment.rentalCount || 0 }}</span>
+          <span>Semanal: ${{ equipment.precio_alquiler_semanal || equipment.weeklyRate || 0 }}</span>
+          <span>Mensual: ${{ equipment.precio_alquiler_mensual || equipment.monthlyRate || 0 }}</span>
         </div>
         <div class="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
           <span>Ingresos:</span>
@@ -106,7 +106,7 @@
         </fwb-button>
         
         <fwb-button 
-          v-if="equipment.status === 'available'"
+          v-if="(equipment.estado || equipment.status) === 'disponible'"
           size="sm" 
           gradient="green" 
           @click="$emit('rent-equipment', equipment)"
@@ -176,7 +176,12 @@ const equipmentImage = computed(() => {
     accessory: '/images/defaults/accessory.jpg'
   };
   
-  return defaultImages[props.equipment.category] || '/images/defaults/equipment.jpg';
+  const category = props.equipment.categoria || props.equipment.category;
+  return defaultImages[category] || '/images/defaults/equipment.jpg';
+});
+
+const getSpecifications = computed(() => {
+  return props.equipment.especificaciones || props.equipment.specifications || {};
 });
 
 // Métodos

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
-class InventoryService {
+class CategoryService {
   constructor() {
     this.api = axios.create({
       baseURL: API_BASE_URL,
@@ -41,76 +41,73 @@ class InventoryService {
     );
   }
 
-  // ===== GESTIÓN DE PRODUCTOS =====
+  // ===== GESTIÓN DE CATEGORÍAS =====
   
   /**
-   * Obtener todos los productos
+   * Obtener todas las categorías
    */
-  async getProducts() {
+  async getCategories() {
     try {
-      const response = await this.api.get('/producto');
-      console.log('Products API response:', response.data);
+      const response = await this.api.get('/categoria');
+      console.log('Categories API response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error al obtener productos:', error);
+      console.error('Error al obtener categorías:', error);
       throw error;
     }
   }
 
   /**
-   * Obtener un producto por ID
+   * Obtener una categoría por ID
    */
-  async getProductById(id) {
+  async getCategoryById(id) {
     try {
-      const response = await this.api.get(`/producto/${id}`);
+      const response = await this.api.get(`/categoria/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error al obtener producto:', error);
+      console.error('Error al obtener categoría:', error);
       throw error;
     }
   }
 
   /**
-   * Crear nuevo producto
+   * Crear nueva categoría
    */
-  async createProduct(productData) {
+  async createCategory(categoryData) {
     try {
-      const response = await this.api.post('/producto', productData);
+      const response = await this.api.post('/categoria', categoryData);
       return response.data;
     } catch (error) {
-      console.error('Error al crear producto:', error);
+      console.error('Error al crear categoría:', error);
       throw error;
     }
   }
 
   /**
-   * Actualizar producto existente
+   * Actualizar categoría existente
    */
-  async updateProduct(id, productData) {
+  async updateCategory(id, categoryData) {
     try {
-      const response = await this.api.put(`/producto/${id}`, productData);
+      const response = await this.api.put(`/categoria/${id}`, categoryData);
       return response.data;
     } catch (error) {
-      console.error('Error al actualizar producto:', error);
+      console.error('Error al actualizar categoría:', error);
       throw error;
     }
   }
 
   /**
-   * Eliminar producto
+   * Eliminar categoría
    */
-  async deleteProduct(id) {
+  async deleteCategory(id) {
     try {
-      console.log('InventoryService: Eliminando producto ID:', id);
-      const response = await this.api.delete(`/producto/${id}`);
-      console.log('InventoryService: Respuesta de eliminación:', response.data);
+      const response = await this.api.delete(`/categoria/${id}`);
       return response.data;
     } catch (error) {
-      console.error('InventoryService: Error al eliminar producto:', error.response?.data || error.message);
+      console.error('Error al eliminar categoría:', error);
       throw error;
     }
   }
 }
 
-export default new InventoryService();
-
+export default new CategoryService();

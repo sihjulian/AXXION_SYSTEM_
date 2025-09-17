@@ -3,7 +3,7 @@
     <SideBar/>
     <RouterView></RouterView>
 
-    <main class="container">
+    <main class="container h-full">
       <div class="rounded-lg flex-col">
         <headerP></headerP>
         
@@ -135,27 +135,38 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Estado
               </label>
-              <fwb-select v-model="statusFilter">
+              <select 
+                v-model="statusFilter"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              >
                 <option value="">Todos los estados</option>
-                <option value="available">Disponible</option>
-                <option value="rented">Alquilado</option>
-                <option value="maintenance">Mantenimiento</option>
-                <option value="out_of_service">Fuera de Servicio</option>
-              </fwb-select>
+                <option 
+                  v-for="state in inventoryStore.uniqueStates" 
+                  :key="state.value" 
+                  :value="state.value"
+                >
+                  {{ state.label }}
+                </option>
+              </select>
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Categoría
               </label>
-              <fwb-select v-model="categoryFilter">
+              <select 
+                v-model="categoryFilter"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              >
                 <option value="">Todas las categorías</option>
-                <option value="laptop">Laptop</option>
-                <option value="desktop">Desktop</option>
-                <option value="projector">Proyector</option>
-                <option value="monitor">Monitor</option>
-                <option value="accessory">Accesorio</option>
-              </fwb-select>
+                <option 
+                  v-for="category in inventoryStore.categoryList" 
+                  :key="category.id" 
+                  :value="category.nombre"
+                >
+                  {{ category.nombre }}
+                </option>
+              </select>
             </div>
             
             <div class="flex items-end">
@@ -282,10 +293,11 @@
       </fwb-footer-link>
     </fwb-footer-link-group>
   </fwb-footer>
+
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useInventoryStore } from '@/stores/inventory.js';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
@@ -298,7 +310,6 @@ import {
   FwbModal,
   FwbCard,
   FwbInput,
-  FwbSelect,
   FwbPagination,
   FwbFooter,
   FwbFooterCopyright,
@@ -355,7 +366,7 @@ const alerts = ref([
 
 // Filtros y búsqueda
 const filteredProducts = computed(() => {
-  let filtered = products.value;
+  let filtered = inventoryStore.productList;
 
   // Filtro de búsqueda
   if (searchQuery.value) {
@@ -432,11 +443,49 @@ function showMaintenanceModal() {
 }
 
 // Funciones de acción
-function confirmDelete() {
+async function confirmDelete() {
   if (selectedProduct.value) {
-    inventoryStore.deleteProduct(selectedProduct.value.id);
-    closeModal();
-    loadProducts();
+    console.log('Iniciando eliminación del producto:', selectedProduct.value.nombre);
+    try {
+      const productId = selectedProduct.value.id;
+      const productName = selectedProduct.value.nombre;
+      
+      console.log('Llamando a deleteProduct con ID:', productId);
+      await inventoryStore.deleteProduct(productId);
+      
+      console.log('Producto eliminado del store, cerrando modal...');
+      closeModal();
+      
+      // Mostrar mensaje de éxito
+      console.log(`Producto "${productName}" eliminado exitosamente`);
+      
+      // Forzar actualización de la vista
+      await nextTick();
+      console.log('Productos actuales en store:', inventoryStore.productList.length);
+      
+      // Opcional: mostrar notificación de éxito
+      alerts.value.unshift({
+        id: Date.now(),
+        type: 'success',
+        icon: 'fa-solid fa-check-circle',
+        title: 'Producto Eliminado',
+        message: `El producto "${productName}" ha sido eliminado exitosamente.`
+      });
+      
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+      
+      // Mostrar error al usuario
+      alerts.value.unshift({
+        id: Date.now(),
+        type: 'error',
+        icon: 'fa-solid fa-exclamation-triangle',
+        title: 'Error al Eliminar',
+        message: 'No se pudo eliminar el producto. ' + (error.message || 'Error desconocido')
+      });
+    }
+  } else {
+    console.error('No hay producto seleccionado para eliminar');
   }
 }
 
@@ -465,9 +514,17 @@ function handlePageChange(page) {
   currentPage.value = page;
 }
 
-function handleProductSuccess() {
+async function handleProductSuccess() {
+  console.log('Producto guardado exitosamente, actualizando vista...');
   closeModal();
-  loadProducts();
+  
+  // Recargar productos desde el backend para asegurar sincronización
+  try {
+    await inventoryStore.fetchProducts();
+    console.log('Vista actualizada exitosamente');
+  } catch (error) {
+    console.error('Error al actualizar la vista:', error);
+  }
 }
 
 // Cargar datos
@@ -494,8 +551,12 @@ watch([searchQuery, statusFilter, categoryFilter], () => {
 });
 
 // Cargar datos al montar el componente
-onMounted(() => {
-  loadProducts();
+onMounted(async () => {
+  // Cargar productos y categorías
+  await Promise.all([
+    loadProducts(),
+    inventoryStore.fetchCategories()
+  ]);
 });
 </script>
 

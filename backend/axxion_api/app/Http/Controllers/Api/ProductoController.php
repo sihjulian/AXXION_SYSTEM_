@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class ProductoController extends Controller
 {
@@ -32,8 +33,21 @@ class ProductoController extends Controller
             'descripcion' => 'nullable|string',
             'marca' => 'nullable|string|max:255',
             'modelo' => 'nullable|string|max:255',
-            'precio_referencia_renta' => 'required|numeric|min:0',
+            'precio_referencia_renta' => 'nullable|numeric|min:0',
             'sku' => 'nullable|string|max:255|unique:producto,sku',
+            'numero_serie' => 'nullable|string|max:100|unique:producto,numero_serie',
+            'categoria' => 'nullable|string|max:50',
+            'especificaciones' => 'nullable|array',
+            'precio_alquiler_dia' => 'nullable|numeric|min:0',
+            'precio_alquiler_semanal' => 'nullable|numeric|min:0',
+            'precio_alquiler_mensual' => 'nullable|numeric|min:0',
+            'precio_compra' => 'nullable|numeric|min:0',
+            'valor_actual' => 'nullable|numeric|min:0',
+            'fecha_compra' => 'nullable|date',
+            'condicion' => 'nullable|string|max:50',
+            'ubicacion' => 'nullable|string|max:255',
+            'notas' => 'nullable|string',
+            'estado' => 'nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -76,8 +90,21 @@ class ProductoController extends Controller
             'descripcion' => 'nullable|string',
             'marca' => 'nullable|string|max:255',
             'modelo' => 'nullable|string|max:255',
-            'precio_referencia_renta' => 'sometimes|required|numeric|min:0',
+            'precio_referencia_renta' => 'nullable|numeric|min:0',
             'sku' => 'nullable|string|max:255|unique:producto,sku,' . $producto->id,
+            'numero_serie' => 'nullable|string|max:100|unique:producto,numero_serie,' . $producto->id,
+            'categoria' => 'nullable|string|max:50',
+            'especificaciones' => 'nullable|array',
+            'precio_alquiler_dia' => 'nullable|numeric|min:0',
+            'precio_alquiler_semanal' => 'nullable|numeric|min:0',
+            'precio_alquiler_mensual' => 'nullable|numeric|min:0',
+            'precio_compra' => 'nullable|numeric|min:0',
+            'valor_actual' => 'nullable|numeric|min:0',
+            'fecha_compra' => 'nullable|date',
+            'condicion' => 'nullable|string|max:50',
+            'ubicacion' => 'nullable|string|max:255',
+            'notas' => 'nullable|string',
+            'estado' => 'nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -95,13 +122,39 @@ class ProductoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Producto $producto)
+    public function destroy($id)
     {
         try {
-            $producto->delete();
-            return response()->json(null, 204);
+            // Buscar el producto por ID
+            $producto = Producto::find($id);
+            
+            if (!$producto) {
+                return response()->json(['error' => 'Producto no encontrado'], 404);
+            }
+            
+            // Log para debugging
+            \Log::info('Intentando eliminar producto ID: ' . $id . ', Nombre: ' . $producto->nombre);
+            
+            // Eliminar directamente con query builder
+            $deleted = DB::table('producto')->where('id', $id)->delete();
+            
+            \Log::info('Filas eliminadas: ' . $deleted);
+            
+            if ($deleted > 0) {
+                return response()->json([
+                    'message' => 'Producto eliminado exitosamente',
+                    'deleted_id' => $id
+                ], 200);
+            } else {
+                return response()->json(['error' => 'No se pudo eliminar el producto'], 500);
+            }
+            
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al eliminar el producto: ' . $e->getMessage()], 500);
+            \Log::error('Error al eliminar producto: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'error' => 'Error al eliminar el producto: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

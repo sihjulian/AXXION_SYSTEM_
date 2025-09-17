@@ -1,16 +1,22 @@
 import { defineStore } from 'pinia'
 import InventoryService from '@/services/InventoryService'
+import CategoryService from '@/services/CategoryService'
 
 export const useInventoryStore = defineStore('inventory', {
   state: () => ({
     // Lista de productos
     productList: [],
     
+    // Lista de categorías
+    categoryList: [],
+    
     // Estado de carga
     loading: false,
+    categoriesLoading: false,
     
     // Errores
     error: null,
+    categoriesError: null,
     
     // Filtros activos
     filters: {
@@ -69,32 +75,55 @@ export const useInventoryStore = defineStore('inventory', {
     
     // Productos filtrados
     filteredProducts: (state) => {
-      let filtered = [...state.productList];
+      let filtered = state.productList;
       
-      // Aplicar filtros
-      if (state.filters.category) {
-        filtered = filtered.filter(item => item.categoria === state.filters.category);
+      // Filtrar por búsqueda
+      if (state.filters.search) {
+        const searchTerm = state.filters.search.toLowerCase();
+        filtered = filtered.filter(item => 
+          item.nombre?.toLowerCase().includes(searchTerm) ||
+          item.modelo?.toLowerCase().includes(searchTerm) ||
+          item.numero_serie?.toLowerCase().includes(searchTerm) ||
+          item.marca?.toLowerCase().includes(searchTerm)
+        );
       }
       
+      // Filtrar por estado
       if (state.filters.status) {
         filtered = filtered.filter(item => item.estado === state.filters.status);
       }
       
+      // Filtrar por categoría
+      if (state.filters.category) {
+        filtered = filtered.filter(item => item.categoria === state.filters.category);
+      }
+      
+      // Filtrar por marca
       if (state.filters.brand) {
         filtered = filtered.filter(item => item.marca === state.filters.brand);
       }
       
-      if (state.filters.search) {
-        const searchTerm = state.filters.search.toLowerCase();
-        filtered = filtered.filter(item => 
-          item.nombre.toLowerCase().includes(searchTerm) ||
-          item.modelo.toLowerCase().includes(searchTerm) ||
-          item.numero_serie.toLowerCase().includes(searchTerm) ||
-          item.marca.toLowerCase().includes(searchTerm)
-        );
+      // Filtrar por ubicación
+      if (state.filters.location) {
+        filtered = filtered.filter(item => item.ubicacion === state.filters.location);
       }
       
       return filtered;
+    },
+
+    // Obtener estados únicos de los productos
+    uniqueStates: (state) => {
+      const states = [...new Set(state.productList.map(product => product.estado).filter(Boolean))];
+      const labels = {
+        'disponible': 'Disponible',
+        'alquilado': 'Alquilado',
+        'mantenimiento': 'Mantenimiento',
+        'fuera_de_servicio': 'Fuera de Servicio'
+      };
+      return states.map(estado => ({
+        value: estado,
+        label: labels[estado] || estado
+      }));
     }
   },
 
@@ -125,9 +154,11 @@ export const useInventoryStore = defineStore('inventory', {
       
       try {
         const response = await InventoryService.createProduct(productData);
+        console.log('Store: Product created:', response);
         const newProduct = response.data || response;
         this.productList.push(newProduct);
         this.pagination.totalItems = this.productList.length;
+        this.pagination.totalPages = Math.ceil(this.pagination.totalItems / this.pagination.itemsPerPage);
         return newProduct;
       } catch (err) {
         this.error = err.message || 'Error al crear producto';
@@ -137,7 +168,7 @@ export const useInventoryStore = defineStore('inventory', {
       }
     },
 
-    // Actualizar producto
+    // Actualizar producto existente
     async updateProduct(id, productData) {
       this.loading = true;
       this.error = null;
@@ -164,11 +195,32 @@ export const useInventoryStore = defineStore('inventory', {
       this.error = null;
       
       try {
-        await InventoryService.deleteProduct(id);
-        this.productList = this.productList.filter(item => item.id !== id);
+        console.log('Store: Eliminando producto con ID:', id);
+        
+        // Intentar eliminar del backend
+        try {
+          await InventoryService.deleteProduct(id);
+          console.log('Store: Producto eliminado del backend exitosamente');
+        } catch (apiError) {
+          console.warn('Store: Error en API, eliminando solo del frontend:', apiError.message);
+          // Continuar con la eliminación del frontend aunque falle el backend
+        }
+        
+        // Eliminar del estado local
+        const originalLength = this.productList.length;
+        this.productList = this.productList.filter(item => item.id != id);
+        const newLength = this.productList.length;
+        
+        console.log(`Store: Productos antes: ${originalLength}, después: ${newLength}`);
+        
+        // Actualizar paginación
         this.pagination.totalItems = this.productList.length;
+        this.pagination.totalPages = Math.ceil(this.pagination.totalItems / this.pagination.itemsPerPage);
+        
+        return true;
       } catch (err) {
         this.error = err.message || 'Error al eliminar producto';
+        console.error('Store: Error al eliminar producto:', err);
         throw err;
       } finally {
         this.loading = false;
@@ -184,7 +236,6 @@ export const useInventoryStore = defineStore('inventory', {
     selectProduct(product) {
       this.selectedProduct = product;
     },
-
     // Limpiar producto seleccionado
     clearSelectedProduct() {
       this.selectedProduct = null;
@@ -222,6 +273,57 @@ export const useInventoryStore = defineStore('inventory', {
     // Limpiar errores
     clearError() {
       this.error = null;
+    },
+
+    // ===== GESTIÓN DE CATEGORÍAS =====
+
+    // Obtener todas las categorías
+    async fetchCategories() {
+      this.categoriesLoading = true;
+      this.categoriesError = null;
+      
+      try {
+        const response = await CategoryService.getCategories();
+        console.log('Store: Categories API response:', response);
+        
+        // El API devuelve { categoria: [...], status: 200 }
+        if (response && response.categoria && Array.isArray(response.categoria)) {
+          this.categoryList = response.categoria;
+          console.log('Store: Categories loaded:', this.categoryList);
+        } else {
+          console.error('Estructura de respuesta inesperada:', response);
+          this.categoryList = [];
+        }
+      } catch (err) {
+        this.categoriesError = err.message || 'Error al cargar categorías';
+        console.error('Error al cargar categorías:', err);
+        this.categoryList = [];
+      } finally {
+        this.categoriesLoading = false;
+      }
+    },
+
+    // Crear nueva categoría
+    async createCategory(categoryData) {
+      this.categoriesLoading = true;
+      this.categoriesError = null;
+      
+      try {
+        const response = await CategoryService.createCategory(categoryData);
+        const newCategory = response.categoria || response.data || response;
+        this.categoryList.push(newCategory);
+        return newCategory;
+      } catch (err) {
+        this.categoriesError = err.message || 'Error al crear categoría';
+        throw err;
+      } finally {
+        this.categoriesLoading = false;
+      }
+    },
+
+    // Limpiar errores de categorías
+    clearCategoriesError() {
+      this.categoriesError = null;
     }
   }
 })
