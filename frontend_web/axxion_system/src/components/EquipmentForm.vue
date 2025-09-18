@@ -461,7 +461,11 @@ const validateForm = () => {
 };
 
 const handleSubmit = async () => {
+  console.log('handleSubmit iniciado, modo:', props.mode);
+  console.log('Datos del formulario:', form);
+  
   if (!validateForm()) {
+    console.log('Validación falló, errores:', errors.value);
     return;
   }
   
@@ -489,45 +493,64 @@ const handleSubmit = async () => {
       notas: form.notes
     };
 
+    console.log('Datos mapeados para enviar:', productData);
+
     if (props.mode === 'add') {
+      console.log('Creando nuevo producto...');
       await inventoryStore.createProduct(productData);
     } else {
+      console.log('Actualizando producto ID:', props.selectedEquipment.id);
       await inventoryStore.updateProduct(props.selectedEquipment.id, productData);
     }
     
+    console.log('Operación exitosa, emitiendo success...');
     emit('success');
   } catch (error) {
     console.error('Error al guardar producto:', error);
-    // Aquí podrías mostrar un mensaje de error al usuario
+    alert('Error al guardar el producto: ' + (error.message || 'Error desconocido'));
   } finally {
     isSubmitting.value = false;
   }
 };
 
 const loadEquipmentData = () => {
+  console.log('loadEquipmentData llamado con:', props.selectedEquipment);
+  console.log('Modo actual:', props.mode);
+  
   if (props.selectedEquipment) {
     const equipment = props.selectedEquipment;
-    Object.assign(form, {
-      name: equipment.nombre || '',
-      brand: equipment.marca || '',
-      model: equipment.modelo || '',
-      serialNumber: equipment.numero_serie || '',
-      category: equipment.categoria || '',
-      status: equipment.estado || 'disponible',
-      dailyRate: equipment.precio_alquiler_dia || 0,
-      weeklyRate: equipment.precio_alquiler_semanal || 0,
-      monthlyRate: equipment.precio_alquiler_mensual || 0,
-      purchasePrice: equipment.precio_compra || 0,
-      currentValue: equipment.valor_actual || 0,
-      purchaseDate: equipment.fecha_compra || '',
-      condition: equipment.condicion || 'excelente',
-      location: equipment.ubicacion || '',
-      notes: equipment.notas || '',
-      specifications: {
-        ...form.specifications,
-        ...(equipment.especificaciones || {})
-      }
-    });
+    console.log('Datos del equipo a cargar:', equipment);
+    
+    // Asignar datos básicos
+    form.name = equipment.nombre || '';
+    form.brand = equipment.marca || '';
+    form.model = equipment.modelo || '';
+    form.serialNumber = equipment.numero_serie || '';
+    form.category = equipment.categoria || '';
+    form.status = equipment.estado || 'disponible';
+    form.dailyRate = equipment.precio_alquiler_dia || 0;
+    form.weeklyRate = equipment.precio_alquiler_semanal || 0;
+    form.monthlyRate = equipment.precio_alquiler_mensual || 0;
+    form.purchasePrice = equipment.precio_compra || 0;
+    form.currentValue = equipment.valor_actual || 0;
+    form.purchaseDate = equipment.fecha_compra || '';
+    form.condition = equipment.condicion || 'excelente';
+    form.location = equipment.ubicacion || '';
+    form.notes = equipment.notas || '';
+    
+    // Asignar especificaciones
+    if (equipment.especificaciones) {
+      form.specifications.processor = equipment.especificaciones.procesador || '';
+      form.specifications.ram = equipment.especificaciones.memoria_ram || '';
+      form.specifications.storage = equipment.especificaciones.almacenamiento || '';
+      form.specifications.graphics = equipment.especificaciones.tarjeta_grafica || '';
+      form.specifications.screen = equipment.especificaciones.pantalla || '';
+      form.specifications.os = equipment.especificaciones.sistema_operativo || '';
+    }
+    
+    console.log('Formulario después de cargar datos:', form);
+  } else {
+    console.log('No hay selectedEquipment para cargar');
   }
 };
 
