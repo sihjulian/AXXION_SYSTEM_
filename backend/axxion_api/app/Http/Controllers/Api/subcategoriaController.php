@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Categoria;
+use App\Models\Subcategoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 
-class categoriaController extends Controller
+class subcategoriaController extends Controller
     {
         public function index(){
-        $categoria = Categoria::with('subcategorias')->get();
+        $subcategoria = Subcategoria::with('categorias')->get();
         $data = [
-            'categoria' => $categoria,
+            'categoria' => $subcategoria,
             'status' => 200
         ];
         return response()->json($data, 200);
@@ -24,8 +24,7 @@ class categoriaController extends Controller
             $validator = Validator::make($request->all(),[
                 'nombre' => ['required', 'string'],
                 'descripcion' => ['required', 'string'],
-                'tipo_categoria' => ['required', 'string'],
-                'subcategorias' => ['array'],
+                'categorias' => ['array']
             ]);
             if($validator->fails()){
                 $data = [
@@ -35,23 +34,22 @@ class categoriaController extends Controller
                 ];
                 return response()->json($data, 400);
             }
-            $categoria = Categoria::create([
+            $subcategoria = Subcategoria::create([
                 'nombre' => $request->nombre,
-                'descripcion' => $request->descripcion,
-                'tipo_categoria' => $request->tipo_categoria
+                'descripcion' => $request->descripcion
             ]);
-            if(!$categoria){
+            if(!$subcategoria){
                 $data = [
-                    'message' => 'Error al crear categoria',
+                    'message' => 'Error al crear subcategoria',
                     'status' => 500
                 ];
                 return response()->json($data, 500);
             }
-            if($request->has('subcategorias')){
-                $categoria->subcategorias()->sync($request->subcategorias);
+            if($request->has('categorias')){
+                $subcategoria->categorias()->sync($request->categorias);
             }
             $data = [
-                'categoria' => $categoria,
+                'subcategoria' => $subcategoria,
                 'status' => 200
             ];
             return response()->json($data, 200);
@@ -65,33 +63,33 @@ class categoriaController extends Controller
             }
         }
         public function show($id){
-            $categoria = Categoria::with('subcategorias')->find($id);
-            if(!$categoria){
+            $subcategoria = Subcategoria::with('categorias')->find($id);
+            if(!$subcategoria){
                 $data = [
-                    'message' => 'Categoria no encontrada',
+                    'message' => 'subcategoria no encontrada',
                     'status' => 404
                 ];
                 return response()->json($data, 404);
             }
             $data = [
-                'categoria' => $categoria,
+                'subcategoria' => $subcategoria,
                 'status' => 200
             ];
             return response()->json($data, 200);
         }
         public function destroy($id){
-            $categoria = Categoria::with('subcategorias')->find($id);
-            if(!$categoria){
+            $subcategoria = Subcategoria::with('categorias')->find($id);
+            if(!$subcategoria){
                 $data = [
-                    'message' => 'Categoria no encontrada',
+                    'message' => 'subCategoria no encontrada',
                     'status' => 404
                 ];
                 return response()->json($data, 404);
             }
-            $categoria->subcategorias()->detach();
-            $categoria->delete();
+            $subcategoria->categorias()->detach();
+            $subcategoria->delete();
             $data = [
-                'categoria' => $categoria,
+                'subcategoria' => $subcategoria,
                 'status' => 200
             ];
             return response()->json($data, 200);
@@ -99,10 +97,10 @@ class categoriaController extends Controller
         public function update(Request $request, $id)
         {
             try {
-            $categoria = Categoria::with('subcategorias')->find($id);
-            if(!$categoria){
+            $subcategoria = Subcategoria::with('categorias')->find($id);
+            if(!$subcategoria){
                 $data = [
-                    'message' => 'categoria no encontrada',
+                    'message' => 'subcategoria no encontrada',
                     'status' => 200
                 ];
                 return response()->json($data, 200);
@@ -110,27 +108,25 @@ class categoriaController extends Controller
             $validator = Validator::make($request->all(), [
                 'nombre' => ['required', 'string'],
                 'descripcion' => ['required', 'string'],
-                'tipo_categoria' => ['required', 'string'],
-                'subcategorias' => ['array'],
+                'categorias' => ['array']
             ]);
             if($validator->fails()){
                 $data = [
                     'message' => 'Validator failed',
                     'errors' => $validator->errors(),
-                    'status' => 400
+                    'status' => 201
                 ];
-                return response()->json($data, 400);
+                return response()->json($data, 201);
             }
-            $categoria->nombre = $request->nombre;
-            $categoria->descripcion = $request->descripcion;
-            $categoria->tipo_categoria = $request->tipo_categoria;
-            if($request->has('subcategorias')){
-                $categoria->subcategorias()->sync($request->subcategorias);
+            $subcategoria->nombre = $request->nombre;
+            $subcategoria->descripcion = $request->descripcion;
+            if($request->has('categorias')){
+                $subcategoria->categorias()->sync($request->categorias);
             }
-            $categoria->save();
+            $subcategoria->save();
             $data = [
-                'message' => 'categoria actualizada',
-                'categoria' => $categoria,
+                'message' => 'subcategoria actualizada',
+                'subcategoria' => $subcategoria,
                 'status' => 200
             ];
             return response()->json($data, 200);
@@ -143,13 +139,12 @@ class categoriaController extends Controller
                 ], 500);
             }
         }
-        public function updatePartial(Request $request, $id)
-        {
+        public function updatePartial(Request $request, $id){
             try {
-            $categoria = Categoria::with('subcategorias')->find($id);
-            if(!$categoria){
+            $subcategoria = Subcategoria::with('categorias')->find($id);
+            if(!$subcategoria){
                 $data = [
-                    'message' => 'categoria no encontrado',
+                    'message' => 'subcategoria no encontrado',
                     'status' => 404
                 ];
                 return response()->json($data, 404);
@@ -157,8 +152,7 @@ class categoriaController extends Controller
             $validator = Validator::make($request->all(),[
                 'nombre' => ['string'],
                 'descripcion' => ['string'],
-                'tipo_categoria' => ['string'],
-                'subcategorias' => ['array'],
+                'categorias' => ['array']
             ]);
             
             if($validator->fails()){
@@ -171,28 +165,25 @@ class categoriaController extends Controller
             }
             
             if($request->has('nombre')){
-                $categoria->nombre = $request->nombre;
+                $subcategoria->nombre = $request->nombre;
             }
             if($request->has('descripcion')){
-                $categoria->descripcion = $request->descripcion;
+                $subcategoria->descripcion = $request->descripcion;
             }
-            if($request->has('tipo_categoria')){
-                $categoria->tipo_categoria = $request->tipo_categoria;
+            if($request->has('categorias')){
+                $subcategoria->categorias()->sync($request->categorias);
             }
-            if($request->has('subcategorias')){
-                $categoria->subcategorias()->sync($request->subcategorias);
-            }
-            $categoria->save();
+            $subcategoria->save();
             $data = [
-                'message' => 'categoria actualizado',
-                'categoria' => $categoria,
+                'message' => 'subcategoria actualizado',
+                'subcategoria' => $subcategoria,
                 'status' => 200
             ];
             return response()->json($data, 200);
             } catch (\Exception $e) {
-                Log::error('Error al crear Entrega: ' . $e->getMessage());
+                Log::error('Error al crear subcategoria: ' . $e->getMessage());
                 return response()->json([
-                    'message' => 'Error interno al crear la entrega',
+                    'message' => 'Error interno al crear la subcategoria',
                     'error' => $e->getMessage(),
                     'status' => 500
                 ], 500);

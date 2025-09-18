@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\categoriaController;
 use App\Http\Controllers\Api\clienteController;
+use App\Http\Controllers\Api\subcategoriaController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\ProductoController;
@@ -10,16 +11,23 @@ use App\Http\Controllers\Api\cotizacionController;
 use App\Http\Controllers\Api\detalleCotizacionController;
 use App\Http\Controllers\Api\devolucionController;
 use App\Http\Controllers\Api\direccionController;
-
 use App\Http\Controllers\Api\entregaController;
 
 // Rutas públicas (sin autenticación)
 Route::post('/usuarios', [UsuarioController::class, 'store']);
 
+
 Route::post('/login',    [UsuarioController::class, 'login']);
 Route::get('/usuarios',  [UsuarioController::class, 'index']);
 Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
 Route::get('/usuario/{id}', [UsuarioController::class, 'show']);
+
+Route::post('/login', [UsuarioController::class, 'login']);
+
+ Route::get('/usuarios', [UsuarioController::class, 'index']);
+ Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
+
+
 
     // Rutas para actualizar usuario
     Route::put('/usuario/{id}', [UsuarioController::class, 'update']);
@@ -109,7 +117,6 @@ Route::delete('/direccion/{id}', [direccionController::class, 'destroy']);
 Route::put('/direccion/{id}', [direccionController::class, 'update']);
 Route::patch('/direccion/{id}', [direccionController::class, 'updatePartial']);
 
-
 // ENTREGA
 
 Route::get('/entrega', [entregaController::class, 'index']);
@@ -118,3 +125,13 @@ Route::get('/entrega/{id}', [entregaController::class, 'show']);
 Route::delete('/entrega/{id}', [entregaController::class, 'destroy']);
 Route::put('/entrega/{id}', [entregaController::class, 'update']);
 Route::patch('/entrega/{id}', [entregaController::class, 'updatePartial']);
+
+// SUBCATEGORIA
+
+Route::get('/subcategoria', [subcategoriaController::class, 'index']);
+Route::post('/subcategoria', [subcategoriaController::class, 'store']);
+Route::get('/subcategoria/{id}', [subcategoriaController::class, 'show']);
+Route::delete('/subcategoria/{id}', [subcategoriaController::class, 'destroy']);
+Route::put('/subcategoria/{id}', [subcategoriaController::class, 'update']);
+Route::patch('/subcategoria/{id}', [subcategoriaController::class, 'updatePartial']);
+
