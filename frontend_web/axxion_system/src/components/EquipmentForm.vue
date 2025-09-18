@@ -60,27 +60,58 @@
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Categoría *
           </label>
-          <fwb-select v-model="form.category" :error="errors.category" required>
+          <select 
+            v-model="form.category" 
+            :class="[
+              'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5',
+              'dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
+              errors.category ? 'border-red-500' : ''
+            ]"
+            required
+          >
             <option value="">Seleccionar categoría</option>
-            <option value="laptop">Laptop</option>
-            <option value="desktop">Desktop</option>
-            <option value="projector">Proyector</option>
-            <option value="monitor">Monitor</option>
-            <option value="accessory">Accesorio</option>
-          </fwb-select>
+            <option v-if="loadingCategories" disabled>Cargando categorías...</option>
+            <option v-if="!loadingCategories && categories.length === 0" disabled>No hay categorías disponibles</option>
+            <option 
+              v-for="category in categories" 
+              :key="category.id" 
+              :value="category.nombre"
+            >
+              {{ category.nombre }}
+            </option>
+          </select>
+          <!-- Debug info -->
+          <div v-if="categories.length > 0" class="text-xs text-green-600 mt-1">
+            {{ categories.length }} categorías cargadas
+          </div>
         </div>
         
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Estado *
           </label>
-          <fwb-select v-model="form.status" :error="errors.status" required>
+          <select 
+            v-model="form.status" 
+            :class="[
+              'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5',
+              'dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
+              errors.status ? 'border-red-500' : ''
+            ]"
+            required
+          >
             <option value="">Seleccionar estado</option>
-            <option value="available">Disponible</option>
-            <option value="rented">Alquilado</option>
-            <option value="maintenance">Mantenimiento</option>
-            <option value="out_of_service">Fuera de Servicio</option>
-          </fwb-select>
+            <option 
+              v-for="state in availableStates" 
+              :key="state.value" 
+              :value="state.value"
+            >
+              {{ state.label }}
+            </option>
+          </select>
+          <!-- Debug info -->
+          <div v-if="availableStates.length > 0" class="text-xs text-blue-600 mt-1">
+            {{ availableStates.length }} estados disponibles
+          </div>
         </div>
       </div>
     </div>
@@ -254,13 +285,16 @@
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Condición
           </label>
-          <fwb-select v-model="form.condition">
+          <select 
+            v-model="form.condition"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          >
             <option value="">Seleccionar condición</option>
-            <option value="excellent">Excelente</option>
-            <option value="good">Buena</option>
-            <option value="fair">Regular</option>
-            <option value="poor">Mala</option>
-          </fwb-select>
+            <option value="excelente">Excelente</option>
+            <option value="buena">Buena</option>
+            <option value="regular">Regular</option>
+            <option value="mala">Mala</option>
+          </select>
         </div>
         
         <div>
@@ -315,9 +349,9 @@
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue';
 import { useInventoryStore } from '@/stores/inventory.js';
+import CategoryService from '@/services/CategoryService.js';
 import { 
   FwbInput, 
-  FwbSelect, 
   FwbTextarea, 
   FwbButton 
 } from 'flowbite-vue';
@@ -344,6 +378,25 @@ const inventoryStore = useInventoryStore();
 // Estado
 const isSubmitting = ref(false);
 const errors = ref({});
+const categories = ref([]);
+const loadingCategories = ref(false);
+
+// Estados disponibles
+const availableStates = ref([
+  { value: 'disponible', label: 'Disponible' },
+  { value: 'alquilado', label: 'Alquilado' },
+  { value: 'mantenimiento', label: 'Mantenimiento' },
+  { value: 'fuera_de_servicio', label: 'Fuera de Servicio' }
+]);
+
+// Inicializar categorías con datos de prueba para asegurar que funcione
+const testCategories = [
+  { id: 1, nombre: 'Sonido' },
+  { id: 2, nombre: 'Video' },
+  { id: 3, nombre: 'Iluminación' },
+  { id: 4, nombre: 'Mobiliario' },
+  { id: 5, nombre: 'Estructuras' }
+];
 
 // Formulario
 const form = reactive({
@@ -352,14 +405,14 @@ const form = reactive({
   model: '',
   serialNumber: '',
   category: '',
-  status: 'available',
+  status: 'disponible',
   dailyRate: 0,
   weeklyRate: 0,
   monthlyRate: 0,
   purchasePrice: 0,
   currentValue: 0,
   purchaseDate: '',
-  condition: 'excellent',
+  condition: 'excelente',
   location: '',
   notes: '',
   specifications: {
@@ -415,15 +468,36 @@ const handleSubmit = async () => {
   isSubmitting.value = true;
   
   try {
+    // Mapear campos del formulario a los campos del backend
+    const productData = {
+      nombre: form.name,
+      descripcion: form.notes || '',
+      marca: form.brand,
+      modelo: form.model,
+      numero_serie: form.serialNumber,
+      categoria: form.category,
+      estado: form.status,
+      especificaciones: form.specifications,
+      precio_alquiler_dia: form.dailyRate,
+      precio_alquiler_semanal: form.weeklyRate,
+      precio_alquiler_mensual: form.monthlyRate,
+      precio_compra: form.purchasePrice,
+      valor_actual: form.currentValue,
+      fecha_compra: form.purchaseDate,
+      condicion: form.condition,
+      ubicacion: form.location,
+      notas: form.notes
+    };
+
     if (props.mode === 'add') {
-      await inventoryStore.addEquipment(form);
+      await inventoryStore.createProduct(productData);
     } else {
-      await inventoryStore.updateEquipment(props.selectedEquipment.id, form);
+      await inventoryStore.updateProduct(props.selectedEquipment.id, productData);
     }
     
     emit('success');
   } catch (error) {
-    console.error('Error al guardar equipo:', error);
+    console.error('Error al guardar producto:', error);
     // Aquí podrías mostrar un mensaje de error al usuario
   } finally {
     isSubmitting.value = false;
@@ -432,11 +506,26 @@ const handleSubmit = async () => {
 
 const loadEquipmentData = () => {
   if (props.selectedEquipment) {
+    const equipment = props.selectedEquipment;
     Object.assign(form, {
-      ...props.selectedEquipment,
+      name: equipment.nombre || '',
+      brand: equipment.marca || '',
+      model: equipment.modelo || '',
+      serialNumber: equipment.numero_serie || '',
+      category: equipment.categoria || '',
+      status: equipment.estado || 'disponible',
+      dailyRate: equipment.precio_alquiler_dia || 0,
+      weeklyRate: equipment.precio_alquiler_semanal || 0,
+      monthlyRate: equipment.precio_alquiler_mensual || 0,
+      purchasePrice: equipment.precio_compra || 0,
+      currentValue: equipment.valor_actual || 0,
+      purchaseDate: equipment.fecha_compra || '',
+      condition: equipment.condicion || 'excelente',
+      location: equipment.ubicacion || '',
+      notes: equipment.notas || '',
       specifications: {
         ...form.specifications,
-        ...props.selectedEquipment.specifications
+        ...(equipment.especificaciones || {})
       }
     });
   }
@@ -449,14 +538,14 @@ const resetForm = () => {
     model: '',
     serialNumber: '',
     category: '',
-    status: 'available',
+    status: 'disponible',
     dailyRate: 0,
     weeklyRate: 0,
     monthlyRate: 0,
     purchasePrice: 0,
     currentValue: 0,
     purchaseDate: '',
-    condition: 'excellent',
+    condition: 'excelente',
     location: '',
     notes: '',
     specifications: {
@@ -480,8 +569,61 @@ watch(() => props.selectedEquipment, () => {
   }
 }, { immediate: true });
 
+// Watcher para categorías del store
+watch(() => inventoryStore.categoryList, (newCategories) => {
+  if (newCategories && newCategories.length > 0) {
+    categories.value = newCategories;
+    console.log('Categorías actualizadas en el formulario:', categories.value);
+  }
+}, { immediate: true, deep: true });
+
+// Función para cargar categorías
+const loadCategories = async () => {
+  loadingCategories.value = true;
+  
+  // Primero, cargar categorías de prueba para garantizar que funcione
+  categories.value = testCategories;
+  console.log('Categorías de prueba cargadas:', categories.value);
+  
+  try {
+    // Intentar cargar desde el store
+    await inventoryStore.fetchCategories();
+    
+    if (inventoryStore.categoryList && inventoryStore.categoryList.length > 0) {
+      categories.value = inventoryStore.categoryList;
+      console.log('Categorías actualizadas desde store:', categories.value);
+    } else {
+      // Si el store no tiene categorías, cargar directamente desde el servicio
+      console.log('Store vacío, intentando cargar desde API...');
+      const response = await CategoryService.getCategories();
+      console.log('Respuesta directa del API:', response);
+      
+      if (response && response.categoria && Array.isArray(response.categoria)) {
+        categories.value = response.categoria;
+        console.log('Categorías actualizadas desde API:', categories.value);
+      } else {
+        console.log('Manteniendo categorías de prueba');
+      }
+    }
+  } catch (error) {
+    console.error('Error al cargar categorías, usando categorías de prueba:', error);
+    // Mantener las categorías de prueba en caso de error
+  } finally {
+    loadingCategories.value = false;
+  }
+};
+
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
+  console.log('EquipmentForm mounted, loading categories...');
+  
+  // Cargar categorías
+  await loadCategories();
+  
+  // Debug: verificar estado después de cargar
+  console.log('Categories after load:', categories.value);
+  console.log('Store categoryList:', inventoryStore.categoryList);
+  
   if (props.mode === 'edit' && props.selectedEquipment) {
     loadEquipmentData();
   }

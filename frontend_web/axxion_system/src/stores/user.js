@@ -48,7 +48,9 @@ export const useUserStore = defineStore('user', () => {
   const fetchRoles = async () => {
     try {
       const response = await UserService.getRoles();
-      roles.value = response.data || [];
+      console.log('Roles response in store:', response);
+      // La API devuelve {rol: [...], status: 200} no {data: [...]}
+      roles.value = response.rol || response.data || [];
       return response;
     } catch (err) {
       console.error('Error al cargar roles:', err);
@@ -68,8 +70,8 @@ export const useUserStore = defineStore('user', () => {
       const response = await UserService.createUser(userData);
       
       // Agregar el nuevo usuario al estado local
-      if (response.data) {
-        users.value.push(response.data);
+      if (response.data && response.data.data) {
+        users.value.push(response.data.data);
       }
       
       return response;
@@ -89,8 +91,8 @@ export const useUserStore = defineStore('user', () => {
       
       // Actualizar el usuario en el estado local
       const index = users.value.findIndex(user => user.id === id);
-      if (index !== -1 && response.data) {
-        users.value[index] = response.data;
+      if (index !== -1 && response.data && response.data.data) {
+        users.value[index] = response.data.data;
       }
       
       return response;

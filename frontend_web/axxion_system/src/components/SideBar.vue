@@ -41,9 +41,7 @@
           >
         </li>
         <li>
-          <a href="#" class="sidebar-item flex items-center py-3 px-6 "
-          >Mantenimiento</a
-          >
+          <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Mantenace">Mantenimientos</RouterLink>
         </li>
         <li>
           <a href="#" class="sidebar-item flex items-center py-3 px-6 "   

@@ -4,8 +4,10 @@ import Home from '/src/views/Home.vue'
 import User from '@/views/User.vue'
 import Login from '@/views/login.vue'
 import Inventory from '@/views/Inventory.vue'
+import Maintenace from '@/views/Maintenace.vue'
 import Category from '@/views/Category.vue'
 import SubCategory from '@/views/Subcategory.vue'
+
 
 
 const routes = [
@@ -33,6 +35,10 @@ const routes = [
     component: Inventory,
     meta: { requiresAuth: false },
   },
+  {
+    path: '/Mantenace',
+    name: 'Mantenimiento',
+    component: Maintenace,
     {
     path: '/Category',
     name: 'Category',
@@ -43,6 +49,7 @@ const routes = [
     path: '/SubCategory',
     name: 'SubCategory',
     component: SubCategory,
+
     meta: { requiresAuth: false },
   },
 ]

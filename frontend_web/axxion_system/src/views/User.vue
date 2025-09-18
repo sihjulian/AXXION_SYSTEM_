@@ -1,7 +1,7 @@
 <template>
   <div class=" app flex">
-
-    <SideBar/>
+    
+  <SideBar/>
 
     <RouterView></RouterView>
 
@@ -56,6 +56,7 @@
                   :key="user.id" 
                   :user="user" 
                   @delete-user="showDeleteModal"
+                  @update-user="showUpdateModal"
                 />
             </div>
         </div>
@@ -72,10 +73,10 @@
     <template #header>
       <div class="flex items-center text-lg font-semibold text-gray-900 dark:text-white">
         <font-awesome-icon 
-          :icon="modalMode === 'add' ? 'fa-solid fa-user-plus' : 'fa-solid fa-user-minus'" 
-          :class="modalMode === 'add' ? 'mr-2 text-green-600' : 'mr-2 text-red-600'"
+          :icon="modalMode === 'add' ? 'fa-solid fa-user-plus' : (modalMode === 'update' ? 'fa-solid fa-user-pen' : 'fa-solid fa-user-minus')" 
+          :class="modalMode === 'add' ? 'mr-2 text-green-600' : (modalMode === 'update' ? 'mr-2 text-blue-600' : 'mr-2 text-red-600')"
         />
-        {{ modalMode === 'add' ? 'Agregar Nuevo Usuario' : 'Eliminar Usuario' }}
+        {{ modalMode === 'add' ? 'Agregar Nuevo Usuario' : (modalMode === 'update' ? 'Actualizar Usuario' : 'Eliminar Usuario') }}
       </div>
     </template>
     <template #body>
@@ -121,13 +122,13 @@ import headerP from '@/components/headerP.vue';
 import Modal from '@/components/modal.vue';
 import UserCard from '@/components/UserCard.vue';
 import UserForm from '@/components/UserForm.vue';
-import { FwbAlert } from 'flowbite-vue';
 import {
+  FwbAlert,
   FwbFooter,
   FwbFooterCopyright,
   FwbFooterLink,
   FwbFooterLinkGroup,
-} from 'flowbite-vue'
+} from 'flowbite-vue';
 import { FwbButton } from 'flowbite-vue';
 import { FwbModal } from 'flowbite-vue';
 // Store
@@ -136,7 +137,7 @@ const userStore = useUserStore();
 // Estado local
 const displayedUsers = ref([]);
 const isShowModal = ref(false);
-const modalMode = ref('add'); // 'add' o 'delete'
+const modalMode = ref('add'); // 'add', 'delete' or 'update'
 const selectedUser = ref(null);
 
 // Computed del store
@@ -161,13 +162,20 @@ function showDeleteModal (user) {
   isShowModal.value = true;
 }
 
+function showUpdateModal (user) {
+  modalMode.value = 'update';
+  selectedUser.value = user;
+  isShowModal.value = true;
+}
+
 const getuserdata = async () => {
   try {
     await userStore.fetchUsers();
+    console.log(users.value);
     
     // Clear displayedUsers and then reveal each user with a small delay
     displayedUsers.value = [];
-    const delayPerCard = 1000; // ms per card reveal
+    const delayPerCard = 500; // ms per card reveal
 
     for (let i = 0; i < users.value.length; i++) {
       // wait before pushing the next user so UI updates between pushes

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\clienteController;
 use App\Http\Controllers\Api\subcategoriaController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UsuarioController;
+use App\Http\Controllers\Api\ProductoController;
 use App\Http\Controllers\Api\rolController;
 use App\Http\Controllers\Api\cotizacionController;
 use App\Http\Controllers\Api\detalleCotizacionController;
@@ -14,12 +15,24 @@ use App\Http\Controllers\Api\entregaController;
 
 // Rutas públicas (sin autenticación)
 Route::post('/usuarios', [UsuarioController::class, 'store']);
+
+
+Route::post('/login',    [UsuarioController::class, 'login']);
+Route::get('/usuarios',  [UsuarioController::class, 'index']);
+Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
+Route::get('/usuario/{id}', [UsuarioController::class, 'show']);
+
 Route::post('/login', [UsuarioController::class, 'login']);
 
  Route::get('/usuarios', [UsuarioController::class, 'index']);
  Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
 
 
+
+    // Rutas para actualizar usuario
+    Route::put('/usuario/{id}', [UsuarioController::class, 'update']);
+    Route::patch('/usuario/{id}', [UsuarioController::class, 'update']);
+    
 // Rutas protegidas (requieren autenticación)
 Route::middleware(['jwt.auth'])->group(function () {
     
@@ -27,16 +40,18 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::middleware(['check.role:ADMIN'])->group(function () {
 
     });
-    
-    // Rutas para usuarios autenticados (cualquier rol)
-
-    Route::get('/usuario/{id}', [UsuarioController::class, 'show']);
-    
     // Ruta de logout
     Route::post('/logout', [UsuarioController::class, 'logout']);
 });
 
+// PRODUCTOS 
 
+Route::get('/producto', [ProductoController::class, 'index']);
+Route::post('/producto', [ProductoController::class, 'store']);
+Route::get('/producto/{id}', [ProductoController::class, 'show']);
+Route::delete('/producto/{id}', [ProductoController::class, 'destroy']);
+Route::put('/producto/{id}', [ProductoController::class, 'update']);
+Route::patch('/producto/{id}', [ProductoController::class, 'updatePartial']);
 
 
 // ROLES
@@ -119,3 +134,4 @@ Route::get('/subcategoria/{id}', [subcategoriaController::class, 'show']);
 Route::delete('/subcategoria/{id}', [subcategoriaController::class, 'destroy']);
 Route::put('/subcategoria/{id}', [subcategoriaController::class, 'update']);
 Route::patch('/subcategoria/{id}', [subcategoriaController::class, 'updatePartial']);
+

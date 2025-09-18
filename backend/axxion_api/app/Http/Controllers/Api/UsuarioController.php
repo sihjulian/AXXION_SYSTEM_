@@ -16,12 +16,11 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UsuarioController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+
     public function index()
     {
-        $usuarios = Usuario::all();
+        $usuarios = Usuario::with('roles')->get();
         return UsuarioResource::collection($usuarios);
     }
 
@@ -33,9 +32,10 @@ class UsuarioController extends Controller
         $validator = Validator :: make($request->all(), [
             'nombre_usuario' => 'required',
             'nombre' => 'required',
-            'nombre2' => 'required',
+            // second name and second surname can be optional
+            'nombre2' => 'nullable',
             'apellido1' => 'required',
-            'apellido2' => 'required',
+            'apellido2' => 'nullable',
             'password' => 'required|min:6',
             'email' => 'required|email|unique:usuario,email',
             'telefono' => 'required',
@@ -65,6 +65,7 @@ class UsuarioController extends Controller
         'email' => $request->email,
         'telefono' => $request->telefono,
         'departamento' => $request->departamento,
+        'estado' => $request->estado,
     ]);
         
         if ($request->has('roles')) {
@@ -146,6 +147,66 @@ class UsuarioController extends Controller
         $usuario->roles()->detach();
         $usuario->delete();
         return response()->json(status: 204);
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $usuario = Usuario::findOrFail($id);
+        $validator = Validator::make($request->all(), [
+            'nombre_usuario' => 'required',
+            'nombre' => 'required',
+            // second name and second surname can be optional
+            'nombre2' => 'nullable',
+            'apellido1' => 'required',
+            'apellido2' => 'nullable',
+            'password' => 'nullable|min:6',
+            // allow the same email for the current user
+            'email' => 'required|email|unique:usuario,email,' . $id,
+            'telefono' => 'required',
+            'departamento' => 'required',
+            'estado' => 'required',
+            'roles' => 'sometimes|array'
+        ]);
+
+        if ($validator->fails()) {
+            $data = [
+                'message' => 'Error en la validacion de los datos',
+                'errors' => $validator->errors(),
+                'status' => 400
+            ];
+
+            return response()->json($data, 400);
+        }
+
+        // Update fields
+        $usuario->nombre_usuario = $request->nombre_usuario;
+        $usuario->nombre = $request->nombre;
+        $usuario->nombre2 = $request->nombre2;
+        $usuario->apellido1 = $request->apellido1;
+        $usuario->apellido2 = $request->apellido2;
+
+        // If password is provided, hash and update the password_hash column
+        if ($request->filled('password')) {
+            $usuario->password_hash = Hash::make($request->password);
+        }
+
+        $usuario->email = $request->email;
+        $usuario->telefono = $request->telefono;
+        $usuario->departamento = $request->departamento;
+        $usuario->estado = $request->estado;
+
+        $usuario->save();
+
+        // Sync roles if provided
+        if ($request->has('roles')) {
+            $usuario->roles()->sync($request->roles);
+        }
+
+        return response()->json([
+            'message' => 'Usuario actualizado correctamente',
+            'data' => new UsuarioResource($usuario)
+        ], 200);
+
     }
 
     public function logout(){

@@ -17,6 +17,7 @@ class UserService {
   async getUsers() {
     try {
       const response = await this.api.get('/usuarios');
+      console.log('Users API response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
@@ -38,7 +39,7 @@ class UserService {
   // Actualizar un usuario
   async updateUser(id, userData) {
     try {
-      const response = await this.api.put(`/usuarios/${id}`, userData);
+      const response = await this.api.put(`/usuario/${id}`, userData);
       return response.data;
     } catch (error) {
       console.error('Error al actualizar usuario:', error);
@@ -60,7 +61,8 @@ class UserService {
   // Obtener roles disponibles
   async getRoles() {
     try {
-      const response = await this.api.get('/roles');
+      const response = await this.api.get('/rol');
+      console.log('Roles API response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error al obtener roles:', error);

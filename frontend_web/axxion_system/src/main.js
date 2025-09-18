@@ -14,9 +14,7 @@ library.add(fas, far, fab)
 
 const app = createApp(App)
 app.use(createPinia())
-app. component ('font-awesome-icon' , FontAwesomeIcon)
-
+app.component('font-awesome-icon' , FontAwesomeIcon)
 app.use(router)
-
 app.mount('#app')
 

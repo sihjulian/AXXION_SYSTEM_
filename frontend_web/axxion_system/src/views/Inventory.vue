@@ -3,7 +3,7 @@
     <SideBar/>
     <RouterView></RouterView>
 
-    <main class="container">
+    <main class="container h-full">
       <div class="rounded-lg flex-col">
         <headerP></headerP>
         
@@ -135,27 +135,38 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Estado
               </label>
-              <fwb-select v-model="statusFilter">
+              <select 
+                v-model="statusFilter"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              >
                 <option value="">Todos los estados</option>
-                <option value="available">Disponible</option>
-                <option value="rented">Alquilado</option>
-                <option value="maintenance">Mantenimiento</option>
-                <option value="out_of_service">Fuera de Servicio</option>
-              </fwb-select>
+                <option 
+                  v-for="state in inventoryStore.uniqueStates" 
+                  :key="state.value" 
+                  :value="state.value"
+                >
+                  {{ state.label }}
+                </option>
+              </select>
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Categoría
               </label>
-              <fwb-select v-model="categoryFilter">
+              <select 
+                v-model="categoryFilter"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              >
                 <option value="">Todas las categorías</option>
-                <option value="laptop">Laptop</option>
-                <option value="desktop">Desktop</option>
-                <option value="projector">Proyector</option>
-                <option value="monitor">Monitor</option>
-                <option value="accessory">Accesorio</option>
-              </fwb-select>
+                <option 
+                  v-for="category in inventoryStore.categoryList" 
+                  :key="category.id" 
+                  :value="category.nombre"
+                >
+                  {{ category.nombre }}
+                </option>
+              </select>
             </div>
             
             <div class="flex items-end">
@@ -177,16 +188,16 @@
           <span class="loader" aria-hidden="true"></span>
         </div>
         
-        <!-- Grid de Equipos -->
+        <!-- Grid de Productos -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <EquipmentCard 
-            v-for="equipment in paginatedEquipment" 
-            :key="equipment.id" 
-            :equipment="equipment" 
-            @view-details="viewEquipmentDetails"
-            @edit-equipment="editEquipment"
+            v-for="product in paginatedProducts" 
+            :key="product.id" 
+            :equipment="product" 
+            @view-details="viewProductDetails"
+            @edit-equipment="editProduct"
             @delete-equipment="showDeleteModal"
-            @rent-equipment="rentEquipment"
+            @rent-equipment="rentProduct"
           />
         </div>
 
@@ -217,8 +228,8 @@
         <EquipmentForm 
           v-if="modalMode !== 'delete'"
           :mode="modalMode"
-          :selectedEquipment="selectedEquipment"
-          @success="handleEquipmentSuccess"
+          :selectedEquipment="selectedProduct"
+          @success="handleProductSuccess"
           @cancel="closeModal"
         />
         <div v-else class="text-center">
@@ -228,7 +239,7 @@
           </h3>
           <p class="text-gray-600 dark:text-gray-400 mb-6">
             Esta acción no se puede deshacer. Se eliminará permanentemente:
-            <strong>{{ selectedEquipment?.name }} - {{ selectedEquipment?.model }}</strong>
+            <strong>{{ selectedProduct?.nombre }} - {{ selectedProduct?.modelo }}</strong>
           </p>
           <div class="flex justify-center gap-4">
             <fwb-button gradient="red-yellow" @click="confirmDelete">
@@ -282,10 +293,11 @@
       </fwb-footer-link>
     </fwb-footer-link-group>
   </fwb-footer>
+
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useInventoryStore } from '@/stores/inventory.js';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
@@ -298,7 +310,6 @@ import {
   FwbModal,
   FwbCard,
   FwbInput,
-  FwbSelect,
   FwbPagination,
   FwbFooter,
   FwbFooterCopyright,
@@ -310,11 +321,11 @@ import {
 const inventoryStore = useInventoryStore();
 
 // Estado local
-const displayedEquipment = ref([]);
+const displayedProducts = ref([]);
 const isShowModal = ref(false);
 const isShowDetailsModal = ref(false);
 const modalMode = ref('add'); // 'add', 'edit', 'delete'
-const selectedEquipment = ref(null);
+const selectedProduct = ref(null);
 const searchQuery = ref('');
 const statusFilter = ref('');
 const categoryFilter = ref('');
@@ -322,17 +333,17 @@ const currentPage = ref(1);
 const itemsPerPage = 12;
 
 // Computed del store
-const equipment = computed(() => inventoryStore.equipment);
-const isLoading = computed(() => inventoryStore.isLoading);
+const products = computed(() => inventoryStore.productList);
+const isLoading = computed(() => inventoryStore.loading);
 
 // Métricas del panel de control
 const metrics = computed(() => ({
-  available: equipment.value.filter(e => e.status === 'available').length,
-  rented: equipment.value.filter(e => e.status === 'rented').length,
-  maintenance: equipment.value.filter(e => e.status === 'maintenance').length,
-  monthlyRevenue: equipment.value
-    .filter(e => e.status === 'rented')
-    .reduce((sum, e) => sum + (e.dailyRate * 30), 0)
+  available: products.value.filter(p => p.estado === 'disponible').length,
+  rented: products.value.filter(p => p.estado === 'alquilado').length,
+  maintenance: products.value.filter(p => p.estado === 'mantenimiento').length,
+  monthlyRevenue: products.value
+    .filter(p => p.estado === 'alquilado')
+    .reduce((sum, p) => sum + (p.precio_alquiler_dia * 30), 0)
 }));
 
 // Alertas del sistema
@@ -354,27 +365,27 @@ const alerts = ref([
 ]);
 
 // Filtros y búsqueda
-const filteredEquipment = computed(() => {
-  let filtered = equipment.value;
+const filteredProducts = computed(() => {
+  let filtered = inventoryStore.productList;
 
   // Filtro de búsqueda
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(e => 
-      e.name.toLowerCase().includes(query) ||
-      e.model.toLowerCase().includes(query) ||
-      e.serialNumber.toLowerCase().includes(query)
+    filtered = filtered.filter(p => 
+      p.nombre.toLowerCase().includes(query) ||
+      p.modelo.toLowerCase().includes(query) ||
+      p.numero_serie.toLowerCase().includes(query)
     );
   }
 
   // Filtro de estado
   if (statusFilter.value) {
-    filtered = filtered.filter(e => e.status === statusFilter.value);
+    filtered = filtered.filter(p => p.estado === statusFilter.value);
   }
 
   // Filtro de categoría
   if (categoryFilter.value) {
-    filtered = filtered.filter(e => e.category === categoryFilter.value);
+    filtered = filtered.filter(p => p.categoria === categoryFilter.value);
   }
 
   return filtered;
@@ -382,47 +393,47 @@ const filteredEquipment = computed(() => {
 
 // Paginación
 const totalPages = computed(() => 
-  Math.ceil(filteredEquipment.value.length / itemsPerPage)
+  Math.ceil(filteredProducts.value.length / itemsPerPage)
 );
 
-const paginatedEquipment = computed(() => {
+const paginatedProducts = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
-  return filteredEquipment.value.slice(start, end);
+  return filteredProducts.value.slice(start, end);
 });
 
 // Funciones de modal
 function closeModal() {
   isShowModal.value = false;
   modalMode.value = 'add';
-  selectedEquipment.value = null;
+  selectedProduct.value = null;
 }
 
 function closeDetailsModal() {
   isShowDetailsModal.value = false;
-  selectedEquipment.value = null;
+  selectedProduct.value = null;
 }
 
 function showAddModal() {
   modalMode.value = 'add';
-  selectedEquipment.value = null;
+  selectedProduct.value = null;
   isShowModal.value = true;
 }
 
-function showDeleteModal(equipment) {
+function showDeleteModal(product) {
   modalMode.value = 'delete';
-  selectedEquipment.value = equipment;
+  selectedProduct.value = product;
   isShowModal.value = true;
 }
 
-function editEquipment(equipment) {
+function editProduct(product) {
   modalMode.value = 'edit';
-  selectedEquipment.value = equipment;
+  selectedProduct.value = product;
   isShowModal.value = true;
 }
 
-function viewEquipmentDetails(equipment) {
-  selectedEquipment.value = equipment;
+function viewProductDetails(product) {
+  selectedProduct.value = product;
   isShowDetailsModal.value = true;
 }
 
@@ -432,17 +443,55 @@ function showMaintenanceModal() {
 }
 
 // Funciones de acción
-function confirmDelete() {
-  if (selectedEquipment.value) {
-    inventoryStore.deleteEquipment(selectedEquipment.value.id);
-    closeModal();
-    loadEquipment();
+async function confirmDelete() {
+  if (selectedProduct.value) {
+    console.log('Iniciando eliminación del producto:', selectedProduct.value.nombre);
+    try {
+      const productId = selectedProduct.value.id;
+      const productName = selectedProduct.value.nombre;
+      
+      console.log('Llamando a deleteProduct con ID:', productId);
+      await inventoryStore.deleteProduct(productId);
+      
+      console.log('Producto eliminado del store, cerrando modal...');
+      closeModal();
+      
+      // Mostrar mensaje de éxito
+      console.log(`Producto "${productName}" eliminado exitosamente`);
+      
+      // Forzar actualización de la vista
+      await nextTick();
+      console.log('Productos actuales en store:', inventoryStore.productList.length);
+      
+      // Opcional: mostrar notificación de éxito
+      alerts.value.unshift({
+        id: Date.now(),
+        type: 'success',
+        icon: 'fa-solid fa-check-circle',
+        title: 'Producto Eliminado',
+        message: `El producto "${productName}" ha sido eliminado exitosamente.`
+      });
+      
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+      
+      // Mostrar error al usuario
+      alerts.value.unshift({
+        id: Date.now(),
+        type: 'error',
+        icon: 'fa-solid fa-exclamation-triangle',
+        title: 'Error al Eliminar',
+        message: 'No se pudo eliminar el producto. ' + (error.message || 'Error desconocido')
+      });
+    }
+  } else {
+    console.error('No hay producto seleccionado para eliminar');
   }
 }
 
-function rentEquipment(equipment) {
+function rentProduct(product) {
   // Implementar lógica de alquiler
-  console.log('Alquilar equipo:', equipment);
+  console.log('Alquilar producto:', product);
 }
 
 function exportReport() {
@@ -465,26 +514,34 @@ function handlePageChange(page) {
   currentPage.value = page;
 }
 
-function handleEquipmentSuccess() {
+async function handleProductSuccess() {
+  console.log('Producto guardado exitosamente, actualizando vista...');
   closeModal();
-  loadEquipment();
+  
+  // Recargar productos desde el backend para asegurar sincronización
+  try {
+    await inventoryStore.fetchProducts();
+    console.log('Vista actualizada exitosamente');
+  } catch (error) {
+    console.error('Error al actualizar la vista:', error);
+  }
 }
 
 // Cargar datos
-const loadEquipment = async () => {
+const loadProducts = async () => {
   try {
-    await inventoryStore.fetchEquipment();
+    await inventoryStore.fetchProducts();
     
     // Animación de carga progresiva
-    displayedEquipment.value = [];
+    displayedProducts.value = [];
     const delayPerCard = 200;
 
-    for (let i = 0; i < equipment.value.length; i++) {
+    for (let i = 0; i < products.value.length; i++) {
       await new Promise(resolve => setTimeout(resolve, delayPerCard));
-      displayedEquipment.value.push(equipment.value[i]);
+      displayedProducts.value.push(products.value[i]);
     }
   } catch (error) {
-    console.error('Error al cargar equipos:', error);
+    console.error('Error al cargar productos:', error);
   }
 };
 
@@ -494,8 +551,12 @@ watch([searchQuery, statusFilter, categoryFilter], () => {
 });
 
 // Cargar datos al montar el componente
-onMounted(() => {
-  loadEquipment();
+onMounted(async () => {
+  // Cargar productos y categorías
+  await Promise.all([
+    loadProducts(),
+    inventoryStore.fetchCategories()
+  ]);
 });
 </script>
 
