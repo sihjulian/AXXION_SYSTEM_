@@ -25,7 +25,7 @@ export const useSubcategoryStore = defineStore("subcategory", {
         const res = await SubCategoryService.createSubcategoria(data);
         this.subcategorias.push(res.data);
       } catch (error) {
-        console.error("❌ Error creando subcategoría:", error);
+        console.error(" Error creando subcategoría:", error);
       }
     },
 

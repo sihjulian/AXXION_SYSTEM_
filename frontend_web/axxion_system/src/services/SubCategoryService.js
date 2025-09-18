@@ -7,7 +7,7 @@ const api = axios.create({
 });
 
 export default {
-  async create(payload) {              // payload must include categoria_id
+  async create(payload) {              
     const res = await api.post('/subcategoria', payload);
     return res.data;
   },
