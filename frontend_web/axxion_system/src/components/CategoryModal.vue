@@ -1,5 +1,5 @@
 <template>
-  <FwbModal @close="onClose">
+  <FwbModal class="text-amber-50" @close="onClose">
     <template #header>
       <div class="text-lg text-amber-50">
         {{ mode === 'add' ? 'Agregar Categoría' : mode === 'edit' ? 'Editar Categoría' : 'Eliminar Categoría' }}

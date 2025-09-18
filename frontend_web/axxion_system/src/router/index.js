@@ -40,7 +40,7 @@ const routes = [
     name: 'Mantenimiento',
     component: Maintenace,
   },
-    {
+  {
     path: '/Category',
     name: 'Category',
     component: Category,
