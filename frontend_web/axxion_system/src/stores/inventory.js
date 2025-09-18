@@ -134,14 +134,21 @@ export const useInventoryStore = defineStore('inventory', {
       this.error = null;
       
       try {
+        console.log('Store: Iniciando fetchProducts...');
         const response = await InventoryService.getProducts();
-        console.log('Store: Products fetched:', response);
-        this.productList = response.data || response;
+        console.log('Store: Products API response:', response);
+        
+        const products = response.data || response;
+        console.log('Store: Productos procesados:', products.length);
+        
+        this.productList = products;
         this.pagination.totalItems = this.productList.length;
         this.pagination.totalPages = Math.ceil(this.pagination.totalItems / this.pagination.itemsPerPage);
+        
+        console.log('Store: ProductList actualizada:', this.productList.length, 'productos');
       } catch (err) {
         this.error = err.message || 'Error al cargar productos';
-        console.error('Error al cargar productos:', err);
+        console.error('Store: Error al cargar productos:', err);
       } finally {
         this.loading = false;
       }
@@ -174,14 +181,27 @@ export const useInventoryStore = defineStore('inventory', {
       this.error = null;
       
       try {
+        console.log('Store: Actualizando producto ID:', id);
+        console.log('Store: Datos a actualizar:', productData);
+        
         const response = await InventoryService.updateProduct(id, productData);
+        console.log('Store: Respuesta de actualización:', response);
+        
         const updatedProduct = response.data || response;
-        const index = this.productList.findIndex(item => item.id === id);
+        const index = this.productList.findIndex(item => item.id == id);
+        
+        console.log('Store: Índice del producto en la lista:', index);
+        
         if (index !== -1) {
           this.productList[index] = updatedProduct;
+          console.log('Store: Producto actualizado en la lista');
+        } else {
+          console.warn('Store: No se encontró el producto en la lista para actualizar');
         }
+        
         return updatedProduct;
       } catch (err) {
+        console.error('Store: Error al actualizar producto:', err);
         this.error = err.message || 'Error al actualizar producto';
         throw err;
       } finally {

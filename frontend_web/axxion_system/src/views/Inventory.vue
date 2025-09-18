@@ -3,7 +3,7 @@
     <SideBar/>
     <RouterView></RouterView>
 
-    <main class="container h-full">
+    <main class="container h-screen">
       <div class="rounded-lg flex-col">
         <headerP></headerP>
         
@@ -108,12 +108,22 @@
           </fwb-button>
           
           <fwb-button 
-            gradient="cyan-blue" 
+            gradient="purple" 
             size="lg" 
             @click="exportReport"
           >
             <font-awesome-icon icon="fa-solid fa-file-export" class="mr-2"/>
             Exportar Reporte
+          </fwb-button>
+          
+          <!-- Botón temporal para debug -->
+          <fwb-button 
+            gradient="gray" 
+            size="lg" 
+            @click="forceRefresh"
+          >
+            <font-awesome-icon icon="fa-solid fa-refresh" class="mr-2"/>
+            Actualizar Vista
           </fwb-button>
         </div>
 
@@ -251,6 +261,7 @@
             </fwb-button>
           </div>
         </div>
+<!-- ... -->
       </template>
     </fwb-modal>
 
@@ -271,7 +282,8 @@
       </template>
     </fwb-modal>
   </div>
-
+<!--footer-->
+  <footer>
   <fwb-footer>
     <fwb-footer-copyright
       by="Flowbite™"
@@ -293,7 +305,7 @@
       </fwb-footer-link>
     </fwb-footer-link-group>
   </fwb-footer>
-
+</footer>
 </template>
 
 <script setup>
@@ -337,28 +349,32 @@ const products = computed(() => inventoryStore.productList);
 const isLoading = computed(() => inventoryStore.loading);
 
 // Métricas del panel de control
-const metrics = computed(() => ({
-  available: products.value.filter(p => p.estado === 'disponible').length,
-  rented: products.value.filter(p => p.estado === 'alquilado').length,
-  maintenance: products.value.filter(p => p.estado === 'mantenimiento').length,
-  monthlyRevenue: products.value
-    .filter(p => p.estado === 'alquilado')
-    .reduce((sum, p) => sum + (p.precio_alquiler_dia * 30), 0)
-}));
+const metrics = computed(() => {
+  const available = inventoryStore.productList.filter(p => p.estado === 'disponible').length;
+  const rented = inventoryStore.productList.filter(p => p.estado === 'alquilado').length;
+  const maintenance = inventoryStore.productList.filter(p => p.estado === 'mantenimiento').length;
+  
+  return {
+    available,
+    rented,
+    maintenance,
+    monthlyRevenue: 15420 // Placeholder - calcular desde datos reales
+  };
+});
 
 // Alertas del sistema
 const alerts = ref([
   {
     id: 1,
     type: 'warning',
-    icon: 'fa-solid fa-exclamation-triangle',
+    icon: true,
     title: 'Mantenimiento Programado',
     message: '3 equipos requieren mantenimiento preventivo esta semana'
   },
   {
     id: 2,
     type: 'info',
-    icon: 'fa-solid fa-info-circle',
+    icon: true,
     title: 'Devolución Pendiente',
     message: '2 equipos tienen devoluciones programadas para hoy'
   }
@@ -459,15 +475,14 @@ async function confirmDelete() {
       // Mostrar mensaje de éxito
       console.log(`Producto "${productName}" eliminado exitosamente`);
       
-      // Forzar actualización de la vista
-      await nextTick();
-      console.log('Productos actuales en store:', inventoryStore.productList.length);
+      // Forzar actualización completa de la vista
+      await forceRefresh();
       
       // Opcional: mostrar notificación de éxito
       alerts.value.unshift({
         id: Date.now(),
         type: 'success',
-        icon: 'fa-solid fa-check-circle',
+        icon: true,
         title: 'Producto Eliminado',
         message: `El producto "${productName}" ha sido eliminado exitosamente.`
       });
@@ -479,7 +494,7 @@ async function confirmDelete() {
       alerts.value.unshift({
         id: Date.now(),
         type: 'error',
-        icon: 'fa-solid fa-exclamation-triangle',
+        icon: true,
         title: 'Error al Eliminar',
         message: 'No se pudo eliminar el producto. ' + (error.message || 'Error desconocido')
       });
@@ -514,17 +529,24 @@ function handlePageChange(page) {
   currentPage.value = page;
 }
 
+// Función para forzar actualización completa
+async function forceRefresh() {
+  console.log('Forzando actualización completa de la vista...');
+  try {
+    await inventoryStore.fetchProducts();
+    await nextTick();
+    console.log('Actualización completa exitosa');
+  } catch (error) {
+    console.error('Error en actualización completa:', error);
+  }
+}
+
 async function handleProductSuccess() {
   console.log('Producto guardado exitosamente, actualizando vista...');
   closeModal();
   
-  // Recargar productos desde el backend para asegurar sincronización
-  try {
-    await inventoryStore.fetchProducts();
-    console.log('Vista actualizada exitosamente');
-  } catch (error) {
-    console.error('Error al actualizar la vista:', error);
-  }
+  // Usar función de actualización completa
+  await forceRefresh();
 }
 
 // Cargar datos
@@ -547,8 +569,16 @@ const loadProducts = async () => {
 
 // Watchers
 watch([searchQuery, statusFilter, categoryFilter], () => {
-  currentPage.value = 1;
+  currentPage.value = 1; // Reset pagination when filters change
 });
+
+watch(() => inventoryStore.productList, (newProducts) => {
+  console.log('Vista: Productos del store actualizados:', newProducts.length);
+  // Forzar re-renderizado
+  nextTick(() => {
+    console.log('Vista: Re-renderizado completado');
+  });
+}, { deep: true, immediate: true });
 
 // Cargar datos al montar el componente
 onMounted(async () => {

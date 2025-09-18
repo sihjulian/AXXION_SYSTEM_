@@ -88,10 +88,15 @@ class InventoryService {
    */
   async updateProduct(id, productData) {
     try {
+      console.log('InventoryService: Actualizando producto ID:', id);
+      console.log('InventoryService: Datos enviados:', productData);
+      
       const response = await this.api.put(`/producto/${id}`, productData);
+      console.log('InventoryService: Respuesta de actualización:', response.data);
+      
       return response.data;
     } catch (error) {
-      console.error('Error al actualizar producto:', error);
+      console.error('InventoryService: Error al actualizar producto:', error.response?.data || error.message);
       throw error;
     }
   }
