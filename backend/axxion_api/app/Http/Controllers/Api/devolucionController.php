@@ -20,10 +20,10 @@ class devolucionController extends Controller
         }
         public function store(Request $request){
             $validator = Validator::make($request->all(),[
-                'renta_id' => [ 'required', Rule::exists('rentas', 'id')],
+                'renta_id' => [ 'required', Rule::exists('renta', 'id')],
                 'fecha_devolucion_programada' => ['required', 'date'],
                 'fecha_devolucion_real' => ['required', 'date'],
-                'estado_devolucion' => ['required', 'string', Rule::in(['Pendiente','EnProcesoInspeccion','Completa','IncompletaConProblemas'])],
+                'estado_devolucion' => [ 'string', Rule::in(['Pendiente','EnProcesoInspeccion','Completa','IncompletaConProblemas'])],
                 'persona_recibe' => ['required', 'string'],
                 'notas_generales' => ['required', 'string']
             ]);
@@ -31,9 +31,9 @@ class devolucionController extends Controller
                 $data = [
                     'message' => 'Validation failed',
                     'errors' => $validator->errors(),
-                    'status' => 400
+                    'status' => 201
                 ];
-                return response()->json($data, 400);
+                return response()->json($data, 201);
             }
             $devolucion = Devolucion::create([
                 'renta_id' => $request->renta_id,
@@ -97,21 +97,21 @@ class devolucionController extends Controller
                 ];
                 return response()->json($data, 404);
             }
-            $validator = Validator::make($request->all(), [
-                'renta_id' => 'required',
-                'fecha_devolucion_programada' => 'required',
-                'fecha_devolucion_real' => 'required',
-                'estado_devolucion' => 'required',
-                'persona_recibe' => 'required',
-                'notas_generales' => 'required'
+            $validator = Validator::make($request->all(),[
+                'renta_id' => [ 'required', Rule::exists('renta', 'id')],
+                'fecha_devolucion_programada' => ['required', 'date'],
+                'fecha_devolucion_real' => ['required', 'date'],
+                'estado_devolucion' => ['required', 'string', Rule::in(['Pendiente','EnProcesoInspeccion','Completa','IncompletaConProblemas'])],
+                'persona_recibe' => ['required', 'string'],
+                'notas_generales' => ['required', 'string']
             ]);
             if($validator->fails()){
                 $data = [
                     'message' => 'Validator failed',
                     'errors' => $validator->errors(),
-                    'status' => 400
+                    'status' => 201
                 ];
-                return response()->json($data, 400);
+                return response()->json($data, 201);
             }
             $devolucion->renta_id = $request->renta_id;
             $devolucion->fecha_devolucion_programada = $request->fecha_devolucion_programada;
@@ -120,6 +120,7 @@ class devolucionController extends Controller
             $devolucion->persona_recibe = $request->persona_recibe;
             $devolucion->notas_generales = $request->notas_generales;
             $devolucion->save();
+            $devolucion->load('renta');
             $data = [
                 'message' => 'devolucion actualizado',
                 'devolucion' => $devolucion,
@@ -137,21 +138,20 @@ class devolucionController extends Controller
                 return response()->json($data, 404);
             }
             $validator = Validator::make($request->all(),[
-                'renta_id' => 'sometimes|required',
-                'fecha_devolucion_programada' => 'sometimes|required',
-                'fecha_devolucion_real' => 'sometimes|required',
-                'estado_devolucion' => 'sometimes|required',
-                'persona_recibe' => 'sometimes|required',
-                'notas_generales' => 'sometimes|required'
+                'renta_id' => [ Rule::exists('renta', 'id')],
+                'fecha_devolucion_programada' => ['date'],
+                'fecha_devolucion_real' => ['date'],
+                'estado_devolucion' => ['string', Rule::in(['Pendiente','EnProcesoInspeccion','Completa','IncompletaConProblemas'])],
+                'persona_recibe' => ['string'],
+                'notas_generales' => ['string']
             ]);
-            
             if($validator->fails()){
                 $data = [
                     'message' => 'Error en la Validacion',
                     'errors' => $validator->errors(),
-                    'status' => 400
+                    'status' => 201
                 ];
-                return response()->json($data, 400);
+                return response()->json($data, 201);
             }
 
             if($request->has('renta_id')){
@@ -173,6 +173,7 @@ class devolucionController extends Controller
                 $devolucion->notas_generales = $request->notas_generales;
             }
             $devolucion->save();
+            $devolucion->load('renta');
             $data = [
                 'message' => 'devolucion actualizado',
                 'devolucion' => $devolucion,

@@ -8,6 +8,7 @@ use App\Models\DetalleCotizacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class detalleCotizacionController extends Controller
 {
@@ -93,51 +94,70 @@ class detalleCotizacionController extends Controller
             ];
             return response()->json($data, 200);
         }
-        public function update(Request $request, $id){
-            $detalleCotizacion = DetalleCotizacion::find($id);
-            if(!$detalleCotizacion){
-                $data = [
-                    'message' => 'Detalle de cotizacion no encontrado',
-                    'status' => 404
-                ];
-                return response()->json($data, 404);
-            }
-            $validator = Validator::make($request->all(), [
-                'cotizacion_id' => ['required', Rule::exists('cotizaciones','id')],
-                'producto_id' => ['required', Rule::exists('productos','id')],
-                'descripcion_item' => ['required', 'string', 'max:255'],
-                'cantidad' => ['required', 'integer', 'min:1'],
-                'precio_unitario' => ['required', 'numeric', 'min:0'],
-                'descuento_porcentaje' => ['required', 'numeric', 'min:0', 'max:100'],
-                'impuestos_aplicables' => ['required', 'numeric'],
-                'notas' => ['required', 'string', 'max:255'],
-            ]);
-            if($validator->fails()){
-                $data = [
-                    'message' => 'Validator failed',
-                    'errors' => $validator->errors(),
-                    'status' => 400
-                ];
-                return response()->json($data, 400);
-            }
-            $detalleCotizacion->cotizacion_id = $request->cotizacion_id;
-            $detalleCotizacion->producto_id = $request->producto_id;
-            $detalleCotizacion->descripcion_item = $request->descripcion_item;
-            $detalleCotizacion->cantidad = $request->cantidad;
-            $detalleCotizacion->precio_unitario = $request->precio_unitario;
-            $detalleCotizacion->descuento_porcentaje = $request->descuento_porcentaje;
-            $detalleCotizacion->impuestos_aplicables = $request->impuestos_aplicables;
-            $detalleCotizacion->notas = $request->notas;
-            $detalleCotizacion->save();
-            $detalleCotizacion->load(['cotizacion', 'producto']);
-            $data = [
-                'message' => 'detalle de cotizacion actualizado',
-                'detalleCotizacion' => $detalleCotizacion,
-                'status' => 200
-            ];
-            return response()->json($data, 200);
+        public function update(Request $request, $id)
+{
+    try {
+        // Buscar el registro
+        $detalleCotizacion = DetalleCotizacion::find($id);
+        if (!$detalleCotizacion) {
+            return response()->json([
+                'message' => 'Detalle de cotización no encontrado',
+                'status' => 404
+            ], 404);
         }
-        public function updatePartial(Request $request, $id){
+
+        // Validar los datos del request
+        $validator = Validator::make($request->all(), [
+            'cotizacion_id' => ['required', Rule::exists('cotizacion', 'id')],
+            'producto_id' => ['required', Rule::exists('producto', 'id')],
+            'descripcion_item' => ['required', 'string', 'max:255'],
+            'cantidad' => ['required', 'integer', 'min:1'],
+            'precio_unitario' => ['required', 'numeric'],
+            'descuento_porcentaje' => ['required', 'numeric'],
+            'impuestos_aplicables' => ['required', 'numeric'],
+            'notas' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validación fallida',
+                'errors' => $validator->errors(),
+                'status' => 400
+            ], 400);
+        }
+
+        // Actualizar los campos
+        $detalleCotizacion->cotizacion_id = $request->cotizacion_id;
+        $detalleCotizacion->producto_id = $request->producto_id;
+        $detalleCotizacion->descripcion_item = $request->descripcion_item;
+        $detalleCotizacion->cantidad = $request->cantidad;
+        $detalleCotizacion->precio_unitario = $request->precio_unitario;
+        $detalleCotizacion->descuento_porcentaje = $request->descuento_porcentaje;
+        $detalleCotizacion->impuestos_aplicables = $request->impuestos_aplicables;
+        $detalleCotizacion->notas = $request->notas;
+
+        $detalleCotizacion->save();
+        $detalleCotizacion->load(['cotizacion', 'producto']);
+
+        return response()->json([
+            'message' => 'Detalle de cotización actualizado correctamente',
+            'detalleCotizacion' => $detalleCotizacion,
+            'status' => 200
+        ], 200);
+
+    } catch (\Exception $e) {
+        Log::error('Error al actualizar DetalleCotizacion: ' . $e->getMessage());
+
+        return response()->json([
+            'message' => 'Error interno al actualizar el detalle de cotización',
+            'error' => $e->getMessage(),
+            'status' => 500
+        ], 500);
+    }
+}
+        public function updatePartial(Request $request, $id)
+        {
+            try {
             $detalleCotizacion = DetalleCotizacion::find($id);
             if(!$detalleCotizacion){
                 $data = [
@@ -146,16 +166,16 @@ class detalleCotizacionController extends Controller
                 ];
                 return response()->json($data, 404);
             }
-            $validator = Validator::make($request->all(),[
-                'cotizacion_id' => 'integer|exists:cotizaciones,id',
-                'producto_id' => 'integer|exists:productos,id',
-                'descripcion_item' => 'string|max:255',
-                'cantidad' => 'integer|min:1',
-                'precio_unitario' => 'numeric|min:0',
-                'descuento_porcentaje' => 'numeric|min:0|max:100',
-                'impuestos_aplicables' => 'string',
-                'notas' => 'string|max:255',
-            ]);
+            $validator = Validator::make($request->all(), [
+            'cotizacion_id' => [Rule::exists('cotizacion', 'id')],
+            'producto_id' => [Rule::exists('producto', 'id')],
+            'descripcion_item' => ['string', 'max:255'],
+            'cantidad' => ['integer', 'min:1'],
+            'precio_unitario' => ['numeric'],
+            'descuento_porcentaje' => ['numeric'],
+            'impuestos_aplicables' => ['numeric'],
+            'notas' => ['nullable', 'string', 'max:255'],
+        ]);
             if($validator->fails()){
                 $data = [
                     'message' => 'Error en la Validacion',
@@ -189,11 +209,21 @@ class detalleCotizacionController extends Controller
                 $detalleCotizacion->notas = $request->notas;
             }
             $detalleCotizacion->save();
+
+            $detalleCotizacion->load(['cotizacion', 'producto']);
             $data = [
                 'message' => 'detalle de cotizacion actualizado',
                 'detalleCotizacion' => $detalleCotizacion,
                 'status' => 200
             ];
             return response()->json($data, 200);
+
+            } catch (\Exception $e) {
+                Log::error('Error al actualizar DetalleCotizacion: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Error interno al actualizar el detalle de cotización',
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }}
         }
-}

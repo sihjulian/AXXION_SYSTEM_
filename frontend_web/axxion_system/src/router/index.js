@@ -5,6 +5,9 @@ import User from '@/views/User.vue'
 import Login from '@/views/login.vue'
 import Inventory from '@/views/Inventory.vue'
 import Maintenace from '@/views/Maintenace.vue'
+import Category from '@/views/Category.vue'
+import SubCategory from '@/views/Subcategory.vue'
+
 
 
 const routes = [
@@ -36,6 +39,17 @@ const routes = [
     path: '/Mantenace',
     name: 'Mantenimiento',
     component: Maintenace,
+    {
+    path: '/Category',
+    name: 'Category',
+    component: Category,
+    meta: { requiresAuth: false },
+  },
+    {
+    path: '/SubCategory',
+    name: 'SubCategory',
+    component: SubCategory,
+
     meta: { requiresAuth: false },
   },
 ]
