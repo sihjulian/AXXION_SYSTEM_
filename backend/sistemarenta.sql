@@ -443,7 +443,7 @@ CREATE TABLE `usuario` (
   `nombre2` varchar(100) NOT NULL,
   `apellido1` varchar(100) NOT NULL,
   `apellido2` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
   `email` varchar(100) NOT NULL,
   `telefono` varchar(20) DEFAULT NULL,
   `departamento` varchar(100) DEFAULT NULL,

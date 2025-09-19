@@ -14,6 +14,8 @@ INSERT INTO usuario (nombre_usuario, nombre, nombre2, apellido1, apellido2, pass
 ('operador1', 'María', 'Elena', 'López', 'Martínez', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'operador@example.com', '5559876543', 'Operaciones', 'Activo'),
 ('vendedor1', 'Roberto', 'José', 'González', 'Ramírez', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'vendedor@example.com', '5552345678', 'Ventas', 'Activo');
 
+INSERT INTO usuario (nombre_usuario, nombre, nombre2, apellido1, apellido2, password, email, telefono, departamento, estado) VALUES
+('admin1', 'Juan', 'Carlos', 'Pérez', 'García', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@example.com', '5551234567', 'Administración', 'Activo');
 -- Asignación de roles a usuarios
 INSERT INTO usuario_rol (usuario_id, rol_id) 
 SELECT u.id, r.id FROM usuario u, rol r WHERE u.nombre_usuario = 'admin1' AND r.codigo = 'ADMIN';

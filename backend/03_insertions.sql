@@ -22,7 +22,7 @@ INSERT INTO rol (codigo, nombre, descripcion) VALUES
 -- Insertar usuarios del sistema
 INSERT INTO usuario (nombre_usuario, nombre, nombre2, apellido1, apellido2, password, email, telefono, departamento, estado) VALUES
 ('admin', 'Carlos', 'Alberto', 'González', 'Pérez', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@sistemarenta.com', '555-0001', 'Administración', 'Activo'),
-('vendedor1', 'María', 'Elena', 'Rodríguez', 'López', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'maria.rodriguez@sistemarenta.com', '555-0002', 'Ventas', 'Activo'),
+('vendedor', 'María', 'Elena', 'Rodríguez', 'López', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'maria.rodriguez@sistemarenta.com', '555-0002', 'Ventas', 'Activo'),
 ('inventario1', 'José', 'Luis', 'Martínez', 'García', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'jose.martinez@sistemarenta.com', '555-0003', 'Inventario', 'Activo'),
 ('soporte1', 'Ana', 'Patricia', 'Hernández', 'Silva', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'ana.hernandez@sistemarenta.com', '555-0004', 'Soporte', 'Activo');
 
@@ -78,13 +78,13 @@ INSERT INTO categoria_subcategoria (categoria_id, subcategoria_id) VALUES
 (5, 2), (5, 8); -- Gaming
 
 -- Insertar productos
-INSERT INTO producto (nombre, descripcion, marca, modelo, precio_referencia_renta, sku, peso_kg, dimensiones, garantia_meses) VALUES
-('Laptop Dell Latitude 7420', 'Laptop empresarial con procesador Intel i7', 'Dell', 'Latitude 7420', 150.00, 'DELL-LAT-7420', 1.4, '32.1 x 21.2 x 1.8 cm', 24),
-('Laptop Gaming ASUS ROG', 'Laptop gaming con RTX 3070', 'ASUS', 'ROG Strix G15', 300.00, 'ASUS-ROG-G15', 2.3, '35.4 x 25.9 x 2.7 cm', 12),
-('Proyector Epson PowerLite', 'Proyector 4K para presentaciones', 'Epson', 'PowerLite 5050UB', 200.00, 'EPSON-PL-5050', 7.2, '52 x 44.5 x 19.3 cm', 36),
-('Console PlayStation 5', 'Consola de videojuegos de última generación', 'Sony', 'PS5', 80.00, 'SONY-PS5-STD', 4.5, '39 x 26 x 10.4 cm', 12),
-('Switch Cisco Catalyst', 'Switch de 24 puertos gigabit', 'Cisco', 'Catalyst 2960-X', 100.00, 'CISCO-CAT-2960X', 3.2, '44.5 x 35.6 x 4.4 cm', 60);
-
+INSERT INTO producto (nombre, descripcion, marca, modelo, precio_referencia_renta, sku) VALUES
+('Laptop Dell Latitude 7420', 'Laptop empresarial con procesador Intel i7', 'Dell', 'Latitude 7420', 150.00, 'DELL-LAT-7420'),
+('Laptop Gaming ASUS ROG', 'Laptop gaming con RTX 3070', 'ASUS', 'ROG Strix G15', 300.00, 'ASUS-ROG-G15'),
+('Proyector Epson PowerLite', 'Proyector 4K para presentaciones', 'Epson', 'PowerLite 5050UB', 200.00, 'EPSON-PL-5050'),
+('Console PlayStation 5', 'Consola de videojuegos de última generación', 'Sony', 'PS5', 80.00, 'SONY-PS5-STD'),
+('Switch Cisco Catalyst', 'Switch de 24 puertos gigabit', 'Cisco', 'Catalyst 2960-X', 100.00, 'CISCO-CAT-2960X');
+describe producto;
 -- Relacionar productos con subcategorías
 INSERT INTO producto_subcategoria (producto_id, subcategoria_id) VALUES
 (1, 1), -- Laptop Dell con Laptops Ejecutivas
