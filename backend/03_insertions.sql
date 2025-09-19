@@ -9,7 +9,7 @@ INSERT INTO rol (codigo, nombre, descripcion) VALUES
 ('CLIE', 'Cliente', 'Usuario cliente del sistema');
 
 -- Inserción de usuarios
-INSERT INTO usuario (nombre_usuario, nombre, nombre2, apellido1, apellido2, password_hash, email, telefono, departamento, estado) VALUES
+INSERT INTO usuario (nombre_usuario, nombre, nombre2, apellido1, apellido2, password, email, telefono, departamento, estado) VALUES
 ('admin1', 'Juan', 'Carlos', 'Pérez', 'García', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@example.com', '5551234567', 'Administración', 'Activo'),
 ('operador1', 'María', 'Elena', 'López', 'Martínez', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'operador@example.com', '5559876543', 'Operaciones', 'Activo'),
 ('vendedor1', 'Roberto', 'José', 'González', 'Ramírez', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'vendedor@example.com', '5552345678', 'Ventas', 'Activo');
