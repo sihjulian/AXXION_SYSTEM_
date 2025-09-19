@@ -3,7 +3,7 @@
     <SideBar/>
     <RouterView></RouterView>
 
-    <main class="container h-screen">
+    <main class="container h-screen p-4 flex-1">
       <div class="rounded-lg flex-col">
         <headerP></headerP>
         

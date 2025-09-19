@@ -44,11 +44,47 @@ export const useAuthStore = defineStore('auth', {
     },
     checkAuth() {
         const token = localStorage.getItem('token');
-        if (token) {
-            this.token = token;
-            this.user = JSON.parse(localStorage.getItem('user'));
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        const user = localStorage.getItem('user');
+        
+        if (token && user) {
+            try {
+                this.token = token;
+                this.user = JSON.parse(user);
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                console.log('Auth restored from localStorage:', {
+                    hasToken: !!token,
+                    user: this.user
+                });
+            } catch (error) {
+                console.error('Error parsing user data from localStorage:', error);
+                this.logout();
+            }
+        } else {
+            console.log('No auth data found in localStorage');
         }
+    },
+    
+    // Método para verificar si el usuario tiene un rol específico
+    hasRole(roleName) {
+        if (!this.user || !this.user.roles) return false;
+        
+        // Si roles es un array de strings (formato anterior)
+        if (typeof this.user.roles[0] === 'string') {
+            return this.user.roles.includes(roleName);
+        }
+        
+        // Si roles es un array de objetos (formato nuevo)
+        return this.user.roles.some(role => 
+            role.codigo === roleName || 
+            role.name === roleName ||
+            role.nombre === roleName
+        );
+    },
+    
+    // Método para verificar si el usuario tiene alguno de los roles especificados
+    hasAnyRole(roleNames) {
+        if (!Array.isArray(roleNames)) return false;
+        return roleNames.some(roleName => this.hasRole(roleName));
     }
   },
 });

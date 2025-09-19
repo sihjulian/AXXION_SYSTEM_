@@ -301,14 +301,14 @@ export const useInventoryStore = defineStore('inventory', {
     async fetchCategories() {
       this.categoriesLoading = true;
       this.categoriesError = null;
-      
+
       try {
-        const response = await CategoryService.getCategories();
+        const response = await CategoryService.getAll();
         console.log('Store: Categories API response:', response);
-        
-        // El API devuelve { categoria: [...], status: 200 }
-        if (response && response.categoria && Array.isArray(response.categoria)) {
-          this.categoryList = response.categoria;
+
+        // El servicio devuelve el array de categorías directamente
+        if (response && Array.isArray(response)) {
+          this.categoryList = response;
           console.log('Store: Categories loaded:', this.categoryList);
         } else {
           console.error('Estructura de respuesta inesperada:', response);

@@ -116,12 +116,25 @@ class UsuarioController extends Controller
 
             // Si llegamos aquí, la autenticación fue exitosa
             $user = auth('api')->user();
+            
+            // Cargar los roles completos con sus relaciones
+            $user->load('roles');
+            
             return response()->json([
                 'token' => $token,
                 'user' => [
                     'id' => $user->id,
+                    'nombre' => $user->nombre,
+                    'nombre_usuario' => $user->nombre_usuario,
                     'email' => $user->email,
-                    'roles' => $user->roles()->pluck('codigo')->toArray()
+                    'roles' => $user->roles->map(function($role) {
+                        return [
+                            'id' => $role->id,
+                            'codigo' => $role->codigo,
+                            'nombre' => $role->nombre,
+                            'descripcion' => $role->descripcion ?? ''
+                        ];
+                    })->toArray()
                 ]
             ], 200);
 
