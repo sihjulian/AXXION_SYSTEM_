@@ -19,14 +19,12 @@ INSERT INTO rol (codigo, nombre, descripcion) VALUES
 ('INVENTARIO', 'Encargado de Inventario', 'Gestión de productos e inventario'),
 ('SOPORTE', 'Soporte Técnico', 'Mantenimiento y soporte técnico');
 
-
 -- Insertar usuarios del sistema
 INSERT INTO usuario (nombre_usuario, nombre, nombre2, apellido1, apellido2, password, email, telefono, departamento, estado) VALUES
 ('admin', 'Carlos', 'Alberto', 'González', 'Pérez', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@sistemarenta.com', '555-0001', 'Administración', 'Activo'),
 ('vendedor1', 'María', 'Elena', 'Rodríguez', 'López', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'maria.rodriguez@sistemarenta.com', '555-0002', 'Ventas', 'Activo'),
 ('inventario1', 'José', 'Luis', 'Martínez', 'García', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'jose.martinez@sistemarenta.com', '555-0003', 'Inventario', 'Activo'),
 ('soporte1', 'Ana', 'Patricia', 'Hernández', 'Silva', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'ana.hernandez@sistemarenta.com', '555-0004', 'Soporte', 'Activo');
-
 
 -- Asignar roles a usuarios
 INSERT INTO usuario_rol (usuario_id, rol_id) VALUES
@@ -36,6 +34,21 @@ INSERT INTO usuario_rol (usuario_id, rol_id) VALUES
 (4, 4); -- Ana tiene rol de Soporte
 
 -- Insertar categorías
+-- Inserción de usuarios
+INSERT INTO usuario (nombre_usuario, nombre, nombre2, apellido1, apellido2, password, email, telefono, departamento, estado) VALUES
+('admin1', 'Juan', 'Carlos', 'Pérez', 'García', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@example.com', '5551234567', 'Administración', 'Activo'),
+('operador1', 'María', 'Elena', 'López', 'Martínez', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'operador@example.com', '5559876543', 'Operaciones', 'Activo'),
+('vendedor1', 'Roberto', 'José', 'González', 'Ramírez', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'vendedor@example.com', '5552345678', 'Ventas', 'Activo');
+
+-- Asignación de roles a usuarios
+INSERT INTO usuario_rol (usuario_id, rol_id) 
+SELECT u.id, r.id FROM usuario u, rol r WHERE u.nombre_usuario = 'admin1' AND r.codigo = 'ADMIN';
+INSERT INTO usuario_rol (usuario_id, rol_id) 
+SELECT u.id, r.id FROM usuario u, rol r WHERE u.nombre_usuario = 'operador1' AND r.codigo = 'OPER';
+INSERT INTO usuario_rol (usuario_id, rol_id) 
+SELECT u.id, r.id FROM usuario u, rol r WHERE u.nombre_usuario = 'vendedor1' AND r.codigo = 'VEND';
+
+-- Inserción de categorías
 INSERT INTO categoria (nombre, descripcion, tipo_categoria) VALUES
 ('Computadoras', 'Equipos de cómputo y laptops', 'Tecnología'),
 ('Audio y Video', 'Equipos de sonido y video profesional', 'Multimedia'),
