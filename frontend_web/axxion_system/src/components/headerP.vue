@@ -8,7 +8,7 @@
                 <h1 class="text-3xl font-semibold text-gray-800">AXION SYSTEM</h1>
                 <div class="flex items-center space-x-4">
                     <div v-if="user.roles && user.roles.length > 0">
-                        <span class="text-lg font-medium text-gray-700">{{ user.roles[0] }}</span>
+                        <span class="text-lg font-medium text-gray-700">{{ user.roles[0].nombre}}</span>
                         <font-awesome-icon icon="fa-solid fa-user-tie" fade size="xl" style="color: #63E6BE;" />
                     </div>
                     <div v-else>

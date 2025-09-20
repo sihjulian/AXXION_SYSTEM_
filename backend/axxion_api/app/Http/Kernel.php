@@ -24,23 +24,12 @@ class Kernel extends HttpKernel
      * The application's route middleware.
      *
      * These middleware may be assigned to groups or used individually.
+     * 
+     * Note: En Laravel 11, los middlewares se registran en bootstrap/app.php
      *
      * @var array<string, class-string|string>
      */
     protected $middlewareAliases = [
-        'auth' => Authenticate::class,
-        'auth.basic' => AuthenticateWithBasicAuth::class,
-        'cache.headers' => SetCacheHeaders::class,
-        'can' => Authorize::class,
-        'guest' => RedirectIfAuthenticated::class,
-        'precognitive' => HandlePrecognitiveRequests::class,
-        'signed' => ValidateSignature::class,
-        'throttle' => ThrottleRequests::class,
-        'verified' => EnsureEmailIsVerified::class,
-        'jwt.auth' => JWTAuthenticate::class,
-        'role.admin' => RoleAdminMiddleware::class,
-        'role.auxiliar' => RoleAuxiliarMiddleware::class,
-        'role.tecnico' => RoleTecnicoMiddleware::class,
-        'check.role' => \App\Http\Middleware\CheckRole::class,
+        // Los middlewares personalizados ahora se registran en bootstrap/app.php
     ];
 }
