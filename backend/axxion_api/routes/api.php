@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\detalleCotizacionController;
 use App\Http\Controllers\Api\devolucionController;
 use App\Http\Controllers\Api\direccionController;
 use App\Http\Controllers\Api\entregaController;
+use App\Http\Controllers\Api\MantenimientoController;
 
 // ============================================
 // RUTAS PÚBLICAS (sin autenticación)
@@ -36,9 +37,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/usuario/{id}', [UsuarioController::class, 'update']);
     
     // Solo administradores pueden eliminar usuarios
-    Route::middleware(['check.role:ADMIN'])->group(function () {
-        Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
-    });
+    Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
     // PRODUCTOS (requiere autenticación)
@@ -52,21 +51,17 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/producto/{id}', [ProductoController::class, 'updatePartial']);
     
     // Solo administradores pueden eliminar productos
-    Route::middleware(['check.role:ADMIN'])->group(function () {
-        Route::delete('/producto/{id}', [ProductoController::class, 'destroy']);
-    });
+    Route::delete('/producto/{id}', [ProductoController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
     // ROLES (solo administradores)
     // ============================================
-    Route::middleware(['check.role:ADMIN'])->group(function () {
-        Route::get('/rol', [rolController::class, 'index']); 
-        Route::post('/rol', [rolController::class, 'store']); 
-        Route::get('/rol/{id}', [rolController::class, 'show']);
-        Route::delete('/rol/{id}', [rolController::class, 'destroy']);
-        Route::put('/rol/{id}', [rolController::class, 'update']);
-        Route::patch('/rol/{id}', [rolController::class, 'updatePartial']);
-    });
+    Route::get('/rol', [rolController::class, 'index'])->middleware('check.role:ADMIN');
+    Route::post('/rol', [rolController::class, 'store'])->middleware('check.role:ADMIN');
+    Route::get('/rol/{id}', [rolController::class, 'show'])->middleware('check.role:ADMIN');
+    Route::delete('/rol/{id}', [rolController::class, 'destroy'])->middleware('check.role:ADMIN');
+    Route::put('/rol/{id}', [rolController::class, 'update'])->middleware('check.role:ADMIN');
+    Route::patch('/rol/{id}', [rolController::class, 'updatePartial'])->middleware('check.role:ADMIN');
 
     // ============================================
     // CATEGORÍAS (requiere autenticación)
@@ -78,9 +73,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/categoria/{id}', [categoriaController::class, 'updatePartial']);
     
     // Solo administradores pueden eliminar categorías
-    Route::middleware(['check.role:ADMIN'])->group(function () {
-        Route::delete('/categoria/{id}', [categoriaController::class, 'destroy']);
-    });
+    Route::delete('/categoria/{id}', [categoriaController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
     // SUBCATEGORÍAS (requiere autenticación)
@@ -92,9 +85,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/subcategoria/{id}', [subcategoriaController::class, 'updatePartial']);
     
     // Solo administradores pueden eliminar subcategorías
-    Route::middleware(['check.role:ADMIN'])->group(function () {
-        Route::delete('/subcategoria/{id}', [subcategoriaController::class, 'destroy']);
-    });
+    Route::delete('/subcategoria/{id}', [subcategoriaController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
     // CLIENTES (requiere autenticación)
@@ -106,9 +97,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/cliente/{id}', [clienteController::class, 'updatePartial']);
     
     // Solo administradores pueden eliminar clientes
-    Route::middleware(['check.role:ADMIN'])->group(function () {
-        Route::delete('/cliente/{id}', [clienteController::class, 'destroy']);
-    });
+    Route::delete('/cliente/{id}', [clienteController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
     // COTIZACIONES (requiere autenticación)
@@ -120,9 +109,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/cotizacion/{id}', [cotizacionController::class, 'updatePartial']);
     
     // Solo administradores pueden eliminar cotizaciones
-    Route::middleware(['check.role:ADMIN'])->group(function () {
-        Route::delete('/cotizacion/{id}', [cotizacionController::class, 'destroy']);
-    });
+    Route::delete('/cotizacion/{id}', [cotizacionController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
     // DETALLE COTIZACIÓN (requiere autenticación)
@@ -134,9 +121,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/detalleCotizacion/{id}', [detalleCotizacionController::class, 'updatePartial']);
     
     // Solo administradores pueden eliminar detalles de cotización
-    Route::middleware(['check.role:ADMIN'])->group(function () {
-        Route::delete('/detalleCotizacion/{id}', [detalleCotizacionController::class, 'destroy']);
-    });
+    Route::delete('/detalleCotizacion/{id}', [detalleCotizacionController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
     // DEVOLUCIONES (requiere autenticación)
@@ -148,9 +133,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/devolucion/{id}', [devolucionController::class, 'updatePartial']);
     
     // Solo administradores pueden eliminar devoluciones
-    Route::middleware(['check.role:ADMIN'])->group(function () {
-        Route::delete('/devolucion/{id}', [devolucionController::class, 'destroy']);
-    });
+    Route::delete('/devolucion/{id}', [devolucionController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
     // DIRECCIONES (requiere autenticación)
@@ -162,9 +145,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/direccion/{id}', [direccionController::class, 'updatePartial']);
     
     // Solo administradores pueden eliminar direcciones
-    Route::middleware(['check.role:ADMIN'])->group(function () {
-        Route::delete('/direccion/{id}', [direccionController::class, 'destroy']);
-    });
+    Route::delete('/direccion/{id}', [direccionController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
     // ENTREGAS (requiere autenticación)
@@ -176,9 +157,24 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/entrega/{id}', [entregaController::class, 'updatePartial']);
     
     // Solo administradores pueden eliminar entregas
-    Route::middleware(['check.role:ADMIN'])->group(function () {
-        Route::delete('/entrega/{id}', [entregaController::class, 'destroy']);
-    });
+    Route::delete('/entrega/{id}', [entregaController::class, 'destroy'])->middleware('check.role:ADMIN');
+
+    // ============================================
+    // MANTENIMIENTOS (requiere autenticación)
+    // ============================================
+    Route::get('/mantenimiento', [MantenimientoController::class, 'index']);
+    Route::get('/mantenimiento/{id}', [MantenimientoController::class, 'show']);
+    Route::post('/mantenimiento', [MantenimientoController::class, 'store']);
+    Route::put('/mantenimiento/{id}', [MantenimientoController::class, 'update']);
+    Route::patch('/mantenimiento/{id}', [MantenimientoController::class, 'updatePartial']);
+    
+    // Solo administradores pueden eliminar mantenimientos
+    Route::delete('/mantenimiento/{id}', [MantenimientoController::class, 'destroy'])->middleware('check.role:ADMIN');
+
+    // Rutas adicionales para mantenimientos
+    Route::get('/mantenimiento/inventario/{inventario_item_id}', [MantenimientoController::class, 'getByInventarioItem']);
+    Route::get('/mantenimiento/estado/{estado}', [MantenimientoController::class, 'getByEstado']);
+    Route::get('/mantenimiento/tipo/{tipo}', [MantenimientoController::class, 'getByTipo']);
 
 });
 
