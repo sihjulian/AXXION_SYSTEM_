@@ -1,26 +1,21 @@
 // src/services/SubCategoryService.js
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
-  headers: { 'Content-Type': 'application/json', Accept: 'application/json' }
-});
+import apiClient from './axiosConfig';
 
 export default {
   async create(payload) {              
-    const res = await api.post('/subcategoria', payload);
+    const res = await apiClient.post('/subcategoria', payload);
     return res.data;
   },
   async update(id, payload) {
-    const res = await api.put(`/subcategoria/${id}`, payload);
+    const res = await apiClient.put(`/subcategoria/${id}`, payload);
     return res.data;
   },
   async delete(id) {
-    const res = await api.delete(`/subcategoria/${id}`);
+    const res = await apiClient.delete(`/subcategoria/${id}`);
     return res.data;
   },
   async getAll() {
-    const res = await api.get('/subcategoria');
+    const res = await apiClient.get('/subcategoria');
     return res.data?.subcategoria ?? res.data;
   }
 };

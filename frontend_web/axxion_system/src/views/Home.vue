@@ -288,6 +288,9 @@
     </fwb-footer-link-group>
   </fwb-footer>
   </footer>
+  
+  <!-- Componente de Debug -->
+  <DebugUserInfo />
 </template>
 
 <script setup>
@@ -295,6 +298,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import SideBar from '@/components/SideBar.vue'
 import headerP from '@/components/headerP.vue'
+import DebugUserInfo from '@/components/DebugUserInfo.vue'
 import { useInventoryStore } from '@/stores/inventory.js'
 import {
   FwbAlert,

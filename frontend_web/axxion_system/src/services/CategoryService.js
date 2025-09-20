@@ -1,25 +1,20 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
-  headers: { 'Content-Type': 'application/json', Accept: 'application/json' }
-});
+import apiClient from './axiosConfig';
 
 export default {
   async getAll() {
-    const res = await api.get('/categoria');
+    const res = await apiClient.get('/categoria');
     return res.data?.categoria ?? res.data;
   },
   async createCategory(payload) {
-    const res = await api.post('/categoria', payload);
+    const res = await apiClient.post('/categoria', payload);
     return res.data;
   },
   async updateCategory(id, payload) {
-    const res = await api.put(`/categoria/${id}`, payload);
+    const res = await apiClient.put(`/categoria/${id}`, payload);
     return res.data;
   },
   async deleteCategory(id) {
-    const res = await api.delete(`/categoria/${id}`);
+    const res = await apiClient.delete(`/categoria/${id}`);
     return res.data;
   }
 };

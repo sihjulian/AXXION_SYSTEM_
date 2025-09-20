@@ -1,16 +1,8 @@
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:8000/api';
+import apiClient from './axiosConfig';
 
 class UserService {
   constructor() {
-    this.api = axios.create({
-      baseURL: API_BASE_URL,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
+    this.api = apiClient;
   }
 
   // Obtener todos los usuarios

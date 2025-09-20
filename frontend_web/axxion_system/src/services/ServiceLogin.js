@@ -1,16 +1,15 @@
-import axios from "axios";
-
-let urlBase = "http://localhost:8000/api";
+import apiClient from "./axiosConfig";
 
 export default class ServiceLogin {
 
   resetPassword(userData) {
-    return axios.post(`${urlBase}/passwordreset`, userData);
+    return apiClient.post(`/passwordreset`, userData);
   }
   login(userData) {
-    return axios.post(`${urlBase}/login`, userData);
+    // Para login no usamos el interceptor porque aún no tenemos token
+    return apiClient.post(`/login`, userData);
   }
   register(userData) {
-    return axios.post(`${urlBase} + /register`, userData);
+    return apiClient.post(`/register`, userData);
   }
 }
