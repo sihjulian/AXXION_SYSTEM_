@@ -222,8 +222,8 @@ INSERT INTO `detalle_cotizacion` (`cotizacion_id`, `producto_id`, `descripcion_i
 
 -- Inserciones adicionales para rentas
 INSERT INTO `renta` (`cliente_id`, `cotizacion_id`, `fecha_inicio`, `fecha_fin_prevista`, `estado_renta`, `monto_total_renta`, `deposito_garantia`, `notas`) VALUES
-(1, 6, '2025-09-25 18:00:00', '2025-09-26 02:00:00', 'Programada', 2400.00, 500.00, 'Fiesta privada en casa, instalación incluida'),
-(4, 3, '2025-10-05 08:00:00', '2025-10-05 20:00:00', 'Programada', 8500.00, 2000.00, 'Presentación corporativa, requiere técnico especializado');
+(1, 2, '2025-09-25 18:00:00', '2025-09-26 02:00:00', 'Programada', 2400.00, 500.00, 'Fiesta privada en casa, instalación incluida'),
+(2, 1, '2025-10-05 08:00:00', '2025-10-05 20:00:00', 'Programada', 8500.00, 2000.00, 'Presentación corporativa, requiere técnico especializado');
 
 -- Inserciones adicionales para renta_inventario_item
 INSERT INTO `renta_inventario_item` (`renta_id`, `inventario_item_id`, `precio_renta_item`, `condicion_salida`, `notas`) VALUES

@@ -17,10 +17,7 @@
           <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Category">Categorias</RouterLink>
         </li>
         <li>
-          <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/SubCategory">Subcategorias</RouterLink>
-        </li>
-        <li>
-         <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Inventory">Inventario</RouterLink>
+          <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Inventory">Inventario</RouterLink>
         </li>
         <li>
           <a href="reportes.html" class="sidebar-item flex items-center py-3 px-6 "
@@ -32,12 +29,6 @@
           <a href="#" class="sidebar-item flex items-center py-3 px-6 "
         
             >Alertas</a
-          >
-        </li>
-        <li>
-          <a href="#" class="sidebar-item flex items-center py-3 px-6 "
-            >
-            >Rutas de distribucion</a
           >
         </li>
         <li>

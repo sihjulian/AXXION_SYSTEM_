@@ -10,7 +10,7 @@
 
       <section class="flex flex-row space-x-4">
         <!-- CATEGORIAS -->
-        <article class="basis-2/5 bg-black text-amber-50 rounded-md p-4">
+        <article class="basis-2/5 bg-gray-800 text-amber-50 rounded-md p-4">
           <h2 class="font-bold text-2xl mb-4">Categorias</h2>
           <ul>
             <li
@@ -29,7 +29,7 @@
         </article>
 
         <!-- SUBCATEGORIAS -->
-        <article class="basis-3/5 bg-black text-amber-50 rounded-md p-4">
+        <article class="basis-3/5 bg-gray-800 text-amber-50 rounded-md p-4">
 
           <div v-if="selectedCategoria">
             <h3 class="text-xl font-semibold mb-2">{{ selectedCategoria.nombre }}</h3>
