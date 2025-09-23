@@ -3,7 +3,6 @@
     <SideBar />
     <main class="container h-screen p-4 flex-1 overflow-y-auto">
       <headerP />
-
       <div class="mb-4 flex gap-3">
         <fwb-button class="transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110" gradient="cyan-blue" outline @click="openAddCategory">+ Agregar Categoria</fwb-button>
       </div>

@@ -57,10 +57,10 @@ WHERE rfc IS NULL;
 SELECT nombre, marca, modelo, precio_referencia_renta
 FROM producto;
 
--- 10. ¿Cuáles son los productos de Dell?
+-- 10. ¿Cuáles son los productos de QSC?
 SELECT nombre, modelo, precio_referencia_renta
 FROM producto
-WHERE marca = 'Dell';
+WHERE marca = 'QSC';
 
 -- 11. ¿Cuáles son los productos ordenados por precio de mayor a menor?
 SELECT nombre, marca, precio_referencia_renta

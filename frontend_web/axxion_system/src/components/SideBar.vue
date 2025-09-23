@@ -19,17 +19,39 @@
         <li>
           <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Inventory">Inventario</RouterLink>
         </li>
+              <div>
+        <button 
+          @click="toggleReports"
+          class="w-full flex justify-between items-center py-3 px-1 hover:bg-[#01995f]"
+        >
+          <span>Reportes</span>
+          <span>{{ showReports ? "▲" : "▼" }}</span>
+        </button>
+        <ul v-if="showReports" class="ml-4">
+          <li>
+            <RouterLink to="/reports" class="block px-4 py-2 hover:bg-[#01995f]">
+              Inventario
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/reportUsers" class="block px-4 py-2 hover:bg-[#01995f]">
+              Empleados
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/ReportMaintenance" class="block px-4 py-2 hover:bg-[#01995f]">
+              Mantenimientos
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/reports/rentals" class="block px-4 py-2 hover:bg-[#01995f]">
+              Alquileres
+            </RouterLink>
+          </li>
+        </ul>
+      </div>
+        <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Alertas">Alertas</RouterLink>
         <li>
-          <a href="reportes.html" class="sidebar-item flex items-center py-3 px-6 "
-            >
-            >Reportes</a
-          >
-        </li>
-        <li>
-          <a href="#" class="sidebar-item flex items-center py-3 px-6 "
-        
-            >Alertas</a
-          >
         </li>
         <li>
           <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Mantenace">Mantenimientos</RouterLink>
@@ -46,6 +68,13 @@
 
 <script setup>
 import { RouterLink } from 'vue-router';
+import { ref } from "vue";
+
+const showReports = ref(false);
+
+function toggleReports() {
+  showReports.value = !showReports.value;
+}
 </script>
 
 <style lang="scss" scoped>

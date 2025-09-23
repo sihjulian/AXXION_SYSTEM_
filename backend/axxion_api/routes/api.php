@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\devolucionController;
 use App\Http\Controllers\Api\direccionController;
 use App\Http\Controllers\Api\entregaController;
 use App\Http\Controllers\Api\MantenimientoController;
+use App\Http\Controllers\Api\ReporteController;
 
 // ============================================
 // RUTAS PÚBLICAS (sin autenticación)
@@ -175,6 +176,16 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::get('/mantenimiento/inventario/{inventario_item_id}', [MantenimientoController::class, 'getByInventarioItem']);
     Route::get('/mantenimiento/estado/{estado}', [MantenimientoController::class, 'getByEstado']);
     Route::get('/mantenimiento/tipo/{tipo}', [MantenimientoController::class, 'getByTipo']);
+
+    // ============================================
+    // REPORTES (requiere autenticación)
+    // ============================================
+
+    Route::get('/reportes/inventario', [ReporteController::class, 'inventario']);
+    Route::get('/reportes/usuarios', [ReporteController::class, 'usuarios']);
+    Route::get('/reportes/rentas', [ReporteController::class, 'rentas']);
+    Route::get('/reportes/metrics', [ReporteController::class, 'metrics']);
+
 
 });
 

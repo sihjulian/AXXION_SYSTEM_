@@ -8,7 +8,9 @@ import Inventory from '@/views/Inventory.vue'
 import Maintenace from '@/views/Maintenace.vue'
 import Category from '@/views/Category.vue'
 import SubCategory from '@/views/SubCategory.vue'
-
+import Reports from '@/views/Reports.vue'
+import ReportUsers from '@/views/ReportUsers.vue'
+import ReportMaintenances from '@/views/ReportMaintenances.vue'
 
 
 const routes = [
@@ -85,6 +87,35 @@ const routes = [
     meta: { 
       requiresAuth: true,
       title: 'Subcategorías'
+    },
+  },
+  {
+    path: '/Reports',
+    name: 'Reports',
+    component: Reports,
+    meta:{ 
+      requiresAuth: true,
+      title: 'Reportes'
+    },
+  },
+  {
+    path: '/ReportUsers',
+    name: 'ReportUsers',
+    component: ReportUsers,
+    meta:{ 
+      requiresAuth: true,
+      title: 'Gestión de Usuarios',
+      roles: ['ADMIN']
+    },
+  },
+  {
+    path: '/ReportMaintenance',
+    name: 'ReportMaintenance',
+    component: ReportMaintenances,
+    meta: { 
+      requiresAuth: true,
+      title: 'Reporte de Mantenimientos',
+      roles: ['ADMIN', 'TECNICO'] // Solo admin y técnicos
     },
   },
 ]
@@ -168,3 +199,4 @@ router.beforeEach(async (to, from, next) => {
 });
 
 export default router
+
