@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\categoriaController;
 use App\Http\Controllers\Api\clienteController;
+use App\Http\Controllers\Api\RentaController;
 use App\Http\Controllers\Api\subcategoriaController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UsuarioController;
@@ -186,6 +187,15 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::get('/reportes/rentas', [ReporteController::class, 'rentas']);
     Route::get('/reportes/metrics', [ReporteController::class, 'metrics']);
 
+    // ============================================
+    // ALQUILER (requiere autenticación)
+    // ============================================
 
+    Route::get('/renta', [RentaController::class, 'index']);
+    Route::post('/renta', [RentaController::class, 'store']);
+    Route::get('/renta/{id}', [RentaController::class, 'show']);
+    Route::delete('/renta/{id}', [RentaController::class, 'destroy'])->middleware('check.role:ADMIN');
+    Route::put('/renta/{id}', [RentaController::class, 'update']);
+    Route::patch('/renta/{id}', [RentaController::class, 'updatePartial']);
 });
 

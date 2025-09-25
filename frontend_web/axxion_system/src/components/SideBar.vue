@@ -44,7 +44,7 @@
             </RouterLink>
           </li>
           <li>
-            <RouterLink to="/reports/rentals" class="block px-4 py-2 hover:bg-[#01995f]">
+            <RouterLink to="/ReportAlquiler" class="block px-4 py-2 hover:bg-[#01995f]">
               Alquileres
             </RouterLink>
           </li>

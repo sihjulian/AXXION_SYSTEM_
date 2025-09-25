@@ -4,7 +4,6 @@
     <main class="container h-screen p-4 flex-1 overflow-y-auto flex flex-col">
       <headerP />
       <h1 class="text-3xl font-bold mb-6 text-black">Reportes de Inventario</h1>
-
     <section class="flex flex-wrap gap-6">
         <fwb-card class="w-sm flex-1 min-w-[300px] ">
             <div class="p-5">
@@ -40,20 +39,21 @@
 <br><br>
     <section class="flex flex-wrap gap-6">
         <!-- Gráfico por Categoría -->
-        <article class="bg-gray-800 text-amber-50 rounded-md p-4 flex-1 min-w-[300px]">
+        <article class="bg-gray-200 shadow-xl/30 text-black rounded-md p-4 flex-1 min-w-[300px]">
             <h2 class="font-bold text-2xl mb-4">Equipos por Categoría</h2>
-            <v-chart :option="chartByCategory" style="height: 300px; " autoresize />
+            <v-chart :option="chartByCategory" style="height: 300px;" autoresize />
         </article>
         <!-- Gráfico por Valor -->
-        <article class="bg-gray-800 text-amber-50 rounded-md p-4 flex-1 min-w-[300px]">
+        <article class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md pl-4 p-4 flex-1 min-w-[300px]">
             <h2 class="font-bold text-2xl mb-4">Valor Total por Categoría</h2>
             <v-chart :option="chartByValue" style="height: 300px;" autoresize />
         </article>
         <!-- Gráfico por Condición -->
-        <article class="bg-gray-800 text-amber-50 rounded-md p-4 flex-1 min-w-[300px]">
+        <article class="bg-gray-200 shadow-xl/30 text-black rounded-md p-4 flex-1 min-w-[300px]">
             <h2 class="font-bold text-2xl mb-4">Equipos por Condición</h2>
             <v-chart :option="chartByCondition" style="height: 300px;" autoresize />
         </article>
+        
     </section>
     </main>
   </div>
@@ -77,6 +77,7 @@ import {
 import InventoryService from '@/services/InventoryService'
 import ReportService from '@/services/ReportService'
 import { text } from '@fortawesome/fontawesome-svg-core'
+import LineBar from '@/components/LineBar.vue'
 
 
 // registrar echarts
@@ -140,6 +141,7 @@ console.log('Inventario (productos):', items)
             data: Object.entries(categorias).map(([name, value]) => ({ name, value }))
             }
         ]
+        
     }
 
     chartByValue.value = {
@@ -170,7 +172,6 @@ console.log('Inventario (productos):', items)
     console.error('Error cargando inventario:', error)
   }
 })
-
 </script>
 
 

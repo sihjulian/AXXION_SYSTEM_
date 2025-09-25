@@ -11,6 +11,7 @@ import SubCategory from '@/views/SubCategory.vue'
 import Reports from '@/views/Reports.vue'
 import ReportUsers from '@/views/ReportUsers.vue'
 import ReportMaintenances from '@/views/ReportMaintenances.vue'
+import ReportAlquiler from '@/views/ReportAlquiler.vue'
 
 
 const routes = [
@@ -116,6 +117,16 @@ const routes = [
       requiresAuth: true,
       title: 'Reporte de Mantenimientos',
       roles: ['ADMIN', 'TECNICO'] // Solo admin y técnicos
+    },
+  },
+  {
+    path: '/ReportAlquiler',
+    name: 'ReportAlquiler',
+    component: ReportAlquiler,
+    meta: { 
+      requiresAuth: true,
+      title: 'Reporte de Alquileres',
+      
     },
   },
 ]
