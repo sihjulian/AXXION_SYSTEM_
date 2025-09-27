@@ -208,6 +208,7 @@
             @edit-equipment="editProduct"
             @delete-equipment="showDeleteModal"
             @rent-equipment="rentProduct"
+            @maintenance-equipment="showMaintenanceModalForEquipment"
           />
         </div>
 
@@ -281,6 +282,133 @@
         />
       </template>
     </fwb-modal>
+    
+    <!-- Modal para Programar Mantenimiento -->
+    <fwb-modal v-if="isShowMaintenanceModal" @close="closeMaintenanceModal" size="2xl">
+      <template #header>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+          <font-awesome-icon icon="fa-solid fa-tools" class="mr-2 text-yellow-500" />
+          Programar Mantenimiento
+        </h3>
+      </template>
+      <template #body>
+        <form @submit.prevent="scheduleMaintenance" class="space-y-4">
+          <div v-if="selectedEquipmentForMaintenance" class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
+            <h4 class="font-semibold text-blue-700 dark:text-blue-300 mb-2">Equipo Seleccionado</h4>
+            <p class="text-sm text-blue-600 dark:text-blue-400">
+              {{ selectedEquipmentForMaintenance.nombre }} - {{ selectedEquipmentForMaintenance.marca }} {{ selectedEquipmentForMaintenance.modelo }}
+            </p>
+            <p class="text-xs text-blue-500 dark:text-blue-500">
+              Serie: {{ selectedEquipmentForMaintenance.numero_serie }}
+            </p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Tipo de Mantenimiento *
+            </label>
+            <select v-model="maintenanceForm.tipo" required
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+              <option v-for="type in maintenanceTypes" :key="type.value" :value="type.value">
+                {{ type.name }}
+              </option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Descripción del Mantenimiento *
+            </label>
+            <textarea v-model="maintenanceForm.descripcion" required rows="3"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+              placeholder="Descripción detallada del mantenimiento a realizar..."></textarea>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Fecha de Inicio *
+              </label>
+              <input type="date" v-model="maintenanceForm.fecha_inicio" required
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Fecha de Fin Estimada
+              </label>
+              <input type="date" v-model="maintenanceForm.fecha_fin"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Técnico Asignado *
+              </label>
+              <select v-model="maintenanceForm.tecnico_asignado" required
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                <option value="">Seleccionar técnico</option>
+                <option v-for="technician in technicianOptions" :key="technician.value" :value="technician.value">
+                  {{ technician.name }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Prioridad *
+              </label>
+              <select v-model="maintenanceForm.prioridad" required
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                <option v-for="priority in maintenancePriorities" :key="priority.value" :value="priority.value">
+                  {{ priority.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Costo Estimado
+              </label>
+              <input type="number" v-model.number="maintenanceForm.costo_estimado" step="0.01" min="0"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Estado Inicial
+              </label>
+              <select v-model="maintenanceForm.estado"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                <option value="PROGRAMADO">Programado</option>
+                <option value="EN_PROCESO">En Proceso</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Observaciones
+            </label>
+            <textarea v-model="maintenanceForm.observaciones" rows="2"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+              placeholder="Observaciones adicionales..."></textarea>
+          </div>
+        </form>
+      </template>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <fwb-button @click="closeMaintenanceModal" color="alternative">
+            Cancelar
+          </fwb-button>
+          <fwb-button @click="scheduleMaintenance" gradient="yellow">
+            <font-awesome-icon icon="fa-solid fa-tools" class="mr-2" />
+            Programar Mantenimiento
+          </fwb-button>
+        </div>
+      </template>
+    </fwb-modal>
   </div>
 <!--footer-->
   <footer>
@@ -311,6 +439,8 @@
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useInventoryStore } from '@/stores/inventory.js';
+import { useMaintenanceStore } from '@/stores/maintenance.js';
+import { useUserStore } from '@/stores/user.js';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
 import EquipmentCard from '@/components/EquipmentCard.vue';
@@ -329,20 +459,52 @@ import {
   FwbFooterLinkGroup
 } from 'flowbite-vue';
 
-// Store
+// Stores
 const inventoryStore = useInventoryStore();
+const maintenanceStore = useMaintenanceStore();
+const userStore = useUserStore();
 
 // Estado local
 const displayedProducts = ref([]);
 const isShowModal = ref(false);
 const isShowDetailsModal = ref(false);
+const isShowMaintenanceModal = ref(false);
 const modalMode = ref('add'); // 'add', 'edit', 'delete'
 const selectedProduct = ref(null);
+const selectedEquipmentForMaintenance = ref(null);
 const searchQuery = ref('');
 const statusFilter = ref('');
 const categoryFilter = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 12;
+
+// Formulario de mantenimiento
+const maintenanceForm = ref({
+  inventario_item_id: '',
+  descripcion: '',
+  tipo: 'PREVENTIVO',
+  fecha_inicio: '',
+  fecha_fin: '',
+  tecnico_asignado: '',
+  estado: 'PROGRAMADO',
+  prioridad: 'MEDIA',
+  costo_estimado: 0,
+  observaciones: ''
+});
+
+// Opciones para el formulario de mantenimiento
+const maintenanceTypes = computed(() => maintenanceStore.getAvailableTypes());
+const maintenancePriorities = computed(() => maintenanceStore.getAvailablePriorities());
+
+const technicianOptions = computed(() => {
+  const users = userStore.users || [];
+  return users
+    .filter(user => user.rol && (user.rol.nombre === 'Técnico' || user.rol.nombre === 'Administrador'))
+    .map(user => ({ 
+      value: user.id, 
+      name: `${user.nombre} ${user.apellido}` 
+    }));
+});
 
 // Computed del store
 const products = computed(() => inventoryStore.productList);
@@ -387,10 +549,11 @@ const filteredProducts = computed(() => {
   // Filtro de búsqueda
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(p => 
-      p.nombre.toLowerCase().includes(query) ||
-      p.modelo.toLowerCase().includes(query) ||
-      p.numero_serie.toLowerCase().includes(query)
+    filtered = filtered.filter(p =>
+      (p.nombre && p.nombre.toLowerCase().includes(query)) ||
+      (p.modelo && p.modelo.toLowerCase().includes(query)) ||
+      (p.numero_serie && p.numero_serie.toLowerCase().includes(query)) ||
+      (p.marca && p.marca.toLowerCase().includes(query))
     );
   }
 
@@ -401,7 +564,7 @@ const filteredProducts = computed(() => {
 
   // Filtro de categoría
   if (categoryFilter.value) {
-    filtered = filtered.filter(p => p.categoria === categoryFilter.value);
+    filtered = filtered.filter(p => p.categoria && p.categoria.toLowerCase() === categoryFilter.value.toLowerCase());
   }
 
   return filtered;
@@ -454,8 +617,84 @@ function viewProductDetails(product) {
 }
 
 function showMaintenanceModal() {
-  // Implementar modal de mantenimiento
-  console.log('Mostrar modal de mantenimiento');
+  selectedEquipmentForMaintenance.value = null;
+  resetMaintenanceForm();
+  isShowMaintenanceModal.value = true;
+}
+
+function showMaintenanceModalForEquipment(equipment) {
+  selectedEquipmentForMaintenance.value = equipment;
+  resetMaintenanceForm();
+  maintenanceForm.value.inventario_item_id = equipment.id;
+  isShowMaintenanceModal.value = true;
+}
+
+function closeMaintenanceModal() {
+  isShowMaintenanceModal.value = false;
+  selectedEquipmentForMaintenance.value = null;
+  resetMaintenanceForm();
+}
+
+function resetMaintenanceForm() {
+  maintenanceForm.value = {
+    inventario_item_id: '',
+    descripcion: '',
+    tipo: 'PREVENTIVO',
+    fecha_inicio: '',
+    fecha_fin: '',
+    tecnico_asignado: '',
+    estado: 'PROGRAMADO',
+    prioridad: 'MEDIA',
+    costo_estimado: 0,
+    observaciones: ''
+  };
+}
+
+async function scheduleMaintenance() {
+  try {
+    // Validar que haya un equipo seleccionado o en el formulario
+    if (!maintenanceForm.value.inventario_item_id && selectedEquipmentForMaintenance.value) {
+      maintenanceForm.value.inventario_item_id = selectedEquipmentForMaintenance.value.id;
+    }
+
+    console.log('Programando mantenimiento:', maintenanceForm.value);
+    
+    // Crear el mantenimiento usando el store
+    await maintenanceStore.createMaintenance(maintenanceForm.value);
+    
+    // Actualizar el estado del producto a 'mantenimiento'
+    if (selectedEquipmentForMaintenance.value) {
+      await inventoryStore.updateProduct(selectedEquipmentForMaintenance.value.id, {
+        ...selectedEquipmentForMaintenance.value,
+        estado: 'mantenimiento'
+      });
+    }
+    
+    // Cerrar modal
+    closeMaintenanceModal();
+    
+    // Mostrar mensaje de éxito
+    alerts.value.unshift({
+      id: Date.now(),
+      type: 'success',
+      icon: true,
+      title: 'Mantenimiento Programado',
+      message: `Se ha programado el mantenimiento para el equipo ${selectedEquipmentForMaintenance.value?.nombre || 'seleccionado'}`
+    });
+    
+    // Actualizar la vista
+    await forceRefresh();
+    
+  } catch (error) {
+    console.error('Error al programar mantenimiento:', error);
+    alerts.value.unshift({
+      id: Date.now(),
+      type: 'error',
+      icon: true,
+      title: 'Error al Programar Mantenimiento',
+      message: error.response?.data?.message || error.message || 'Error desconocido'
+    });
+  }
 }
 
 // Funciones de acción
@@ -580,12 +819,14 @@ watch(() => inventoryStore.productList, (newProducts) => {
   });
 }, { deep: true, immediate: true });
 
-// Cargar datos al montar el componente
+// Al montar el componente
 onMounted(async () => {
+  console.log('Vista de inventario montada');
   // Cargar productos y categorías
   await Promise.all([
     loadProducts(),
-    inventoryStore.fetchCategories()
+    inventoryStore.fetchCategories(),
+    userStore.fetchUsers() // Cargar usuarios para el selector de técnicos
   ]);
 });
 </script>

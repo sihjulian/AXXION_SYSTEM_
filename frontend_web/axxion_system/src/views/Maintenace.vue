@@ -1,7 +1,8 @@
 <template>
-  <div class="app flex">
-    <SideBar />
-    <RouterView />
+  <div class="maintenance-view">
+    <div class="app flex">
+      <SideBar />
+      <RouterView />
 
     <main class="container h-screen">
       <div class="rounded-lg flex-col">
@@ -17,6 +18,28 @@
             <p class="text-gray-600 dark:text-gray-400">
               Planifica, rastrea y gestiona todas las tareas de mantenimiento de equipos.
             </p>
+          </div>
+
+          <!-- Notifications -->
+          <div v-if="notifications.length > 0" class="mb-6 space-y-2">
+            <div
+              v-for="notification in notifications"
+              :key="notification.id"
+              :class="[
+                'p-4 rounded-lg flex justify-between items-center',
+                notification.type === 'success'
+                  ? 'bg-green-100 border border-green-500 text-green-700 dark:bg-green-800 dark:text-green-300'
+                  : 'bg-red-100 border border-red-500 text-red-700 dark:bg-red-800 dark:text-red-300'
+              ]"
+            >
+              <span>{{ notification.message }}</span>
+              <button
+                @click="removeNotification(notification.id)"
+                class="ml-4 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100"
+              >
+                <font-awesome-icon icon="fa-solid fa-times" />
+              </button>
+            </div>
           </div>
 
           <!-- Action Controls -->
@@ -42,10 +65,9 @@
                 </label>
                 <fwb-select v-model="statusFilter">
                   <option value="">Todos</option>
-                  <option value="Programado">Programado</option>
-                  <option value="En Progreso">En Progreso</option>
-                  <option value="Completado">Completado</option>
-                  <option value="Cancelado">Cancelado</option>
+                  <option v-for="status in statusOptions" :key="status.value" :value="status.value">
+                    {{ status.name }}
+                  </option>
                 </fwb-select>
               </div>
               <div>
@@ -54,9 +76,9 @@
                 </label>
                 <fwb-select v-model="technicianFilter">
                   <option value="">Todos</option>
-                  <option value="Juan Perez">Juan Perez</option>
-                  <option value="Maria Rodriguez">Maria Rodriguez</option>
-                  <option value="Carlos Sanchez">Carlos Sanchez</option>
+                  <option v-for="technician in technicianOptions" :key="technician.value" :value="technician.value">
+                    {{ technician.name }}
+                  </option>
                 </fwb-select>
               </div>
               <div class="flex items-end">
@@ -83,15 +105,18 @@
               </fwb-table-head>
               <fwb-table-body>
                 <fwb-table-row v-for="task in filteredTasks" :key="task.id">
-                  <fwb-table-cell>{{ task.equipment }}</fwb-table-cell>
-                  <fwb-table-cell>{{ task.task }}</fwb-table-cell>
-                  <fwb-table-cell>{{ task.scheduledDate }}</fwb-table-cell>
-                  <fwb-table-cell>{{ task.technician }}</fwb-table-cell>
-                  <fwb-table-cell>
-                    <span :class="getStatusClass(task.status)">
-                      {{ task.status }}
-                    </span>
-                  </fwb-table-cell>
+                   <fwb-table-cell>
+                     <div>{{ getEquipmentName(task.inventario_item_id) }}</div>
+                     <div class="text-xs text-gray-500">ID: {{ task.inventario_item_id }}</div>
+                   </fwb-table-cell>
+                   <fwb-table-cell>{{ task.descripcion_problema }}</fwb-table-cell>
+                   <fwb-table-cell>{{ formatDate(task.fecha_inicio) }}</fwb-table-cell>
+                   <fwb-table-cell>{{ getTechnicianName(task.responsable) }}</fwb-table-cell>
+                   <fwb-table-cell>
+                     <span :class="getStatusClass(task.estado_mantenimiento)">
+                       {{ getStatusDisplayName(task.estado_mantenimiento) }}
+                     </span>
+                   </fwb-table-cell>
                   <fwb-table-cell class="flex gap-2">
                     <fwb-button size="xs" gradient="blue" @click="editTask(task)">
                       Editar
@@ -101,6 +126,21 @@
                     </fwb-button>
                   </fwb-table-cell>
                 </fwb-table-row>
+                <fwb-table-row v-if="filteredTasks.length === 0">
+                   <fwb-table-cell colspan="6" class="text-center py-8 text-gray-500">
+                     <div v-if="isLoading" class="flex items-center justify-center">
+                       <font-awesome-icon icon="fa-solid fa-spinner" class="mr-2 animate-spin" />
+                       Cargando mantenimientos...
+                     </div>
+                     <div v-else>
+                       No hay mantenimientos disponibles
+                       <div class="text-xs mt-2 text-gray-400">
+                         Total en store: {{ maintenances?.length || 0 }}
+                         <br>Store maintenances: {{ JSON.stringify(maintenances) }}
+                       </div>
+                     </div>
+                   </fwb-table-cell>
+                 </fwb-table-row>
               </fwb-table-body>
             </fwb-table>
           </div>
@@ -118,45 +158,108 @@
       <template #body>
         <form @submit.prevent="saveTask" class="space-y-4">
           <div>
-            <fwb-input
-              v-model="taskForm.equipment"
-              label="Equipo"
-              placeholder="Ej: Laptop HP ProBook 450"
-              required
-            />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Equipo *
+            </label>
+            <fwb-select v-model="taskForm.inventario_item_id" required :class="{ 'border-red-500': formErrors.inventario_item_id }">
+              <option value="">Seleccionar equipo</option>
+              <option v-for="item in inventoryOptions" :key="item.value" :value="item.value">
+                {{ item.name }}
+              </option>
+            </fwb-select>
+            <p v-if="formErrors.inventario_item_id" class="mt-1 text-sm text-red-600 dark:text-red-400">
+              {{ formErrors.inventario_item_id }}
+            </p>
           </div>
           <div>
             <fwb-textarea
-              v-model="taskForm.task"
-              label="Descripción de la Tarea"
+              v-model="taskForm.descripcion_problema"
+              label="Descripción del Problema"
               placeholder="Ej: Limpieza interna y cambio de pasta térmica"
               required
+              :class="{ 'border-red-500': formErrors.descripcion_problema }"
             />
+            <p v-if="formErrors.descripcion_problema" class="mt-1 text-sm text-red-600 dark:text-red-400">
+              {{ formErrors.descripcion_problema }}
+            </p>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <fwb-input
-                    v-model="taskForm.scheduledDate"
-                    label="Fecha Programada"
+                    v-model="taskForm.fecha_inicio"
+                    label="Fecha de Inicio"
                     type="date"
                     required
                 />
             </div>
             <div>
-                <fwb-select
-                    v-model="taskForm.technician"
-                    label="Técnico Asignado"
-                    :options="technicianOptions"
-                    required
+                <fwb-input
+                    v-model="taskForm.fecha_fin_prevista"
+                    label="Fecha de Fin Prevista"
+                    type="date"
+                />
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Responsable *
+                </label>
+                <fwb-select v-model="taskForm.responsable" required>
+                  <option value="">Seleccionar responsable</option>
+                  <option v-for="technician in technicianOptions" :key="technician.value" :value="technician.value">
+                    {{ technician.name }}
+                  </option>
+                </fwb-select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Estado *
+                </label>
+                <fwb-select v-model="taskForm.estado_mantenimiento" required>
+                  <option v-for="status in statusOptions" :key="status.value" :value="status.value">
+                    {{ status.name }}
+                  </option>
+                </fwb-select>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Tipo de Mantenimiento *
+                </label>
+                <fwb-select v-model="taskForm.tipo_mantenimiento" required>
+                  <option v-for="type in typeOptions" :key="type.value" :value="type.value">
+                    {{ type.name }}
+                  </option>
+                </fwb-select>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <fwb-input
+                    v-model.number="taskForm.costo_estimado"
+                    label="Costo Estimado"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                />
+            </div>
+            <div>
+                <fwb-input
+                    v-model.number="taskForm.costo_real"
+                    label="Costo Real"
+                    type="number"
+                    step="0.01"
+                    min="0"
                 />
             </div>
           </div>
           <div>
-            <fwb-select
-                v-model="taskForm.status"
-                label="Estado"
-                :options="statusOptions"
-                required
+            <fwb-textarea
+              v-model="taskForm.descripcion_trabajo_realizado"
+              label="Descripción del Trabajo Realizado"
+              placeholder="Descripción detallada del trabajo realizado"
             />
           </div>
         </form>
@@ -166,7 +269,8 @@
           <fwb-button @click="closeModal" color="alternative">
             Cancelar
           </fwb-button>
-          <fwb-button @click="saveTask" color="green">
+          <fwb-button @click="saveTask" color="green" :disabled="isSaving">
+            <font-awesome-icon v-if="isSaving" icon="fa-solid fa-spinner" class="mr-2 animate-spin" />
             {{ isEditMode ? 'Guardar Cambios' : 'Guardar' }}
           </fwb-button>
         </div>
@@ -182,16 +286,19 @@
                 ¿Está seguro de que desea eliminar esta tarea?
             </h3>
             <div class="flex justify-center gap-4">
-                <fwb-button @click="deleteTask" color="red">Sí, estoy seguro</fwb-button>
+                <fwb-button @click="deleteTask" color="red" :disabled="isDeleting">
+                  <font-awesome-icon v-if="isDeleting" icon="fa-solid fa-spinner" class="mr-2 animate-spin" />
+                  Sí, estoy seguro
+                </fwb-button>
                 <fwb-button @click="closeDeleteModal" color="alternative">No, cancelar</fwb-button>
             </div>
         </div>
       </template>
     </fwb-modal>
 
- 
-  </div>
-     <fwb-footer>
+    </div>
+    
+    <fwb-footer>
     <fwb-footer-copyright
       by="Flowbite™"
       href="https://flowbite.com/"
@@ -211,13 +318,18 @@
         Contact
       </fwb-footer-link>
     </fwb-footer-link-group>
-  </fwb-footer>
+    </fwb-footer>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
+import { useMaintenanceStore } from '@/stores/maintenance.js';
+import { useUserStore } from '@/stores/user.js';
+import { useInventoryStore } from '@/stores/inventory.js';
 import {
   FwbButton,
   FwbTable,
@@ -232,22 +344,19 @@ import {
   FwbTextarea,
   FwbFooter,
   FwbFooterCopyright,
-} from 'flowbite-vue';
-import {
-  FwbAlert,
   FwbFooterLink,
   FwbFooterLinkGroup,
 } from 'flowbite-vue';
 
 
-// Sample Data
-const maintenanceTasks = ref([
-  { id: 1, equipment: 'Laptop HP ProBook 450', task: 'Limpieza interna', scheduledDate: '2025-10-15', technician: 'Juan Perez', status: 'Programado' },
-  { id: 2, equipment: 'Proyector Epson PowerLite', task: 'Cambio de lámpara', scheduledDate: '2025-10-12', technician: 'Maria Rodriguez', status: 'En Progreso' },
-  { id: 3, equipment: 'PC de Escritorio Dell', task: 'Actualización de RAM', scheduledDate: '2025-09-30', technician: 'Juan Perez', status: 'Completado' },
-  { id: 4, equipment: 'Monitor Samsung 24"', task: 'Revisión de puerto HDMI', scheduledDate: '2025-10-20', technician: 'Carlos Sanchez', status: 'Programado' },
-  { id: 5, equipment: 'Laptop Lenovo ThinkPad T14', task: 'Formateo y reinstalación SO', scheduledDate: '2025-09-28', technician: 'Maria Rodriguez', status: 'Completado' },
-]);
+// Stores
+const maintenanceStore = useMaintenanceStore();
+const userStore = useUserStore();
+const inventoryStore = useInventoryStore();
+
+// Estado reactivo de los stores usando storeToRefs para mantener reactividad
+const { maintenances, isLoading } = storeToRefs(maintenanceStore);
+const { users } = storeToRefs(userStore);
 
 // Form and Modal State
 const isShowModal = ref(false);
@@ -256,26 +365,49 @@ const isEditMode = ref(false);
 const selectedTask = ref(null);
 const taskForm = ref({});
 
+// Loading states
+const isSaving = ref(false);
+const isDeleting = ref(false);
+
+// Form validation
+const formErrors = ref({});
+
 const defaultFormState = {
-    equipment: '',
-    task: '',
-    scheduledDate: '',
-    technician: 'Juan Perez',
-    status: 'Programado',
+    inventario_item_id: '',
+    descripcion_problema: '',
+    fecha_inicio: '',
+    fecha_fin_prevista: '',
+    responsable: '',
+    estado_mantenimiento: 'PROGRAMADO',
+    tipo_mantenimiento: 'PREVENTIVO',
+    costo_estimado: 0,
+    costo_real: 0,
+    descripcion_trabajo_realizado: ''
 };
 
-// Options for Selects
-const technicianOptions = [
-    { value: 'Juan Perez', name: 'Juan Perez' },
-    { value: 'Maria Rodriguez', name: 'Maria Rodriguez' },
-    { value: 'Carlos Sanchez', name: 'Carlos Sanchez' },
-];
-const statusOptions = [
-    { value: 'Programado', name: 'Programado' },
-    { value: 'En Progreso', name: 'En Progreso' },
-    { value: 'Completado', name: 'Completado' },
-    { value: 'Cancelado', name: 'Cancelado' },
-];
+// Options for Selects - Computed para reactividad
+const technicianOptions = computed(() => {
+  return users.value
+    .filter(user => user.rol && (user.rol.nombre === 'Técnico' || user.rol.nombre === 'Administrador'))
+    .map(user => ({ 
+      value: user.id, 
+      name: `${user.nombre} ${user.apellido}` 
+    }));
+});
+
+const statusOptions = computed(() => maintenanceStore.getAvailableStatuses());
+const typeOptions = computed(() => maintenanceStore.getAvailableTypes());
+
+const inventoryOptions = computed(() => {
+  // Obtener opciones de inventario del store de inventario
+  return inventoryStore.productList.map(item => ({
+    value: item.id,
+    name: `${item.numero_serie} - ${item.estado}`
+  }));
+});
+
+// Notification state
+const notifications = ref([]);
 
 
 // Filter State
@@ -284,20 +416,181 @@ const statusFilter = ref('');
 const technicianFilter = ref('');
 
 const filteredTasks = computed(() => {
-  return maintenanceTasks.value.filter(task => {
-    const search = searchQuery.value.toLowerCase();
-    const matchesSearch = !search || task.equipment.toLowerCase().includes(search) || task.task.toLowerCase().includes(search);
-    const matchesStatus = !statusFilter.value || task.status === statusFilter.value;
-    const matchesTechnician = !technicianFilter.value || task.technician === technicianFilter.value;
-    return matchesSearch && matchesStatus && matchesTechnician;
+  console.log('filteredTasks computed - maintenances:', maintenances.value);
+  console.log('filteredTasks computed - maintenances length:', maintenances.value?.length);
+  
+  if (!maintenances.value || maintenances.value.length === 0) {
+    console.log('filteredTasks: No maintenances available');
+    return [];
+  }
+
+  const filtered = maintenanceStore.filterMaintenances({
+    search: searchQuery.value,
+    estado: statusFilter.value,
+    responsable: technicianFilter.value
   });
+  
+  console.log('filteredTasks: Filtered result:', filtered);
+  return filtered;
 });
+
+// Helper Functions
+function getEquipmentName(inventarioItemId) {
+  console.log('getEquipmentName called with:', inventarioItemId);
+  console.log('Available maintenances:', maintenances.value);
+
+  if (!maintenances.value || !Array.isArray(maintenances.value)) {
+    console.log('Maintenances not loaded or not an array');
+    return 'Datos no cargados';
+  }
+
+  // Find the maintenance record with the matching inventory item ID
+  const maintenance = maintenances.value.find(m => m.inventario_item_id === inventarioItemId);
+
+  if (maintenance && maintenance.inventario_item) {
+    const result = `${maintenance.inventario_item.numero_serie} - ${maintenance.inventario_item.estado_item}`;
+    console.log('getEquipmentName result:', result);
+    return result;
+  }
+
+  console.log('Equipment not found for ID:', inventarioItemId);
+  return 'Equipo no encontrado';
+}
+
+function formatDate(dateString) {
+  if (!dateString) return 'Sin fecha';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function getTechnicianName(responsableId) {
+  if (!responsableId) return 'Sin asignar';
+  if (!users.value || !Array.isArray(users.value)) return 'Usuarios no cargados';
+  const technician = users.value.find(user => user.id === responsableId);
+  return technician ? `${technician.nombre} ${technician.apellido}` : 'Técnico no encontrado';
+}
+
+function getStatusClass(status) {
+  const statusClasses = {
+    'PROGRAMADO': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    'EN_PROCESO': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+    'COMPLETADO': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    'CANCELADO': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+    'PAUSADO': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+  };
+  return statusClasses[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+}
+
+function getStatusDisplayName(status) {
+  const statusNames = {
+    'PROGRAMADO': 'Programado',
+    'EN_PROCESO': 'En Proceso',
+    'COMPLETADO': 'Completado',
+    'CANCELADO': 'Cancelado',
+    'PAUSADO': 'Pausado'
+  };
+  return statusNames[status] || status || 'Sin estado';
+}
 
 function clearFilters() {
   searchQuery.value = '';
   statusFilter.value = '';
   technicianFilter.value = '';
 }
+
+// Notification methods
+function addNotification(message, type = 'success') {
+  const notification = {
+    id: Date.now(),
+    message,
+    type,
+    timestamp: new Date()
+  };
+
+  notifications.value.push(notification);
+
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    removeNotification(notification.id);
+  }, 5000);
+}
+
+function removeNotification(id) {
+  const index = notifications.value.findIndex(n => n.id === id);
+  if (index > -1) {
+    notifications.value.splice(index, 1);
+  }
+}
+
+function validateForm() {
+  formErrors.value = {};
+  let isValid = true;
+
+  if (!taskForm.value.inventario_item_id) {
+    formErrors.value.inventario_item_id = 'Debe seleccionar un equipo';
+    isValid = false;
+  }
+
+  if (!taskForm.value.descripcion_problema?.trim()) {
+    formErrors.value.descripcion_problema = 'La descripción del problema es requerida';
+    isValid = false;
+  }
+
+  if (!taskForm.value.fecha_inicio) {
+    formErrors.value.fecha_inicio = 'La fecha de inicio es requerida';
+    isValid = false;
+  }
+
+  if (!taskForm.value.responsable) {
+    formErrors.value.responsable = 'Debe seleccionar un responsable';
+    isValid = false;
+  }
+
+  if (!taskForm.value.estado_mantenimiento) {
+    formErrors.value.estado_mantenimiento = 'Debe seleccionar un estado';
+    isValid = false;
+  }
+
+  if (!taskForm.value.tipo_mantenimiento) {
+    formErrors.value.tipo_mantenimiento = 'Debe seleccionar un tipo de mantenimiento';
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+// Lifecycle
+onMounted(async () => {
+  try {
+    console.log('Starting to load maintenance data...');
+    
+    // Cargar datos secuencialmente para evitar problemas de dependencias
+    console.log('Loading users...');
+    await userStore.fetchUsers();
+    console.log('Users loaded:', users.value?.length);
+    
+    console.log('Loading inventory...');
+    await inventoryStore.fetchProducts();
+    console.log('Inventory loaded:', inventoryStore.productList?.length);
+    
+    console.log('Loading maintenances...');
+    await maintenanceStore.fetchMaintenances();
+    console.log('Maintenances loaded:', maintenances.value?.length);
+    
+    console.log('All data loaded successfully');
+    console.log('Filtered tasks:', filteredTasks.value);
+    addNotification('Datos cargados exitosamente', 'success');
+  } catch (error) {
+    console.error('Error loading initial data:', error);
+    addNotification('Error al cargar los datos iniciales: ' + error.message, 'error');
+  }
+});
 
 // Modal Functions
 function showAddModal() {
@@ -318,19 +611,33 @@ function closeModal() {
   isShowModal.value = false;
 }
 
-function saveTask() {
-    if (isEditMode.value) {
-        // Update existing task
-        const index = maintenanceTasks.value.findIndex(t => t.id === selectedTask.value.id);
-        if (index !== -1) {
-            maintenanceTasks.value[index] = { ...selectedTask.value, ...taskForm.value };
-        }
-    } else {
-        // Add new task
-        const newId = maintenanceTasks.value.length > 0 ? Math.max(...maintenanceTasks.value.map(t => t.id)) + 1 : 1;
-        maintenanceTasks.value.push({ id: newId, ...taskForm.value });
+async function saveTask() {
+    if (isSaving.value) return;
+
+    // Validate form
+    if (!validateForm()) {
+        addNotification('Por favor complete todos los campos requeridos', 'error');
+        return;
     }
-    closeModal();
+
+    try {
+        isSaving.value = true;
+        if (isEditMode.value && selectedTask.value) {
+            // Update existing task
+            await maintenanceStore.updateMaintenance(selectedTask.value.id, taskForm.value);
+            addNotification('Mantenimiento actualizado exitosamente', 'success');
+        } else {
+            // Add new task
+            await maintenanceStore.createMaintenance(taskForm.value);
+            addNotification('Mantenimiento creado exitosamente', 'success');
+        }
+        closeModal();
+    } catch (error) {
+        console.error('Error al guardar mantenimiento:', error);
+        addNotification('Error al guardar mantenimiento: ' + (error.message || 'Error desconocido'), 'error');
+    } finally {
+        isSaving.value = false;
+    }
 }
 
 function showDeleteModal(task) {
@@ -343,28 +650,23 @@ function closeDeleteModal() {
     selectedTask.value = null;
 }
 
-function deleteTask() {
-    if(selectedTask.value) {
-        maintenanceTasks.value = maintenanceTasks.value.filter(t => t.id !== selectedTask.value.id);
+async function deleteTask() {
+    if (isDeleting.value) return;
+
+    try {
+        isDeleting.value = true;
+        if(selectedTask.value) {
+            await maintenanceStore.deleteMaintenance(selectedTask.value.id);
+            addNotification('Mantenimiento eliminado exitosamente', 'success');
+        }
+        closeDeleteModal();
+    } catch (error) {
+        console.error('Error al eliminar mantenimiento:', error);
+        addNotification('Error al eliminar mantenimiento: ' + (error.message || 'Error desconocido'), 'error');
+        closeDeleteModal();
+    } finally {
+        isDeleting.value = false;
     }
-    closeDeleteModal();
-}
-
-
-// Helper for styling status
-function getStatusClass(status) {
-  switch (status) {
-    case 'Programado':
-      return 'bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300';
-    case 'En Progreso':
-      return 'bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300';
-    case 'Completado':
-      return 'bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300';
-    case 'Cancelado':
-        return 'bg-red-100 text-red-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300';
-    default:
-      return 'bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300';
-  }
 }
 </script>
 
