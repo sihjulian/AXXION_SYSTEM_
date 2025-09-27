@@ -117,6 +117,17 @@
         </fwb-button>
         
         <fwb-button 
+          v-if="(equipment.estado || equipment.status) === 'disponible'"
+          size="sm" 
+          gradient="yellow" 
+          @click="$emit('maintenance-equipment', equipment)"
+          class="flex-1"
+        >
+          <font-awesome-icon icon="fa-solid fa-tools" class="mr-1"/>
+          Mantener
+        </fwb-button>
+        
+        <fwb-button 
           size="sm" 
           gradient="purple" 
           @click="$emit('edit-equipment', equipment)"
