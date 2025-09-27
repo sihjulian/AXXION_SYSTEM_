@@ -15,13 +15,22 @@ use Illuminate\Validation\Rule;
 
 class cotizacionController extends Controller
 {
-        public function index(){
-        $cotizacion = Cotizacion::all();
-        $data = [
-            'cotizacion' => $cotizacion,
-            'status' => 200
-        ];
-        return response()->json($data, 200);
+        public function index()
+        {
+            try {
+                $cotizacion = Cotizacion::with('cliente', 'solicitud', 'detalles', 'renta')->get();
+                $data = [
+                    'cotizacion' => $cotizacion,
+                    'status' => 200
+                ];
+                return response()->json($data, 200);
+            } catch (\Exception $e) {
+                Log::error('Error al listar Rentas: ' . $e->getMessage());
+                return response()->json([
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }
         }
         public function store(Request $request){
             $validator = Validator::make($request->all(),[
@@ -66,36 +75,55 @@ class cotizacionController extends Controller
             ];
             return response()->json($data, 200);
         }
-        public function show($id){
-            $cotizacion = Cotizacion::find($id);
-            if(!$cotizacion){
-                $data = [
-                    'message' => 'Cotizacion no encontrada',
-                    'status' => 404
-                ];
-                return response()->json($data, 404);
+        public function show($id)
+            {
+                try{
+                    $cotizacion = Cotizacion::with('cliente', 'solicitud', 'detalles', 'renta' )->find($id);
+                    if(!$cotizacion){
+                        $data = [
+                            'message' => 'Cotizacion no encontrada',
+                            'status' => 404
+                        ];
+                        return response()->json($data, 404);
+                    }
+                    $data = [
+                        'cotizacion' => $cotizacion,
+                        'status' => 200
+                    ];
+                    return response()->json($data, 200);
+                } catch (\Exception $e) {
+                Log::error('Error al listar Rentas: ' . $e->getMessage());
+                return response()->json([
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
             }
-            $data = [
-                'cotizacion' => $cotizacion,
-                'status' => 200
-            ];
-            return response()->json($data, 200);
         }
-        public function destroy($id){
-            $cotizacion = Cotizacion::find($id);
-            if(!$cotizacion){
+        public function destroy($id)
+        {
+            try {
+                $cotizacion = Cotizacion::with('cliente', 'solicitud', 'detalles', 'renta')->find($id);
+                if(!$cotizacion){
+                    $data = [
+                        'message' => 'Cotizacion no encontrada',
+                        'status' => 404
+                    ];
+                    return response()->json($data, 404);
+                }
+                
+                $cotizacion->delete();
                 $data = [
-                    'message' => 'Cotizacion no encontrada',
-                    'status' => 404
+                    'cotizacion' => $cotizacion,
+                    'status' => 200
                 ];
-                return response()->json($data, 404);
+                return response()->json($data, 200);
+                } catch (\Exception $e) {
+                Log::error('Error al listar la cotizacion: ' . $e->getMessage());
+                return response()->json([
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
             }
-            $cotizacion->delete();
-            $data = [
-                'cotizacion' => $cotizacion,
-                'status' => 200
-            ];
-            return response()->json($data, 200);
         }
         public function update(Request $request, $id)
 {

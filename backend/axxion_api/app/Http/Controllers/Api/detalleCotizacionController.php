@@ -12,13 +12,22 @@ use Illuminate\Support\Facades\Log;
 
 class detalleCotizacionController extends Controller
 {
-        public function index(){
-        $detalleCotizacion = DetalleCotizacion::all();
-        $data = [
-            'detalleCotizacion' => $detalleCotizacion,
-            'status' => 200
-        ];
-        return response()->json($data, 200);
+        public function index()
+        {
+            try{
+                $detalleCotizacion = DetalleCotizacion::with('cotizacion', 'producto')->get();
+                $data = [
+                    'detalleCotizacion' => $detalleCotizacion,
+                    'status' => 200
+                ];
+                return response()->json($data, 200);
+            } catch (\Exception $e) {
+                Log::error('Error al listar Detalle cotizacion: ' . $e->getMessage());
+                return response()->json([
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
+            }
         }
         public function store(Request $request){
             $validator = Validator::make($request->all(),[
@@ -64,7 +73,7 @@ class detalleCotizacionController extends Controller
             return response()->json($data, 200);
         }
         public function show($id){
-            $detalleCotizacion = DetalleCotizacion::find($id);
+            $detalleCotizacion = DetalleCotizacion::with('cotizacion', 'producto')->find($id);
             if(!$detalleCotizacion){
                 $data = [
                     'message' => 'Detalle de cotizacion no encontrado',

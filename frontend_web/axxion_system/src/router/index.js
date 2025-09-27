@@ -12,6 +12,7 @@ import Reports from '@/views/Reports.vue'
 import ReportUsers from '@/views/ReportUsers.vue'
 import ReportMaintenances from '@/views/ReportMaintenances.vue'
 import ReportAlquiler from '@/views/ReportAlquiler.vue'
+import Rental from '@/views/Rental.vue'
 
 
 const routes = [
@@ -123,6 +124,16 @@ const routes = [
     path: '/ReportAlquiler',
     name: 'ReportAlquiler',
     component: ReportAlquiler,
+    meta: { 
+      requiresAuth: true,
+      title: 'Reporte de Alquileres',
+      
+    },
+  },
+  {
+    path: '/Rental',
+    name: 'Rental',
+    component: Rental,
     meta: { 
       requiresAuth: true,
       title: 'Reporte de Alquileres',
