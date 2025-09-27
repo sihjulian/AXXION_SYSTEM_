@@ -1,4 +1,4 @@
-const categorias = ref([]); // Aquí guardamos las categorías
+const categorias = ref([]); 
 const nombre = ref('');
 const descripcion = ref('');
 const tipo_categoria = ref('');

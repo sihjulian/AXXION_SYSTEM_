@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\direccionController;
 use App\Http\Controllers\Api\entregaController;
 use App\Http\Controllers\Api\MantenimientoController;
 use App\Http\Controllers\Api\ReporteController;
+use App\Http\Controllers\Api\AlertaController;
 
 // ============================================
 // RUTAS PÚBLICAS (sin autenticación)
@@ -197,5 +198,12 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::delete('/renta/{id}', [RentaController::class, 'destroy'])->middleware('check.role:ADMIN');
     Route::put('/renta/{id}', [RentaController::class, 'update']);
     Route::patch('/renta/{id}', [RentaController::class, 'updatePartial']);
+
+    // ============================================
+    // ALERTAS (requiere autenticación)
+    // ============================================
+
+    Route::get('/alertas', [AlertaController::class, 'index']);
+
 });
 

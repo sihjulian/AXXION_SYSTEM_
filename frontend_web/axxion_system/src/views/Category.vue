@@ -6,7 +6,6 @@
       <div class="mb-4 flex gap-3">
         <fwb-button class="transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110" gradient="cyan-blue" outline @click="openAddCategory">+ Agregar Categoria</fwb-button>
       </div>
-
       <section class="flex flex-row space-x-4">
         <!-- CATEGORIAS -->
         <article class="basis-2/5 bg-gray-800 text-amber-50 rounded-md p-4">
@@ -96,10 +95,10 @@ const selectedCategoryForModal = ref(null)
 
 // modales de subcategoría
 const showSubModal = ref(false)
-const subModalMode = ref('add') // 'add' | 'edit' | 'delete'
+const subModalMode = ref('add') 
 const selectedSubForModal = ref(null)
 
-// FORM para subcategoría (asegúrate que existe)
+
 const subForm = ref({ nombre: '', descripcion: '', categoria_id: null })
 
 // ---------- CARGAR CATEGORIAS ----------
@@ -107,7 +106,6 @@ async function fetchCategorias() {
   try {
     const data = await CategoryService.getAll()
     categorias.value = Array.isArray(data) ? data : (data?.categoria ?? [])
-    // mantener selección si existía
     if (selectedCategoria.value) {
       selectedCategoria.value = categorias.value.find(c => c.id === selectedCategoria.value.id) ?? null
     }
@@ -159,7 +157,6 @@ function showEditSubModal(sub) {
   console.log('DEBUG showEditSubModal', sub)
   subModalMode.value = 'edit'
   selectedSubForModal.value = sub
-  // llenar el form con la subcategoria seleccionada
   subForm.value = { id: sub.id, nombre: sub.nombre ?? '', descripcion: sub.descripcion ?? '', categoria_id: selectedCategoria.value?.id ?? null }
   showSubModal.value = true
 }
@@ -179,7 +176,6 @@ function closeSubModal() {
   showSubModal.value = false
   selectedSubForModal.value = null
   subModalMode.value = 'add'
-  // limpiar form
   subForm.value = { nombre: '', descripcion: '', categoria_id: null }
 }
 
@@ -192,14 +188,12 @@ async function saveSubcategoria(payload) {
     return
   }
 
-  // validar nombre/descripcion
   if (!payload.nombre || payload.nombre.trim() === '') {
     alert('El nombre de la subcategoría es obligatorio')
     return
   }
 
   try {
-    // preparar payload según tu controlador: espera 'categorias' => array
     const send = {
       nombre: payload.nombre,
       descripcion: payload.descripcion,

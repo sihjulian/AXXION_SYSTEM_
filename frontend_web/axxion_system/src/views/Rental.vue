@@ -83,8 +83,6 @@
             </div>
           </FwbCard>
         </div>
-
-        <!-- Modal reutilizable -->
         <RentalModal
           :show="showModal"
           :mode="modalMode"

@@ -13,6 +13,7 @@ import ReportUsers from '@/views/ReportUsers.vue'
 import ReportMaintenances from '@/views/ReportMaintenances.vue'
 import ReportAlquiler from '@/views/ReportAlquiler.vue'
 import Rental from '@/views/Rental.vue'
+import Alerts from '@/views/Alerts.vue'
 
 
 const routes = [
@@ -138,6 +139,15 @@ const routes = [
       requiresAuth: true,
       title: 'Reporte de Alquileres',
       
+    },
+  },
+  {
+    path: '/Alerts',
+    name: 'Alerts',
+    component: Alerts,
+    meta: { 
+      requiresAuth: true,
+      title: 'Reporte de Alertas',
     },
   },
 ]

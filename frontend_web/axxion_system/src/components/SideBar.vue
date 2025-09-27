@@ -50,7 +50,7 @@
           </li>
         </ul>
       </div>
-        <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Alertas">Alertas</RouterLink>
+        <RouterLink class="sidebar-item flex items-center py-3 px-6" to="/Alerts">Alertas</RouterLink>
         <li>
         </li>
         <li>
