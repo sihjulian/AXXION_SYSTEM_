@@ -1,14 +1,14 @@
 <template>
-    <section class="flex flex-col gap-6">
+    <section class="flex flex-wrap gap-6">
         <!-- Gráfico por Categoría -->
-        <article class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md pl-4 p-4 flex-1 min-w-[300px]">
+        <article class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md pl-4 p-4 flex-1 min-w-[450px]">
             <h2 class="font-bold text-2xl mb-4">Equipos por Categoría</h2>
-            <v-chart :option="chartByCategory" style="height: 300px;" autoresize />
+            <v-chart :option="chartByCategory" style="height: 450px;" autoresize />
         </article>
         <!-- Gráfico por Valor -->
-        <article class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md pl-4 p-4 flex-1 min-w-[300px]">
+        <article class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md pl-4 p-4 flex-1 min-w-[450px]">
             <h2 class="font-bold text-2xl mb-4">Valor Total por Categoría</h2>
-            <v-chart :option="chartByValue" style="height: 300px;" autoresize />
+            <v-chart :option="chartByValue" style="height: 450px;" autoresize />
         </article>
         <!-- Gráfico por Condición -->
         <article class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md pl-4 p-4 flex-1 min-w-[300px]">

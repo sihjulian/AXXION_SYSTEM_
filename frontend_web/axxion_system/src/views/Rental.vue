@@ -4,59 +4,51 @@
     <routerView />
     <main class="container h-screen p-4 flex-1 overflow-y-auto">
       <headerP />
-      <section>
+      <section class="flex flex-col">
         <!-- Botón para agregar renta -->
-        <div class="mb-4 flex justify-start">
+        <div class="mb-4 flex  items-baseline">
           <FwbButton gradient="green-blue" @click="openAdd"><font-awesome-icon class="mr-2" icon="fa-solid fa-plus" />Agregar renta</FwbButton>
         </div>
-
         <!-- Estado de carga / error -->
         <div v-if="loading" class="p-4">Cargando rentas...</div>
         <div v-else-if="error" class="p-4 text-red-600">{{ error }}</div>
-
         <!-- Grid de tarjetas -->
-        <div v-else class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div v-else class="flex flex-wrap gap-4 justify-center">
           <FwbCard v-for="r in rentals" :key="r.id" class="w-sm">
-            <div class="p-5">
-              <h5 class="flex justify-between">
-                <div class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white order-1">Renta #{{ r.id }}</div><div class="order-2 text-xs self-start text-[#39FF14] rounded-xl p-1 bg-[#00401A]">{{ r.estado_renta }}</div> 
+            <div class="p-5 flex-1 basis-1/3">
+              <h5 class="flex justify-between items-center">
+                <div class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white order-1 ">Renta #{{ r.id }}</div><div class="order-2 text-xs self-start text-[#39FF14] rounded-xl p-1 bg-[#00401A]">{{ r.estado_renta }}</div> 
               </h5>
-
               <!-- Cliente -->
               <div class="text-sm text-gray-700 dark:text-gray-400 mb-2">
                 <strong>Cliente:</strong>
                 {{ (r.cliente?.nombre || '') + ' ' + (r.cliente?.nombre2 ? r.cliente.nombre2 + ' ' : '') + (r.cliente?.apellido1 || '') + (r.cliente?.apellido2 ? ' ' + r.cliente.apellido2 : '') }}
               </div>
-
               <!-- Fechas -->
-              <div class="text-sm text-gray-700 dark:text-gray-400">
+              <div class="text-sm text-gray-500 dark:text-gray-400">
                 <div><strong>Inicio:</strong> {{ formatDate(r.fecha_inicio) }}</div>
                 <div><strong>Fin prevista:</strong> {{ formatDate(r.fecha_fin_prevista) }}</div>
                 <div><strong>Devolución real:</strong> {{ r.fecha_devolucion_real ? formatDate(r.fecha_devolucion_real) : '-' }}</div>
               </div>
-
               <!-- Montos -->
-              <div class="mt-3 text-sm text-gray-600">
+              <div class="mt-3 text-sm text-black bg-gray-400 rounded-xl p-2">
                 <div><strong>Monto total:</strong> {{ formatCurrency(r.monto_total_renta) }}</div>
                 <div><strong>Depósito garantia:</strong> {{ formatCurrency(r.deposito_garantia) }}</div>
               </div>
-
               <!-- Notas -->
               <p class="mt-3 font-normal text-gray-700 dark:text-gray-400">
                 <strong>Notas:</strong>
                 {{ r.notas || '-' }}
               </p>
-
               <!-- Estado -->
               <div class="mt-2">
                 <strong>Estado:</strong>
                 <span class="ml-2">{{ r.estado_renta }}</span>
               </div>
-
               <!-- Inventario -->
-              <div class="mt-3">
+              <div class="mt-3 border-t pt-2">
                 <strong>Inventario:</strong>
-                <ul class="list-disc list-inside text-sm text-gray-700">
+                <ul class="list-disc list-inside text-sm text-gray-300">
                   <li v-for="item in r.inventario_items || []" :key="item.id" class="mt-2">
                     <div><strong>Producto (serie):</strong> {{ item.numero_serie || item.producto_id }}</div>
                     <div><strong>Estado item:</strong> {{ item.estado_item }}</div>
@@ -68,7 +60,7 @@
               </div>
 
               <!-- Acciones -->
-              <div class="mt-4 flex justify-center-safe gap-9">
+              <div class="mt-4 flex flex-row justify-center  gap-9">
                 <button @click="openEdit(r)" class="px-3 py-1 bg-linear-to-bl from-yellow-500 to-yellow-300 text-black rounded transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-red-500">
                   <font-awesome-icon icon="fa-solid fa-pen-to-square" />
                   <br>
@@ -197,7 +189,7 @@ const formatCurrency = (val) => {
   if (val === null || val === undefined || val === '') return '-';
   const num = Number(val);
   if (Number.isNaN(num)) return val;
-  return num.toLocaleString(undefined, { style: 'currency', currency: 'MXN' });
+  return num.toLocaleString(undefined, { style: 'currency', currency: 'COP' });
 };
 
 // Estado del modal
@@ -211,7 +203,7 @@ const modalTargetId = ref(null);
 const openAdd = () => {
   modalMode.value = 'add';
   modalPayload.value = {
-    cliente_id: '',            // 🔹 pon vacío, no null
+    cliente_id: '',            
     cotizacion_id: null,
     fecha_inicio: '',
     fecha_fin_prevista: '',
