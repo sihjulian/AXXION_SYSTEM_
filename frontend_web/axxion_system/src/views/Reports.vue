@@ -3,7 +3,26 @@
     <SideBar />
     <main class="container h-screen p-4 flex-1 overflow-y-auto flex flex-col">
       <headerP />
-      <h1 class="text-3xl font-bold mb-6 text-black">Reportes de Inventario</h1>
+      <div class="flex flex-row justify-between">
+        <h1 class="text-3xl font-bold mb-6 text-black">Reportes de Inventario</h1>
+        <section>
+                <div class="flex justify-end mb-4">
+                    <ExportWorksheet
+                    filename="inventario.xlsx"
+                    sheetName="Inventario"
+                    :data="inventario"
+                    :columns="[
+                    { key: 'id', label: 'ID' },
+                    { key: 'nombre', label: 'Nombre' },
+                    { key: 'marca', label: 'Marca' },
+                    { key: 'modelo', label: 'Modelo' },
+                    { key: 'estado', label: 'Estado' },
+                    { key: 'ubicacion', label: 'Ubicación' },
+                    ]"
+                />
+                </div>
+            </section>
+      </div>
     <section class="flex flex-wrap gap-6">
         <fwb-card class="w-sm flex-1 min-w-[300px] ">
             <div class="p-5">
@@ -48,7 +67,7 @@
             <h2 class="font-bold text-2xl mb-4">Valor Total por Categoría</h2>
             <v-chart :option="chartByValue" style="height: 300px;" autoresize />
         </article>
-        <!-- Gráfico por Condición -->
+        <!-- Gráfico por Condicion -->
         <article class="bg-gray-200 shadow-xl/30 text-black rounded-md p-4 flex-1 min-w-[300px]">
             <h2 class="font-bold text-2xl mb-4">Equipos por Condición</h2>
             <v-chart :option="chartByCondition" style="height: 300px;" autoresize />
@@ -76,11 +95,9 @@ import {
 } from 'echarts/components'
 import InventoryService from '@/services/InventoryService'
 import ReportService from '@/services/ReportService'
-import { text } from '@fortawesome/fontawesome-svg-core'
-import LineBar from '@/components/LineBar.vue'
 
+import ExportWorksheet from '@/components/ExportWorksheet .vue'
 
-// registrar echarts
 use([
   CanvasRenderer,
   PieChart,
@@ -91,15 +108,13 @@ use([
   GridComponent
 ])
 
-// opciones reactivas
 const chartByCategory = ref({})
 const chartByValue = ref({})
 const chartByCondition = ref({})
-
+const inventario = ref([])
 const itemsTotales = ref(0)
 const valorTotal = ref(0)
 const equiposDisponibles = ref(0)
-// cargar datos
 onMounted(async () => {
     try {
         const data = await ReportService.getMetrics()

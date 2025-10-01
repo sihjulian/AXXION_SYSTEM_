@@ -4,12 +4,31 @@
         <RouterView />
         <main class="container h-screen p-4 flex-1 overflow-y-auto flex flex-col">
             <headerP />
-            <h1 class="text-3xl font-bold mb-6 text-black">Reportes de Alquileres</h1>
+            <div class="flex flex-row justify-between">
+                <h1 class="text-3xl font-bold mb-6 text-black">Reportes de Alquileres</h1>
+                <section>
+                <div class="flex justify-end mb-4">
+                    <ExportWorksheet
+                    filename="inventario.xlsx"
+                    sheetName="Inventario"
+                    :data="inventario"
+                    :columns="[
+                    { key: 'id', label: 'ID' },
+                    { key: 'nombre', label: 'Nombre' },
+                    { key: 'marca', label: 'Marca' },
+                    { key: 'modelo', label: 'Modelo' },
+                    { key: 'estado', label: 'Estado' },
+                    { key: 'ubicacion', label: 'Ubicación' },
+                    ]"
+                />
+                </div>
+            </section>
+            </div>
             <select v-model="selected" class="bg-gray-800  rounded-xl text-amber-50">
-            <option class="rounded-xl text-amber-50" disabled value="">Selecciona un gráfico</option>
-            <option>lineBar</option>
-            <option>barChart</option>
-            <option>pieGraph</option>
+                <option class="rounded-xl text-amber-50" disabled value="">Selecciona un gráfico</option>
+                <option>lineBar</option>
+                <option>barChart</option>
+                <option>pieGraph</option>
             </select>
             <p>Selected: {{ selected }}</p>
             <div v-if="currentComponent" class="flex-1 mt-4">
@@ -21,15 +40,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import ExportWorksheet from '@/components/ExportWorksheet .vue'
 import SideBar from '@/components/SideBar.vue'
 import headerP from '@/components/headerP.vue'
 import { RouterView } from 'vue-router'
-import * as echarts from 'echarts';
-import { FwbCard } from 'flowbite-vue'
 import LineBar from '@/components/LineBar.vue'
-import { FwbSelect } from 'flowbite-vue'
 import BarChart from '@/components/BarChart.vue';   
-import { PieChart } from 'echarts/charts';
 import PieGraph from '@/components/PieGraph.vue';
 import InventoryService from '@/services/InventoryService'
 import ReportService from '@/services/ReportService'
@@ -40,10 +56,6 @@ const Pastel = ref(PieGraph)
 
 const selected = ref('lineBar')
 
-// flowbite select espera objetos con propiedades en minúscula; usar 'value' y 'label'
-
-
-// mapa de identificadores a componentes (añadir más si se crean otros componentes)
 const componentsMap = {
     lineBar: LineBar,
     barChart: BarChart,
@@ -51,8 +63,8 @@ const componentsMap = {
 }
 const currentComponent = computed(() => componentsMap[selected.value] || null)
 
-// datos que podemos pasar a los componentes reutilizables
 const items = ref([])
+const inventario = ref([])
 const metrics = ref(null)
 const loading = ref(true)
 const loadError = ref(null)
@@ -79,9 +91,7 @@ onMounted(async () => {
     } finally {
         loading.value = false
     }
-        // extraer categorías únicas
         categories.value = Array.from(new Set(items.value.map(i => i.categoria).filter(Boolean)))
-        // inicializar filteredItems
         filteredItems.value = items.value.slice()
 })
 

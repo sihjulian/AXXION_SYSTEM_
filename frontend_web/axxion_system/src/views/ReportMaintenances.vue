@@ -3,7 +3,10 @@
     <SideBar />
     <main class="container h-screen p-4 flex-1 overflow-y-auto">
       <headerP />
-      <h1 class="text-3xl font-bold mb-6 text-black">Reportes de Mantenimientos</h1>
+      <div class="flex flex-row justify-between">
+        <h1 class="text-3xl font-bold mb-6 text-black">Reportes de Mantenimientos</h1>
+        <WorksheetMant />
+      </div>
 
       <!-- Tarjeta costo total -->
       <section class="flex flex-wrap gap-6 mb-6">
@@ -82,14 +85,15 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { PieChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 import ReportService from '@/services/ReportService'
+import WorksheetMant from '@/components/WorksheetMant.vue'
 
-// registrar ECharts
+
 use([CanvasRenderer, PieChart, TitleComponent, TooltipComponent, LegendComponent])
 
-// estados reactivas
 const mantenimientos = ref([])
 const costoTotal = ref(0)
 const chartByEstado = ref({})
+const mantenimiento = ref([]);
 
 // cargar datos
 onMounted(async () => {
