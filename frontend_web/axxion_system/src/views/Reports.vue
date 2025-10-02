@@ -24,7 +24,7 @@
             </section>
       </div>
     <section class="flex flex-wrap gap-6">
-        <fwb-card class="w-sm flex-1 min-w-[300px] ">
+        <fwb-card class="w-sm flex-1 min-w-[300px]">
             <div class="p-5">
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900  dark:text-white">
                     Items Totales
