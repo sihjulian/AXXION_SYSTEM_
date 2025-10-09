@@ -2,20 +2,6 @@ import { defineStore } from 'pinia';
 import RentalService from '@/services/RentalService';
 import ClienteService from '@/services/ClienteService';
 
-const normalizePayloadForAPI = (payload) => {
-    return {
-        cliente_id: payload.cliente_id ? Number(payload.cliente_id) : null,
-        cotizacion_id: payload.cotizacion_id ?? null,
-        fecha_inicio: payload.fecha_inicio ? payload.fecha_inicio.replace('T', ' ') + ':00' : null,
-        fecha_fin_prevista: payload.fecha_fin_prevista ? payload.fecha_fin_prevista.replace('T', ' ') + ':00' : null,
-        fecha_devolucion_real: payload.fecha_devolucion_real ? payload.fecha_devolucion_real.replace('T', ' ') + ':00' : null,
-        estado_renta: payload.estado_renta || 'Programada',
-        monto_total_renta: payload.monto_total_renta ? Number(payload.monto_total_renta) : 0,
-        deposito_garantia: payload.deposito_garantia ? Number(payload.deposito_garantia) : 0,
-        notas: payload.notas || '',
-        inventarioItems: payload.inventarioItems || [],
-    };
-};
 
 export const useRentalStore = defineStore('rentals', {
     state: () => ({

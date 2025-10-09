@@ -23,7 +23,7 @@ export const useAlertStore = defineStore('alerts', {
             this.error = null;
             try {
                 const data = await AlertService.getAlerts();
-                this.alertas = data; // Guarda los datos en el archivador.
+                this.alertas = data;
             } catch (e) {
                 console.error("Error cargando alertas:", e);
                 this.error = "No se pudieron cargar las alertas.";

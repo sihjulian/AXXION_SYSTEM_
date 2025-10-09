@@ -9,7 +9,6 @@ export const useCategoryStore = defineStore('category', {
     showCategoryModal: false,
     categoryModalMode: 'add', 
     selectedCategoryForModal: null,
-
     showSubModal: false,
     subModalMode: 'add',
     selectedSubForModal: null,

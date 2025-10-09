@@ -94,6 +94,8 @@ BEGIN
 END//
 DELIMITER ;
 
+call sp_crear_renta_completa;
+
 -- Procedimiento para finalizar una renta
 DELIMITER //
 CREATE PROCEDURE sp_finalizar_renta(
