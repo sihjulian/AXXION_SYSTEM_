@@ -5,6 +5,8 @@ import SubCategoryService from '@/services/SubCategoryService';
 export const useCategoryStore = defineStore('category', {
   state: () => ({
     categorias: [],
+    loading: false,
+    error: null,
     selectedCategoria: null,
     showCategoryModal: false,
     categoryModalMode: 'add', 
@@ -18,15 +20,18 @@ export const useCategoryStore = defineStore('category', {
   },
   actions: {
     async fetchCategorias() {
+      this.loading = true;
+      this.error = null;
       try {
         const data = await CategoryService.getAll();
         this.categorias = Array.isArray(data) ? data : (data?.categoria ?? []);
-        // Re-seleccionar la categoría si aún existe después de la recarga
         if (this.selectedCategoria) {
           this.selectedCategoria = this.categorias.find(c => c.id === this.selectedCategoria.id) ?? null;
         }
       } catch (err) {
         console.error('Error al cargar categorías:', err);
+      } finally {
+        this.loading = false;
       }
     },
     selectCategoria(categoria) {
