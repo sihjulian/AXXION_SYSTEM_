@@ -26,9 +26,9 @@
             </div>
             <select v-model="selected" class="bg-gray-800  rounded-xl text-amber-50">
                 <option class="rounded-xl text-amber-50" disabled value="">Selecciona un gráfico</option>
-                <option>lineBar</option>
-                <option>barChart</option>
-                <option>pieGraph</option>
+                <option>Lineal</option>
+                <option>Barra</option>
+                <option>Pastel</option>
             </select>
             <p>Selected: {{ selected }}</p>
             <div v-if="currentComponent" class="flex-1 mt-4">
@@ -54,12 +54,12 @@ const lineal = ref(LineBar)
 const Barras = ref(BarChart)
 const Pastel = ref(PieGraph)
 
-const selected = ref('lineBar')
+const selected = ref('Lineal')
 
 const componentsMap = {
-    lineBar: LineBar,
-    barChart: BarChart,
-    pieGraph: PieGraph,
+    Lineal: LineBar,
+    Barra: BarChart,
+    Pastel: PieGraph,
 }
 const currentComponent = computed(() => componentsMap[selected.value] || null)
 
