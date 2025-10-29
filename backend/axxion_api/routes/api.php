@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\entregaController;
 use App\Http\Controllers\Api\MantenimientoController;
 use App\Http\Controllers\Api\ReporteController;
 use App\Http\Controllers\Api\AlertaController;
+use App\Http\Controllers\Api\InventarioItemController;
 
 // ============================================
 // RUTAS PÚBLICAS (sin autenticación)
@@ -198,6 +199,22 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::delete('/renta/{id}', [RentaController::class, 'destroy'])->middleware('check.role:ADMIN');
     Route::put('/renta/{id}', [RentaController::class, 'update']);
     Route::patch('/renta/{id}', [RentaController::class, 'updatePartial']);
+
+    // ============================================
+    // INVENTARIO ITEMS (requiere autenticación)
+    // ============================================
+    Route::get('/inventario_item', [InventarioItemController::class, 'index']);
+    Route::get('/inventario_item/{id}', [InventarioItemController::class, 'show']);
+    Route::post('/inventario_item', [InventarioItemController::class, 'store']);
+    Route::put('/inventario_item/{id}', [InventarioItemController::class, 'update']);
+    Route::patch('/inventario_item/{id}', [InventarioItemController::class, 'updatePartial']);
+    
+    // Solo administradores pueden eliminar items de inventario
+    Route::delete('/inventario_item/{id}', [InventarioItemController::class, 'destroy'])->middleware('check.role:ADMIN');
+
+    // Rutas adicionales para inventario items
+    Route::get('/inventario_item/producto/{producto_id}', [InventarioItemController::class, 'getByProducto']);
+    Route::get('/inventario_item/estado/{estado}', [InventarioItemController::class, 'getByEstado']);
 
     // ============================================
     // ALERTAS (requiere autenticación)
