@@ -14,8 +14,8 @@ import { TitleComponent, TooltipComponent, LegendComponent, GridComponent } from
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import axios from 'axios'
-import { createPinia } from 'pinia'
+import axios from 'axios';
+import { createPinia } from 'pinia';
 library.add(fas, far, fab)
 
 use([CanvasRenderer, BarChart, PieChart, TitleComponent, TooltipComponent, LegendComponent, GridComponent])

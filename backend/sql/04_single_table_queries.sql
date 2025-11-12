@@ -7,6 +7,75 @@
 
 USE sistemarenta;
 
+-- Consultas para la tabla `categoria`
+SELECT * FROM `categoria`;
+
+-- Consultas para la tabla `categoria_subcategoria`
+SELECT * FROM `categoria_subcategoria`;
+
+-- Consultas para la tabla `cliente`
+SELECT * FROM `cliente`;
+
+-- Consultas para la tabla `cliente_direccion`
+SELECT * FROM `cliente_direccion`;
+
+-- Consultas para la tabla `cotizacion`
+SELECT * FROM `cotizacion`;
+
+-- Consultas para la tabla `detalle_cotizacion`
+SELECT * FROM `detalle_cotizacion`;
+
+-- Consultas para la tabla `devolucion`
+SELECT * FROM `devolucion`;
+
+-- Consultas para la tabla `direccion`
+SELECT * FROM `direccion`;
+
+-- Consultas para la tabla `entrega`
+SELECT * FROM `entrega`;
+
+-- Consultas para la tabla `inventario_item`
+SELECT * FROM `inventario_item`;
+
+-- Consultas para la tabla `mantenimiento`
+SELECT * FROM `mantenimiento`;
+
+-- Consultas para la tabla `producto`
+SELECT * FROM `producto`;
+
+-- Consultas para la tabla `producto_subcategoria`
+SELECT * FROM `producto_subcategoria`;
+
+-- Consultas para la tabla `proveedor`
+SELECT * FROM `proveedor`;
+
+-- Consultas para la tabla `proveedor_direccion`
+SELECT * FROM `proveedor_direccion`;
+
+-- Consultas para la tabla `renta`
+SELECT * FROM `renta`;
+
+-- Consultas para la tabla `rent-inventario_item`
+SELECT * FROM `rent-inventario_item`;
+
+-- Consultas para la tabla `rol`
+SELECT * FROM `rol`;
+
+-- Consultas para la tabla `solicitud`
+SELECT * FROM `solicitud`;
+
+-- Consultas para la tabla `solicitud_producto`
+SELECT * FROM `solicitud_producto`;
+
+-- Consultas para la tabla `subcategoria`
+SELECT * FROM `subcategoria`;
+
+-- Consultas para la tabla `usuario`
+SELECT * FROM `usuario`;
+
+-- Consultas para la tabla `usuario_rol`
+SELECT * FROM `usuario_rol`;
+
 -- =====================================================
 -- CONSULTAS SOBRE LA TABLA CLIENTE
 -- =====================================================
