@@ -18,6 +18,7 @@
     import { saveAs } from "file-saver";
     import InventoryService from "@/services/InventoryService";
     import { ref, onMounted} from 'vue';
+    import { FwbButton } from 'flowbite-vue'
 
     const inventario = ref([]);
 

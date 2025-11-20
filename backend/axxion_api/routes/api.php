@@ -187,6 +187,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::get('/reportes/usuarios', [ReporteController::class, 'usuarios']);
     Route::get('/reportes/rentas', [ReporteController::class, 'rentas']);
     Route::get('/reportes/metrics', [ReporteController::class, 'metrics']);
+    Route::get('/reportes/metricsAlq', [ReporteController::class, 'metricsAlq']);
 
     // ============================================
     // ALQUILER (requiere autenticación)

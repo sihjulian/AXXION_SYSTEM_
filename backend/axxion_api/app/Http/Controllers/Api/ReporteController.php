@@ -53,4 +53,14 @@ class ReporteController extends Controller
         'equipos_disponibles' => $equiposDisponibles,
     ]);
 }
+
+public function metricsAlq()
+{
+    $totalItems = Renta::count();
+    $valorTotal = Renta::sum('monto_total_renta');
+    return response()->json([
+        'items_totales' => $totalItems,
+        'valor_total' => $valorTotal
+    ]);
+}
 }

@@ -78,7 +78,6 @@ class MantenimientoController extends Controller
     {
         try {
             $mantenimiento = Mantenimiento::with('inventarioItem')->find($id);
-
             if (!$mantenimiento) {
                 return response()->json(['error' => 'Mantenimiento no encontrado'], 404);
             }
