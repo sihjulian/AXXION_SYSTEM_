@@ -544,3 +544,134 @@ DELIMITER ;
 
 -- Asegurarse de que el programador de eventos esté habilitado
 SET GLOBAL event_scheduler = ON;
+
+-- =====================================================
+-- TRIGGERS PARA SINCRONIZACIÓN PRODUCTO-INVENTARIO
+-- =====================================================
+
+-- Trigger para INSERT en producto - Crear item de inventario automáticamente
+DELIMITER $$
+CREATE TRIGGER `trg_producto_after_insert` 
+AFTER INSERT ON `producto`
+FOR EACH ROW
+BEGIN
+    -- Insertar automáticamente un item en inventario_item por cada producto nuevo
+    INSERT INTO `inventario_item` (
+        `producto_id`,
+        `numero_serie`,
+        `estado_item`,
+        `fecha_adquisicion`,
+        `costo_adquisicion`,
+        `ubicacion_fisica`,
+        `notas`,
+        `created_at`,
+        `updated_at`
+    ) VALUES (
+        NEW.id,
+        NEW.numero_serie,
+        CASE 
+            WHEN NEW.estado = 'disponible' THEN 'Disponible'
+            WHEN NEW.estado = 'rentado' THEN 'Rentado'
+            WHEN NEW.estado = 'mantenimiento' THEN 'EnMantenimiento'
+            WHEN NEW.estado = 'baja' THEN 'DeBaja'
+            ELSE 'Disponible'
+        END,
+        NEW.fecha_compra,
+        NEW.precio_compra,
+        NEW.ubicacion,
+        CONCAT('Item creado automáticamente desde producto: ', NEW.nombre),
+        NOW(),
+        NOW()
+    );
+END$$
+DELIMITER ;
+
+-- Trigger para UPDATE en producto - Sincronizar cambios con inventario_item
+DELIMITER $$
+CREATE TRIGGER `trg_producto_after_update` 
+AFTER UPDATE ON `producto`
+FOR EACH ROW
+BEGIN
+    DECLARE cambios_detectados BOOLEAN DEFAULT FALSE;
+    
+    -- Verificar si hay cambios que requieren sincronización
+    IF OLD.estado != NEW.estado OR 
+       OLD.ubicacion != NEW.ubicacion OR 
+       OLD.numero_serie != NEW.numero_serie OR
+       OLD.precio_compra != NEW.precio_compra OR
+       OLD.fecha_compra != NEW.fecha_compra THEN
+        SET cambios_detectados = TRUE;
+    END IF;
+    
+    -- Si hay cambios, actualizar el item de inventario correspondiente
+    IF cambios_detectados THEN
+        UPDATE `inventario_item`
+        SET 
+            `numero_serie` = NEW.numero_serie,
+            `estado_item` = CASE 
+                WHEN NEW.estado = 'disponible' THEN 'Disponible'
+                WHEN NEW.estado = 'rentado' THEN 'Rentado'
+                WHEN NEW.estado = 'mantenimiento' THEN 'EnMantenimiento'
+                WHEN NEW.estado = 'baja' THEN 'DeBaja'
+                ELSE `estado_item`
+            END,
+            `fecha_adquisicion` = NEW.fecha_compra,
+            `costo_adquisicion` = NEW.precio_compra,
+            `ubicacion_fisica` = NEW.ubicacion,
+            `notas` = CONCAT('Actualizado desde producto: ', NEW.nombre, ' - ', NOW()),
+            `updated_at` = NOW()
+        WHERE `producto_id` = NEW.id;
+        
+        -- Registrar en auditoría
+        INSERT INTO `auditoria_inventario` (
+            `inventario_item_id`, 
+            `accion`, 
+            `campos_cambiados`, 
+            `valores_anteriores`, 
+            `valores_nuevos`, 
+            `usuario`
+        ) VALUES (
+            (SELECT id FROM inventario_item WHERE producto_id = NEW.id LIMIT 1),
+            'UPDATE_SYNC',
+            'Sincronización desde producto',
+            CONCAT('Estado: ', OLD.estado, ', Ubicación: ', OLD.ubicacion),
+            CONCAT('Estado: ', NEW.estado, ', Ubicación: ', NEW.ubicacion),
+            USER()
+        );
+    END IF;
+END$$
+DELIMITER ;
+
+-- Trigger para DELETE en producto - Marcar items de inventario como eliminados
+DELIMITER $$
+CREATE TRIGGER `trg_producto_after_delete` 
+AFTER DELETE ON `producto`
+FOR EACH ROW
+BEGIN
+    -- Marcar items de inventario como eliminados (soft delete)
+    UPDATE `inventario_item`
+    SET 
+        `estado_item` = 'DeBaja',
+        `ubicacion_fisica` = 'Producto Eliminado',
+        `notas` = CONCAT('Producto eliminado: ', OLD.nombre, ' - ', NOW()),
+        `updated_at` = NOW()
+    WHERE `producto_id` = OLD.id;
+    
+    -- Registrar en auditoría
+    INSERT INTO `auditoria_inventario` (
+        `inventario_item_id`, 
+        `accion`, 
+        `campos_cambiados`, 
+        `valores_anteriores`, 
+        `valores_nuevos`, 
+        `usuario`
+    ) VALUES (
+        (SELECT id FROM inventario_item WHERE producto_id = OLD.id LIMIT 1),
+        'DELETE_SYNC',
+        'Producto eliminado',
+        CONCAT('Producto: ', OLD.nombre),
+        'Producto eliminado del sistema',
+        USER()
+    );
+END$$
+DELIMITER ;

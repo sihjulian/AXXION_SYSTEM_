@@ -512,9 +512,24 @@ const isLoading = computed(() => inventoryStore.loading);
 
 // Métricas del panel de control
 const metrics = computed(() => {
-  const available = inventoryStore.productList.filter(p => p.estado === 'disponible').length;
-  const rented = inventoryStore.productList.filter(p => p.estado === 'alquilado').length;
-  const maintenance = inventoryStore.productList.filter(p => p.estado === 'mantenimiento').length;
+  // Sincronizar estados con mantenimientos activos
+  const productsWithMaintenanceStatus = inventoryStore.productList.map(product => {
+    // Verificar si el producto tiene un mantenimiento activo
+    const hasActiveMaintenance = maintenanceStore.maintenances.some(maintenance => 
+      maintenance.inventario_item_id === product.id && 
+      ['PROGRAMADO', 'EN_PROCESO'].includes(maintenance.estado_mantenimiento)
+    );
+    
+    // Si tiene mantenimiento activo pero su estado no es 'mantenimiento', retornar con estado actualizado
+    if (hasActiveMaintenance && product.estado !== 'mantenimiento') {
+      return { ...product, estado: 'mantenimiento' };
+    }
+    return product;
+  });
+  
+  const available = productsWithMaintenanceStatus.filter(p => p.estado === 'disponible').length;
+  const rented = productsWithMaintenanceStatus.filter(p => p.estado === 'alquilado').length;
+  const maintenance = productsWithMaintenanceStatus.filter(p => p.estado === 'mantenimiento').length;
   
   return {
     available,
@@ -525,26 +540,62 @@ const metrics = computed(() => {
 });
 
 // Alertas del sistema
-const alerts = ref([
-  {
-    id: 1,
-    type: 'warning',
-    icon: true,
-    title: 'Mantenimiento Programado',
-    message: '3 equipos requieren mantenimiento preventivo esta semana'
-  },
-  {
-    id: 2,
-    type: 'info',
-    icon: true,
-    title: 'Devolución Pendiente',
-    message: '2 equipos tienen devoluciones programadas para hoy'
+const dismissedAlerts = ref([]); // IDs de alertas cerradas manualmente
+const manualAlerts = ref([]); // Alertas agregadas manualmente (éxito/error)
+
+// Alertas dinámicas basadas en datos reales
+const systemAlerts = computed(() => {
+  const alertsList = [];
+  
+  // Alerta de mantenimientos activos
+  const activeMaintenances = maintenanceStore.maintenances.filter(m => 
+    ['PROGRAMADO', 'EN_PROCESO'].includes(m.estado_mantenimiento)
+  );
+  
+  if (activeMaintenances.length > 0 && !dismissedAlerts.value.includes('maintenance-alert')) {
+    alertsList.push({
+      id: 'maintenance-alert',
+      type: 'warning',
+      icon: true,
+      title: 'Mantenimiento Programado',
+      message: `${activeMaintenances.length} equipo${activeMaintenances.length > 1 ? 's' : ''} ${activeMaintenances.length > 1 ? 'requieren' : 'requiere'} mantenimiento esta semana`
+    });
   }
-]);
+  
+  // Alerta de equipos en mantenimiento próximos a completar
+  const upcomingMaintenances = maintenanceStore.upcomingMaintenances || [];
+  if (upcomingMaintenances.length > 0 && !dismissedAlerts.value.includes('upcoming-alert')) {
+    alertsList.push({
+      id: 'upcoming-alert',
+      type: 'info',
+      icon: true,
+      title: 'Devolución Pendiente',
+      message: `${upcomingMaintenances.length} equipo${upcomingMaintenances.length > 1 ? 's tienen' : ' tiene'} devoluciones programadas para hoy`
+    });
+  }
+  
+  return alertsList;
+});
+
+// Todas las alertas (sistema + manuales)
+const alerts = computed(() => [...manualAlerts.value, ...systemAlerts.value]);
 
 // Filtros y búsqueda
 const filteredProducts = computed(() => {
-  let filtered = inventoryStore.productList;
+  // Primero sincronizar estados con mantenimientos activos
+  let filtered = inventoryStore.productList.map(product => {
+    // Verificar si el producto tiene un mantenimiento activo
+    const hasActiveMaintenance = maintenanceStore.maintenances.some(maintenance => 
+      maintenance.inventario_item_id === product.id && 
+      ['PROGRAMADO', 'EN_PROCESO'].includes(maintenance.estado_mantenimiento)
+    );
+    
+    // Si tiene mantenimiento activo, actualizar el estado
+    if (hasActiveMaintenance && product.estado !== 'mantenimiento') {
+      return { ...product, estado: 'mantenimiento' };
+    }
+    return product;
+  });
 
   // Filtro de búsqueda
   if (searchQuery.value) {
@@ -674,7 +725,7 @@ async function scheduleMaintenance() {
     closeMaintenanceModal();
     
     // Mostrar mensaje de éxito
-    alerts.value.unshift({
+    manualAlerts.value.unshift({
       id: Date.now(),
       type: 'success',
       icon: true,
@@ -687,7 +738,7 @@ async function scheduleMaintenance() {
     
   } catch (error) {
     console.error('Error al programar mantenimiento:', error);
-    alerts.value.unshift({
+    manualAlerts.value.unshift({
       id: Date.now(),
       type: 'error',
       icon: true,
@@ -761,7 +812,13 @@ function clearFilters() {
 }
 
 function removeAlert(alertId) {
-  alerts.value = alerts.value.filter(alert => alert.id !== alertId);
+  // Si es una alerta del sistema, agregarla a la lista de cerradas
+  if (typeof alertId === 'string' && alertId.includes('-alert')) {
+    dismissedAlerts.value.push(alertId);
+  } else {
+    // Si es una alerta manual, eliminarla
+    manualAlerts.value = manualAlerts.value.filter(alert => alert.id !== alertId);
+  }
 }
 
 function handlePageChange(page) {
@@ -773,6 +830,8 @@ async function forceRefresh() {
   console.log('Forzando actualización completa de la vista...');
   try {
     await inventoryStore.fetchProducts();
+    await maintenanceStore.fetchMaintenances();
+    await syncEquipmentStatesWithMaintenances();
     await nextTick();
     console.log('Actualización completa exitosa');
   } catch (error) {
@@ -819,15 +878,51 @@ watch(() => inventoryStore.productList, (newProducts) => {
   });
 }, { deep: true, immediate: true });
 
+// Función para sincronizar estados de equipos con mantenimientos
+async function syncEquipmentStatesWithMaintenances() {
+  console.log('Sincronizando estados de equipos con mantenimientos activos...');
+  try {
+    // Cargar todos los mantenimientos
+    await maintenanceStore.fetchMaintenances();
+    
+    // Obtener mantenimientos activos (PROGRAMADO o EN_PROCESO)
+    const activeMaintenances = maintenanceStore.maintenances.filter(m => 
+      ['PROGRAMADO', 'EN_PROCESO'].includes(m.estado_mantenimiento)
+    );
+    
+    console.log(`Encontrados ${activeMaintenances.length} mantenimientos activos`);
+    
+    // Actualizar el estado de los equipos que tienen mantenimientos activos
+    for (const maintenance of activeMaintenances) {
+      const product = inventoryStore.productList.find(p => p.id === maintenance.inventario_item_id);
+      
+      if (product && product.estado !== 'mantenimiento') {
+        console.log(`Actualizando estado del equipo ${product.nombre} a mantenimiento`);
+        // Actualizar solo el estado sin hacer llamada al API
+        // Esto es temporal para la vista, el backend debería manejar esto
+        product.estado = 'mantenimiento';
+      }
+    }
+    
+    console.log('Sincronización completada');
+  } catch (error) {
+    console.error('Error al sincronizar estados:', error);
+  }
+}
+
 // Al montar el componente
 onMounted(async () => {
   console.log('Vista de inventario montada');
-  // Cargar productos y categorías
+  // Cargar productos, categorías, usuarios y mantenimientos
   await Promise.all([
     loadProducts(),
     inventoryStore.fetchCategories(),
-    userStore.fetchUsers() // Cargar usuarios para el selector de técnicos
+    userStore.fetchUsers(), // Cargar usuarios para el selector de técnicos
+    maintenanceStore.fetchMaintenances() // Cargar mantenimientos para sincronización
   ]);
+  
+  // Sincronizar estados después de cargar los datos
+  await syncEquipmentStatesWithMaintenances();
 });
 </script>
 
