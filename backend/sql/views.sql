@@ -12,7 +12,7 @@ USE sistemarenta;
 -- =====================================================
 
 -- 1. Vista de clientes con información completa
-CREATE OR REPLACE VIEW vista_clientes_completa AS
+vista_clientes_completaCREATE OR REPLACE VIEW vista_clientes_completa AS
 SELECT c.id, c.nombre, c.nombre2, c.apellido1, c.apellido2,
        c.rfc, c.telefono_principal, c.correo_electronico,
        c.tipo_cliente, c.estado_cliente,

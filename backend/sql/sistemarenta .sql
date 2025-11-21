@@ -20,7 +20,7 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `sistemarenta`
 
-
+DROP database sistemarenta;
 CREATE DATABASE IF NOT EXISTS `sistemarenta` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `sistemarenta`;
 

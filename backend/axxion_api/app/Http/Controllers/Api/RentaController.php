@@ -122,18 +122,13 @@ class RentaController extends Controller
                 return response()->json($data, 404);
             }
             DB::transaction(function () use ($renta) {
-                // Detach items many-to-many
                 $renta->inventarioItems()->detach();
-
-                // Delete hasOne relations if existen
                 if ($renta->entrega) {
                     $renta->entrega()->delete();
                 }
                 if ($renta->devolucion) {
                     $renta->devolucion()->delete();
                 }
-
-                // Finalmente eliminar la renta
                 $renta->delete();
             });
             $data = [
