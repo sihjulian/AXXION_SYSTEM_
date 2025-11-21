@@ -105,6 +105,9 @@ import { FwbCard, FwbButton } from 'flowbite-vue'
 import RentalModal from '@/components/RentalModal.vue'
 import RentalService from '@/services/RentalService';
 import ClienteService from '@/services/ClienteService'
+import { useCartStore } from '@/stores/cart.js'; // Import Cart Store
+
+const cartStore = useCartStore(); // Init Cart Store
 
 
 const rentals = ref([]);
@@ -135,10 +138,7 @@ const loadClientes = async () => {
 }
 
 
-// Emitir cambios
-const save = () => {
-  emit('save', localPayload.value)
-}
+
 
 
 const loadRentals = async () => {
@@ -179,7 +179,12 @@ const loadRentals = async () => {
 
 onMounted(() => {
   loadRentals();
-  loadClientes()
+  loadClientes();
+  
+  // Verificar si hay items en el carrito
+  if (cartStore.items.length > 0) {
+    openAddWithCart();
+  }
 });
 
 // Helpers de formato
@@ -208,6 +213,29 @@ const modalPayload = ref({});
 const modalTargetId = ref(null);
 
 // Acciones para abrir modal
+const openAddWithCart = () => {
+  modalMode.value = 'add';
+  
+  // Calcular totales
+  const total = cartStore.totalPrice;
+  const deposit = total * 0.1; // 10% depósito por defecto
+
+  modalPayload.value = {
+    cliente_id: '',
+    cotizacion_id: null,
+    fecha_inicio: '',
+    fecha_fin_prevista: '',
+    fecha_devolucion_real: '',
+    estado_renta: 'Programada',
+    monto_total_renta: total,
+    deposito_garantia: deposit,
+    notas: 'Renta generada desde el carrito',
+    inventarioItems: [...cartStore.items]
+  };
+  modalTargetId.value = null;
+  showModal.value = true;
+};
+
 const openAdd = () => {
   modalMode.value = 'add';
   modalPayload.value = {
@@ -219,7 +247,8 @@ const openAdd = () => {
     estado_renta: 'Programada',
     monto_total_renta: '',
     deposito_garantia: '',
-    notas: ''
+    notas: '',
+    inventarioItems: []
   };
   modalTargetId.value = null;
   showModal.value = true;
@@ -293,6 +322,12 @@ const saveModal = async (payloadFromModal) => {
     try {
       const created = await RentalService.createRental(normalized);
       rentals.value.unshift(created.renta ?? created);
+      
+      // Limpiar carrito si se usaron items del carrito
+      if (normalized.inventarioItems && normalized.inventarioItems.length > 0) {
+        cartStore.clearCart();
+      }
+      
       closeModal();
     } catch (err) {
       console.error("Error creando renta:", err);
