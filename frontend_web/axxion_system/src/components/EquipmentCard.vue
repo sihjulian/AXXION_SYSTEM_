@@ -11,7 +11,7 @@
       
       <!-- Badge de estado -->
       <div class="absolute top-3 right-3">
-        <StatusBadge :status="equipment.estado || equipment.status" />
+        <StatusBadge :status="getMappedStatus(equipment)" />
       </div>
       
       <!-- Badge de categoría -->
@@ -34,6 +34,9 @@
         </p>
         <p class="text-xs text-gray-500 dark:text-gray-500">
           Serie: {{ equipment.numero_serie || equipment.serialNumber }}
+        </p>
+        <p v-if="equipment.ubicacion_fisica" class="text-xs text-gray-500 dark:text-gray-500">
+          Ubicación: {{ equipment.ubicacion_fisica }}
         </p>
       </div>
 
@@ -70,26 +73,29 @@
       </div>
 
       <!-- Información de alquiler actual -->
-      <div v-if="equipment.status === 'rented' && equipment.currentRental" class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+      <div v-if="(equipment.estado === 'alquilado' || equipment.status === 'rented') && getCurrentRental" class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
         <div class="flex items-center mb-2">
           <font-awesome-icon icon="fa-solid fa-user" class="w-4 h-4 mr-2 text-blue-500"/>
           <span class="text-sm font-medium text-blue-700 dark:text-blue-300">Cliente Actual</span>
         </div>
-        <p class="text-sm text-blue-600 dark:text-blue-400">{{ equipment.currentRental.clientName }}</p>
+        <p class="text-sm text-blue-600 dark:text-blue-400">{{ getCurrentRental.clientName || getCurrentRental.cliente?.nombre || 'N/A' }}</p>
         <p class="text-xs text-blue-500 dark:text-blue-500">
-          Hasta: {{ formatDate(equipment.currentRental.endDate) }}
+          Hasta: {{ formatDate(getCurrentRental.fecha_fin || getCurrentRental.endDate) }}
         </p>
       </div>
 
       <!-- Información de mantenimiento -->
-      <div v-if="equipment.status === 'maintenance' && equipment.maintenanceSchedule" class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+      <div v-if="(equipment.estado === 'mantenimiento' || equipment.status === 'maintenance') && getCurrentMaintenance" class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
         <div class="flex items-center mb-2">
           <font-awesome-icon icon="fa-solid fa-tools" class="w-4 h-4 mr-2 text-yellow-500"/>
           <span class="text-sm font-medium text-yellow-700 dark:text-yellow-300">En Mantenimiento</span>
         </div>
-        <p class="text-sm text-yellow-600 dark:text-yellow-400">{{ equipment.maintenanceSchedule.description }}</p>
+        <p class="text-sm text-yellow-600 dark:text-yellow-400">{{ getCurrentMaintenance.descripcion || getCurrentMaintenance.description || 'Mantenimiento programado' }}</p>
         <p class="text-xs text-yellow-500 dark:text-yellow-500">
-          Técnico: {{ equipment.maintenanceSchedule.technician }}
+          Técnico: {{ getCurrentMaintenance.tecnico_asignado || getCurrentMaintenance.technician || 'N/A' }}
+        </p>
+        <p v-if="getCurrentMaintenance.fecha_fin" class="text-xs text-yellow-500 dark:text-yellow-500">
+          Hasta: {{ formatDate(getCurrentMaintenance.fecha_fin) }}
         </p>
       </div>
 
@@ -98,7 +104,7 @@
         <fwb-button 
           size="sm" 
           gradient="blue" 
-          @click="$emit('view-details', equipment)"
+          @click="emit('view-details', equipment)"
           class="flex-1"
         >
           <font-awesome-icon icon="fa-solid fa-eye" class="mr-1"/>
@@ -106,10 +112,10 @@
         </fwb-button>
         
         <fwb-button 
-          v-if="(equipment.estado || equipment.status) === 'disponible'"
+          v-if="getMappedStatus(equipment) === 'disponible'"
           size="sm" 
           gradient="green" 
-          @click="$emit('rent-equipment', equipment)"
+          @click="emit('rent-equipment', equipment)"
           class="flex-1"
         >
           <font-awesome-icon icon="fa-solid fa-handshake" class="mr-1"/>
@@ -117,10 +123,10 @@
         </fwb-button>
         
         <fwb-button 
-          v-if="(equipment.estado || equipment.status) === 'disponible'"
+          v-if="getMappedStatus(equipment) === 'disponible'"
           size="sm" 
           gradient="yellow" 
-          @click="$emit('maintenance-equipment', equipment)"
+          @click="emit('maintenance-equipment', equipment)"
           class="flex-1"
         >
           <font-awesome-icon icon="fa-solid fa-tools" class="mr-1"/>
@@ -130,7 +136,7 @@
         <fwb-button 
           size="sm" 
           gradient="purple" 
-          @click="$emit('edit-equipment', equipment)"
+          @click="emit('edit-equipment', equipment)"
           class="flex-1"
         >
           <font-awesome-icon icon="fa-solid fa-edit" class="mr-1"/>
@@ -140,7 +146,7 @@
         <fwb-button 
           size="sm" 
           gradient="red" 
-          @click="$emit('delete-equipment', equipment)"
+          @click="emit('delete-equipment', equipment)"
           class="flex-1"
         >
           <font-awesome-icon icon="fa-solid fa-trash" class="mr-1"/>
@@ -169,7 +175,8 @@ const emit = defineEmits([
   'view-details',
   'edit-equipment', 
   'delete-equipment',
-  'rent-equipment'
+  'rent-equipment',
+  'maintenance-equipment'
 ]);
 
 // Computed
@@ -195,6 +202,26 @@ const getSpecifications = computed(() => {
   return props.equipment.especificaciones || props.equipment.specifications || {};
 });
 
+// Obtener alquiler actual
+const getCurrentRental = computed(() => {
+  if (props.equipment.rentas && Array.isArray(props.equipment.rentas)) {
+    return props.equipment.rentas.find(renta => 
+      renta.estado === 'Activa' || renta.estado === 'active' || !renta.fecha_fin
+    ) || null;
+  }
+  return props.equipment.currentRental || null;
+});
+
+// Obtener mantenimiento actual
+const getCurrentMaintenance = computed(() => {
+  if (props.equipment.mantenimientos && Array.isArray(props.equipment.mantenimientos)) {
+    return props.equipment.mantenimientos.find(m => 
+      ['PROGRAMADO', 'EN_PROCESO'].includes(m.estado_mantenimiento || m.estado)
+    ) || null;
+  }
+  return props.equipment.maintenanceSchedule || null;
+});
+
 // Métodos
 const getCategoryLabel = (category) => {
   const labels = {
@@ -202,9 +229,27 @@ const getCategoryLabel = (category) => {
     desktop: 'Desktop',
     projector: 'Proyector',
     monitor: 'Monitor',
-    accessory: 'Accesorio'
+    accessory: 'Accesorio',
+    'Iluminación': 'Iluminación',
+    'Equipos de Sonido': 'Equipos de Sonido'
   };
   return labels[category] || category;
+};
+
+// Mapear estado para compatibilidad
+const getMappedStatus = (equipment) => {
+  // Si tiene estado_item, mapearlo
+  if (equipment.estado_item) {
+    const estadoMap = {
+      'Disponible': 'disponible',
+      'Rentado': 'alquilado',
+      'EnMantenimiento': 'mantenimiento',
+      'DeBaja': 'de_baja'
+    };
+    return estadoMap[equipment.estado_item] || equipment.estado_item.toLowerCase();
+  }
+  // Usar estado normal si existe
+  return equipment.estado || equipment.status || 'disponible';
 };
 
 const formatDate = (dateString) => {

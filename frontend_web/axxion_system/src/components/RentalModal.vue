@@ -66,6 +66,17 @@
             <label class="block mb-2 text-white">Notas</label>
             <textarea v-model="localPayload.notas" rows="3" class="w-full p-2 border rounded bg-gray-700 text-white"></textarea>
         </div>
+
+        <!-- Items del Inventario (Solo lectura por ahora) -->
+        <div v-if="localPayload.inventarioItems && localPayload.inventarioItems.length > 0" class="mb-3">
+            <label class="block mb-2 text-white">Equipos a Rentar</label>
+            <div class="bg-gray-700 rounded p-2 max-h-40 overflow-y-auto">
+                <div v-for="item in localPayload.inventarioItems" :key="item.id" class="flex justify-between items-center text-sm text-gray-300 border-b border-gray-600 py-1 last:border-0">
+                    <span>{{ item.nombre }} ({{ item.numero_serie }})</span>
+                    <span>{{ item.precio_alquiler_dia ? '$' + item.precio_alquiler_dia : '-' }}</span>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <!-- Footer -->

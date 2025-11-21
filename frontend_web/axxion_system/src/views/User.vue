@@ -182,11 +182,12 @@ const getuserdata = async () => {
       await new Promise(resolve => setTimeout(resolve, delayPerCard));
       displayedUsers.value.push(users.value[i]);
     }
-  } catch (error) {
-    console.error('Error al cargar usuarios:', error);
+  } catch (e) {
+    console.error('Error al cargar usuarios:', e);
+    userStore.error = e.message || 'Error al cargar usuarios';
+    userStore.isLoading = false;
   }
 }
-
 
 const handleUserSuccess = () => {
   closeModal();

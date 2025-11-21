@@ -81,8 +81,17 @@ import { useRentalStore } from '@/stores/rentalStore';
 
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
+import { FwbCard, FwbButton } from 'flowbite-vue'
+import RentalModal from '@/components/RentalModal.vue'
+import RentalService from '@/services/RentalService';
+import ClienteService from '@/services/ClienteService'
+  
+import { useCartStore } from '@/stores/cart.js'; // Import Cart Store
+const cartStore = useCartStore(); // Init Cart Store
+  
 import { FwbCard, FwbButton } from 'flowbite-vue';
 import RentalModal from '@/components/RentalModal.vue';
+
 
 const rentalStore = useRentalStore();
 
@@ -106,6 +115,172 @@ const formatCurrency = (val) => (val === null || val === undefined) ? '-' : Numb
     margin-top: 3rem;
     margin-bottom: 3rem;
   }
+}
+
+
+
+
+
+const loadRentals = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const data = await RentalService.getRental();
+    console.log('Rental API raw response in view:', data);
+
+    // Extraer array de forma segura
+    const extractArrayFromResponse = (obj) => {
+      if (Array.isArray(obj)) return obj;
+      if (!obj || typeof obj !== 'object') return [];
+      if ('id' in obj) return [obj];
+      for (const key of Object.keys(obj)) {
+        if (Array.isArray(obj[key])) return obj[key];
+      }
+      for (const key of Object.keys(obj)) {
+        const val = obj[key];
+        if (val && typeof val === 'object') {
+          for (const subKey of Object.keys(val)) {
+            if (Array.isArray(val[subKey])) return val[subKey];
+          }
+        }
+      }
+      return [];
+    };
+
+    rentals.value = extractArrayFromResponse(data);
+    console.log('Parsed rentals:', rentals.value);
+  } catch (err) {
+    console.error('Error al cargar rentas:', err);
+    error.value = 'No se pudieron cargar las rentas';
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(() => {
+  loadRentals();
+  loadClientes();
+  
+  // Verificar si hay items en el carrito
+  if (cartStore.items.length > 0) {
+    openAddWithCart();
+  }
+});
+
+// Helpers de formato
+const formatDate = (iso) => {
+  if (!iso) return '-';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString();
+  } catch (e) {
+    return iso;
+  }
+};
+
+const formatCurrency = (val) => {
+  if (val === null || val === undefined || val === '') return '-';
+  const num = Number(val);
+  if (Number.isNaN(num)) return val;
+  return num.toLocaleString(undefined, { style: 'currency', currency: 'MXN' });
+};
+
+// Estado del modal
+const actionLoading = ref({});
+const showModal = ref(false);
+const modalMode = ref(''); // 'add' | 'edit' | 'delete'
+const modalPayload = ref({});
+const modalTargetId = ref(null);
+
+// Acciones para abrir modal
+const openAddWithCart = () => {
+  modalMode.value = 'add';
+  
+  // Calcular totales
+  const total = cartStore.totalPrice;
+  const deposit = total * 0.1; // 10% depósito por defecto
+
+  modalPayload.value = {
+    cliente_id: '',
+    cotizacion_id: null,
+    fecha_inicio: '',
+    fecha_fin_prevista: '',
+    fecha_devolucion_real: '',
+    estado_renta: 'Programada',
+    monto_total_renta: total,
+    deposito_garantia: deposit,
+    notas: 'Renta generada desde el carrito',
+    inventarioItems: [...cartStore.items]
+  };
+  modalTargetId.value = null;
+  showModal.value = true;
+};
+
+const openAdd = () => {
+  modalMode.value = 'add';
+  modalPayload.value = {
+    cliente_id: '',            // 🔹 pon vacío, no null
+    cotizacion_id: null,
+    fecha_inicio: '',
+    fecha_fin_prevista: '',
+    fecha_devolucion_real: '',
+    estado_renta: 'Programada',
+    monto_total_renta: '',
+    deposito_garantia: '',
+    notas: '',
+    inventarioItems: []
+  };
+  modalTargetId.value = null;
+  showModal.value = true;
+};
+
+const openEdit = (r) => {
+  modalMode.value = 'edit';
+  modalTargetId.value = r.id;
+  modalPayload.value = {
+    cliente_id: r.cliente_id || '',
+    cotizacion_id: r.cotizacion_id || null,
+    fecha_inicio: r.fecha_inicio ? r.fecha_inicio.replace(' ', 'T') : '',
+    fecha_fin_prevista: r.fecha_fin_prevista ? r.fecha_fin_prevista.replace(' ', 'T') : '',
+    fecha_devolucion_real: r.fecha_devolucion_real ? r.fecha_devolucion_real.replace(' ', 'T') : '',
+    estado_renta: r.estado_renta,
+    monto_total_renta: r.monto_total_renta,
+    deposito_garantia: r.deposito_garantia,
+    notas: r.notas
+  };
+  showModal.value = true;
+};
+
+const openDeleteConfirm = (id) => {
+  modalMode.value = 'delete';
+  modalTargetId.value = id;
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  modalMode.value = '';
+  modalPayload.value = {};
+  modalTargetId.value = null;
+};
+
+const toDateTime = (val) => {
+  if (!val) return null;
+  return val.replace("T", " ") + ":00";
+};
+
+  const normalizePayload = (payload) => {
+  return {
+    cliente_id: payload.cliente_id ? Number(payload.cliente_id) : null,
+    cotizacion_id: payload.cotizacion_id ?? null,
+    fecha_inicio: payload.fecha_inicio ? payload.fecha_inicio.replace("T", " ") + ":00" : null,
+    fecha_fin_prevista: payload.fecha_fin_prevista ? payload.fecha_fin_prevista.replace("T", " ") + ":00" : null,
+    fecha_devolucion_real: payload.fecha_devolucion_real ? payload.fecha_devolucion_real.replace("T", " ") + ":00" : null,
+    estado_renta: payload.estado_renta || "Programada",
+    monto_total_renta: payload.monto_total_renta ? Number(payload.monto_total_renta) : 0,
+    deposito_garantia: payload.deposito_garantia ? Number(payload.deposito_garantia) : 0,
+    notas: payload.notas || "",
+    inventarioItems: payload.inventarioItems || []
   .loader:before,
   .loader:after {
     content: "";
@@ -126,6 +301,44 @@ const formatCurrency = (val) => (val === null || val === undefined) ? '-' : Numb
     box-shadow: 0 0 0 0 #191970;
   }
 
+
+// Guardar en modal — ahora recibe el payload emitido por el modal
+const saveModal = async (payloadFromModal) => {
+  // si el modal no mandó payload (por compatibilidad), fallback al modalPayload.value
+  const sourcePayload = payloadFromModal ?? modalPayload.value;
+
+  // normalizamos lo que viniera (fechas, números, etc.)
+  const normalized = normalizePayload(sourcePayload);
+
+  const id = modalTargetId.value;
+
+  console.log("Payload recibido del modal:", sourcePayload);
+  console.log("Payload normalizado:", normalized);
+
+  if (modalMode.value === 'add') {
+    try {
+      const created = await RentalService.createRental(normalized);
+      rentals.value.unshift(created.renta ?? created);
+      
+      // Limpiar carrito si se usaron items del carrito
+      if (normalized.inventarioItems && normalized.inventarioItems.length > 0) {
+        cartStore.clearCart();
+      }
+      
+      closeModal();
+    } catch (err) {
+      console.error("Error creando renta:", err);
+      alert("No se pudo crear la renta.");
+    }
+  } else if (modalMode.value === 'edit') {
+    try {
+      const updated = await RentalService.updateRental(modalTargetId.value, normalized);
+      const idx = rentals.value.findIndex(r => r.id === modalTargetId.value);
+      if (idx !== -1) rentals.value[idx] = { ...rentals.value[idx], ...updated.renta };
+      closeModal();
+    } catch (err) {
+      console.error("Error actualizando renta:", err);
+      alert("No se pudo actualizar la renta.");
   @keyframes pulsIn {
     0% {
       box-shadow: inset 0 0 0 1rem #191970;

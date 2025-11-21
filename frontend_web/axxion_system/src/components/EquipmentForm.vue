@@ -349,6 +349,7 @@
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue';
 import { useInventoryStore } from '@/stores/inventory.js';
+import { useInventarioItemStore } from '@/stores/inventarioItem.js';
 import CategoryService from '@/services/CategoryService.js';
 import { 
   FwbInput, 
@@ -372,8 +373,9 @@ const props = defineProps({
 // Emits
 const emit = defineEmits(['success', 'cancel']);
 
-// Store
+// Stores
 const inventoryStore = useInventoryStore();
+const inventarioItemStore = useInventarioItemStore();
 
 // Estado
 const isSubmitting = ref(false);
@@ -463,6 +465,7 @@ const validateForm = () => {
 const handleSubmit = async () => {
   console.log('handleSubmit iniciado, modo:', props.mode);
   console.log('Datos del formulario:', form);
+  console.log('Equipo seleccionado:', props.selectedEquipment);
   
   if (!validateForm()) {
     console.log('Validación falló, errores:', errors.value);
@@ -499,15 +502,61 @@ const handleSubmit = async () => {
       console.log('Creando nuevo producto...');
       await inventoryStore.createProduct(productData);
     } else {
-      console.log('Actualizando producto ID:', props.selectedEquipment.id);
-      await inventoryStore.updateProduct(props.selectedEquipment.id, productData);
+      // Obtener el producto_id del equipo seleccionado
+      // El selectedEquipment viene del computed products que tiene producto_id
+      let productoId = null;
+      
+      if (props.selectedEquipment) {
+        // Intentar obtener producto_id de diferentes formas
+        productoId = props.selectedEquipment.producto_id || 
+                    props.selectedEquipment.producto?.id || 
+                    (props.selectedEquipment.id && props.selectedEquipment.inventario_item_id ? null : props.selectedEquipment.id);
+        
+        console.log('Intentando obtener producto_id:');
+        console.log('- producto_id directo:', props.selectedEquipment.producto_id);
+        console.log('- producto.id:', props.selectedEquipment.producto?.id);
+        console.log('- id (puede ser inventario_item_id):', props.selectedEquipment.id);
+        console.log('- inventario_item_id:', props.selectedEquipment.inventario_item_id);
+        
+        // Si no se encontró producto_id pero hay inventario_item_id, 
+        // necesitamos obtener el producto desde el inventarioItem
+        if (!productoId && (props.selectedEquipment.inventario_item_id || props.selectedEquipment.id)) {
+          console.log('No se encontró producto_id, buscando en inventarioItem...');
+          // Buscar el inventarioItem en el store para obtener el producto_id
+          const inventarioItem = inventarioItemStore.inventarioItems.find(
+            item => item.id === props.selectedEquipment.inventario_item_id || 
+                    item.id === props.selectedEquipment.id ||
+                    (item.producto_id && item.producto_id === props.selectedEquipment.producto_id)
+          );
+          
+          if (inventarioItem) {
+            if (inventarioItem.producto) {
+              productoId = inventarioItem.producto.id || inventarioItem.producto_id;
+              console.log('producto_id encontrado en inventarioItem.producto:', productoId);
+            } else if (inventarioItem.producto_id) {
+              productoId = inventarioItem.producto_id;
+              console.log('producto_id encontrado en inventarioItem.producto_id:', productoId);
+            }
+          }
+        }
+      }
+      
+      console.log('Producto ID final para actualizar:', productoId);
+      
+      if (!productoId) {
+        throw new Error('No se encontró el ID del producto para actualizar. Por favor, recarga la página e intenta nuevamente.');
+      }
+      
+      console.log('Actualizando producto ID:', productoId);
+      await inventoryStore.updateProduct(productoId, productData);
     }
     
     console.log('Operación exitosa, emitiendo success...');
     emit('success');
   } catch (error) {
     console.error('Error al guardar producto:', error);
-    alert('Error al guardar el producto: ' + (error.message || 'Error desconocido'));
+    const errorMessage = error.response?.data?.message || error.message || 'Error desconocido';
+    alert('Error al guardar el producto: ' + errorMessage);
   } finally {
     isSubmitting.value = false;
   }
@@ -521,31 +570,60 @@ const loadEquipmentData = () => {
     const equipment = props.selectedEquipment;
     console.log('Datos del equipo a cargar:', equipment);
     
-    // Asignar datos básicos
-    form.name = equipment.nombre || '';
-    form.brand = equipment.marca || '';
-    form.model = equipment.modelo || '';
-    form.serialNumber = equipment.numero_serie || '';
-    form.category = equipment.categoria || '';
-    form.status = equipment.estado || 'disponible';
-    form.dailyRate = equipment.precio_alquiler_dia || 0;
-    form.weeklyRate = equipment.precio_alquiler_semanal || 0;
-    form.monthlyRate = equipment.precio_alquiler_mensual || 0;
-    form.purchasePrice = equipment.precio_compra || 0;
-    form.currentValue = equipment.valor_actual || 0;
-    form.purchaseDate = equipment.fecha_compra || '';
-    form.condition = equipment.condicion || 'excelente';
-    form.location = equipment.ubicacion || '';
-    form.notes = equipment.notas || '';
+    // Obtener datos del producto (puede estar directamente o anidado)
+    const producto = equipment.producto || equipment;
+    
+    // Asignar datos básicos - priorizar datos del producto anidado si existe
+    form.name = producto.nombre || equipment.nombre || '';
+    form.brand = producto.marca || equipment.marca || '';
+    form.model = producto.modelo || equipment.modelo || '';
+    form.serialNumber = producto.numero_serie || equipment.numero_serie || '';
+    form.category = producto.categoria || equipment.categoria || '';
+    
+    // Mapear estado correctamente
+    const estadoMap = {
+      'Disponible': 'disponible',
+      'Rentado': 'alquilado',
+      'EnMantenimiento': 'mantenimiento',
+      'DeBaja': 'de_baja',
+      'disponible': 'disponible',
+      'alquilado': 'alquilado',
+      'mantenimiento': 'mantenimiento',
+      'de_baja': 'de_baja'
+    };
+    const estadoEquipo = producto.estado || equipment.estado || equipment.estado_item || 'disponible';
+    form.status = estadoMap[estadoEquipo] || estadoEquipo.toLowerCase() || 'disponible';
+    
+    form.dailyRate = parseFloat(producto.precio_alquiler_dia || equipment.precio_alquiler_dia || 0);
+    form.weeklyRate = parseFloat(producto.precio_alquiler_semanal || equipment.precio_alquiler_semanal || 0);
+    form.monthlyRate = parseFloat(producto.precio_alquiler_mensual || equipment.precio_alquiler_mensual || 0);
+    form.purchasePrice = parseFloat(producto.precio_compra || equipment.precio_compra || 0);
+    form.currentValue = parseFloat(producto.valor_actual || equipment.valor_actual || 0);
+    
+    // Formatear fecha de compra si existe
+    let fechaCompra = producto.fecha_compra || equipment.fecha_compra || '';
+    if (fechaCompra) {
+      // Si la fecha viene en formato diferente, convertirla
+      const date = new Date(fechaCompra);
+      if (!isNaN(date.getTime())) {
+        fechaCompra = date.toISOString().split('T')[0];
+      }
+    }
+    form.purchaseDate = fechaCompra;
+    
+    form.condition = producto.condicion || equipment.condicion || 'excelente';
+    form.location = producto.ubicacion || equipment.ubicacion || equipment.ubicacion_fisica || '';
+    form.notes = producto.notas || equipment.notas || '';
     
     // Asignar especificaciones
-    if (equipment.especificaciones) {
-      form.specifications.processor = equipment.especificaciones.procesador || '';
-      form.specifications.ram = equipment.especificaciones.memoria_ram || '';
-      form.specifications.storage = equipment.especificaciones.almacenamiento || '';
-      form.specifications.graphics = equipment.especificaciones.tarjeta_grafica || '';
-      form.specifications.screen = equipment.especificaciones.pantalla || '';
-      form.specifications.os = equipment.especificaciones.sistema_operativo || '';
+    const especificaciones = producto.especificaciones || equipment.especificaciones || {};
+    if (especificaciones && typeof especificaciones === 'object') {
+      form.specifications.processor = especificaciones.procesador || especificaciones.processor || '';
+      form.specifications.ram = especificaciones.memoria_ram || especificaciones.ram || '';
+      form.specifications.storage = especificaciones.almacenamiento || especificaciones.storage || '';
+      form.specifications.graphics = especificaciones.tarjeta_grafica || especificaciones.graphics || '';
+      form.specifications.screen = especificaciones.pantalla || especificaciones.screen || '';
+      form.specifications.os = especificaciones.sistema_operativo || especificaciones.os || '';
     }
     
     console.log('Formulario después de cargar datos:', form);
