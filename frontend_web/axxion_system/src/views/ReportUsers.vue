@@ -3,8 +3,25 @@
     <SideBar />
     <main class="container h-screen p-4 flex-1 overflow-y-auto">
       <headerP />
-      <h1 class="text-3xl font-bold mb-6 text-black">Reportes de Usuarios</h1>
-
+      <div class="flex flex-row justify-between">
+        <h1 class="text-3xl font-bold mb-6 text-black">Reportes de Usuarios</h1>
+        <section>
+          <div class="flex justify-end mb-4">
+            <WorksheetUser
+            filename="usuario.xlsx"
+            sheetName="usuario"
+            :data="usuario"
+            :columns="[
+              {key: 'id', label: 'ID'},
+              {key: 'email', label: 'Correo'},
+              {key: 'telefono', label: 'Telefono'},
+              {key: 'departamento', label: 'Departamento'},
+              {key: 'estado', label: 'Estado'}
+            ]"
+            />
+          </div>
+        </section>
+      </div>
       <!-- Tarjetas -->
       <section class="flex flex-wrap gap-6 mb-6">
         <fwb-card class="w-sm flex-1 min-w-[300px]">
@@ -83,10 +100,11 @@
 import { ref, onMounted } from 'vue'
 import SideBar from '@/components/SideBar.vue'
 import headerP from '@/components/headerP.vue'
-import ReportService from '@/services/ReportService'
 import UserService from '@/services/UserService'
 import { FwbCard } from 'flowbite-vue'
-// datos
+import WorksheetUser from '@/components/WorksheetUser.vue'
+
+const usuario = ref([])
 const empleadosTotales = ref(0)
 const empleadosPorEstado = ref({})
 const usuarios = ref([])

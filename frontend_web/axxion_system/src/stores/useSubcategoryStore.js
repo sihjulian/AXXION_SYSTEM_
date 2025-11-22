@@ -14,7 +14,7 @@ export const useSubcategoryStore = defineStore("subcategory", {
         const res = await SubCategoryService.getSubcategoriasByCategoria(categoriaId);
         this.subcategorias = res.data;
       } catch (error) {
-        console.error("❌ Error cargando subcategorías:", error);
+        console.error("Error cargando subcategorías:", error);
       } finally {
         this.loading = false;
       }
@@ -25,7 +25,7 @@ export const useSubcategoryStore = defineStore("subcategory", {
         const res = await SubCategoryService.createSubcategoria(data);
         this.subcategorias.push(res.data);
       } catch (error) {
-        console.error(" Error creando subcategoría:", error);
+        console.error("Error creando subcategoría:", error);
       }
     },
 
@@ -35,7 +35,7 @@ export const useSubcategoryStore = defineStore("subcategory", {
         const index = this.subcategorias.findIndex((s) => s.id === id);
         if (index !== -1) this.subcategorias[index] = res.data;
       } catch (error) {
-        console.error("❌ Error actualizando subcategoría:", error);
+        console.error("Error actualizando subcategoría:", error);
       }
     },
 
@@ -44,7 +44,7 @@ export const useSubcategoryStore = defineStore("subcategory", {
         await SubCategoryService.deleteSubcategoria(id);
         this.subcategorias = this.subcategorias.filter((s) => s.id !== id);
       } catch (error) {
-        console.error("❌ Error eliminando subcategoría:", error);
+        console.error("Error eliminando subcategoría:", error);
       }
     },
   },

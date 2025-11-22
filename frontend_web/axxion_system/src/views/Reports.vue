@@ -1,178 +1,122 @@
 <template>
-  <div class="App flex">
-    <SideBar />
-    <main class="container h-screen p-4 flex-1 overflow-y-auto flex flex-col">
+  <div class="app flex">
+    <SideBar/>
+    <RouterView></RouterView>
+    <main class="container h-screen p-4 flex-1 overflow-y-auto">
       <headerP />
-      <h1 class="text-3xl font-bold mb-6 text-black">Reportes de Inventario</h1>
-    <section class="flex flex-wrap gap-6">
-        <fwb-card class="w-sm flex-1 min-w-[300px] ">
-            <div class="p-5">
-                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900  dark:text-white">
-                    Items Totales
-                </h5>
-                <p class="text-4xl font-extrabold text-blue-600 dark:text-blue-400">
-                    {{ itemsTotales }}
-                </p>
+      <section class="flex flex-col">
+        <h1><strong>Reporte de inventario</strong></h1>
+        <br>
+        <Graphs/>
+        <br>
+      </section>
+              <section>
+                <div class="flex justify-end mb-4">
+                    <ExportWorksheet
+                    filename="inventario.xlsx"
+                    sheetName="Inventario"
+                    :data="inventario"
+                    :columns="[
+                    { key: 'id', label: 'ID' },
+                    { key: 'nombre', label: 'Nombre' },
+                    { key: 'marca', label: 'Marca' },
+                    { key: 'modelo', label: 'Modelo' },
+                    { key: 'estado', label: 'Estado' },
+                    { key: 'ubicacion', label: 'Ubicación' },
+                    ]"
+                />
+                </div>
+            </section>
+        <section class="bg-white rounded-md shadow-md p-4">
+            <h2 class="text-xl font-bold mb-4">Detalle inventarios</h2>
+            <div class="overflow-x-auto overflow-y-auto">
+                <table class="w-full text-sm text-left text-gray-700 border">
+                    <thead class="bg-gray-200 text-gray-900">
+                        <tr>
+                            <th class="p-2 border">Nombre</th>
+                            <th class="p-2 border">Descripcion</th>
+                            <th class="p-2 border">Marca</th>
+                            <th class="p-2 border">Modelo</th>
+                            <th class="p-2 border">Precio Referencia Renta</th>
+                            <th class="p-2 border">Precio de alquiler diario</th>
+                            <th class="p-2 border">Precio de alquiler semanal</th>
+                            <th class="p-2 border">Precio de alquiler mensual</th>
+                            <th class="p-2 border">Precio de compra</th>
+                            <th class="p-2 border">Valor actual</th>
+                            <th class="p-2 border">Fecha de compra</th>
+                            <th class="p-2 border">Condicion</th>
+                            <th class="p-2 border">Ubicacion</th>
+                            <th class="p-2 border">Notas</th>
+                            <th class="p-2 border">SKU</th>
+                            <th class="p-2 border">Numero de serie</th>
+                            <th class="p-2 border">Categoria</th>
+                            <th class="p-2 border">Especificaciones</th>
+                            <th class="p-2 border">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="p in products" :key="p.id" class="hover:bg-gray-100">
+                            <td class="p-2 border">{{ p.nombre }}</td>
+                            <td class="p-2 border">{{ p.descripcion }}</td>
+                            <td class="p-2 border">{{ p.marca }}</td>
+                            <td class="p-2 border">{{ p.modelo }}</td>
+                            <td class="p-2 border">{{ p.precio_referencia_renta || '-' }}</td>
+                            <td class="p-2 border">{{ p.precio_alquiler_dia }}</td>
+                            <td class="p-2 border">{{ p.precio_alquiler_semanal }}</td>
+                            <td class="p-2 border">{{ p.precio_alquiler_mensual }}</td>
+                            <td class="p-2 border">{{ p.precio_compra }}</td>
+                            <td class="p-2 border">{{ p.valor_actual }}</td>
+                            <td class="p-2 border">{{ p.fecha_compra }}</td>
+                            <td class="p-2 border">
+                              <span :class="{
+                                'text-green-600 font-bold': p.condicion === 'Excelente',
+                                'text-yellow-600 font-bold': p.condicion === 'Bueno'
+                                }">
+                                {{ p.condicion }}
+                              </span>
+                            </td>
+                            <td class="p-2 border">{{ p.ubicacion }}</td>
+                            <td class="p-2 border">{{ p.notas }}</td>
+                            <td class="p-2 border">{{ p.sku }}</td>
+                            <td class="p-2 border">{{ p.numero_serie }}</td>
+                            <td class="p-2 border">{{ p.categoria }}</td>
+                            <td class="p-2 border">{{ p.especificaciones }}</td>
+                            <td class="p-2 border">{{p.estado}}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        </fwb-card>
-        <fwb-card class="w-sm flex-1 min-w-[300px]">
-            <div class="p-5">
-                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900  dark:text-white">
-                    Valor Total del Inventario
-                </h5>
-                <p class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">
-                    ${{ valorTotal.toLocaleString() }}
-                </p>
-            </div>
-        </fwb-card>
-        <fwb-card class="w-sm flex-1 min-w-[300px]">
-            <div class="p-5">
-                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900  dark:text-white">
-                    Equipos disponibles
-                </h5>
-                <p class="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400">
-                    {{ equiposDisponibles }}
-                </p>
-            </div>
-        </fwb-card>
-    </section>
-<br><br>
-    <section class="flex flex-wrap gap-6">
-        <!-- Gráfico por Categoría -->
-        <article class="bg-gray-200 shadow-xl/30 text-black rounded-md p-4 flex-1 min-w-[300px]">
-            <h2 class="font-bold text-2xl mb-4">Equipos por Categoría</h2>
-            <v-chart :option="chartByCategory" style="height: 300px;" autoresize />
-        </article>
-        <!-- Gráfico por Valor -->
-        <article class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md pl-4 p-4 flex-1 min-w-[300px]">
-            <h2 class="font-bold text-2xl mb-4">Valor Total por Categoría</h2>
-            <v-chart :option="chartByValue" style="height: 300px;" autoresize />
-        </article>
-        <!-- Gráfico por Condición -->
-        <article class="bg-gray-200 shadow-xl/30 text-black rounded-md p-4 flex-1 min-w-[300px]">
-            <h2 class="font-bold text-2xl mb-4">Equipos por Condición</h2>
-            <v-chart :option="chartByCondition" style="height: 300px;" autoresize />
-        </article>
-        
-    </section>
+        </section>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import SideBar from '@/components/SideBar.vue'
-import headerP from '@/components/headerP.vue'
-import VChart from 'vue-echarts'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { PieChart, BarChart } from 'echarts/charts'
-import { FwbCard } from 'flowbite-vue'
-import {
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
-  GridComponent
-} from 'echarts/components'
-import InventoryService from '@/services/InventoryService'
-import ReportService from '@/services/ReportService'
-import { text } from '@fortawesome/fontawesome-svg-core'
-import LineBar from '@/components/LineBar.vue'
+import { onMounted, ref } from 'vue';
+import SideBar from '@/components/SideBar.vue';
+import headerP from '@/components/headerP.vue';
+import Graphs from '@/components/Graficos/Graphs.vue';
+import InventoryService from '@/services/InventoryService';
+import ExportWorksheet from '@/components/ExportWorksheet .vue'
 
+const products = ref([]);
+const inventario = ref([]);
 
-// registrar echarts
-use([
-  CanvasRenderer,
-  PieChart,
-  BarChart,
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
-  GridComponent
-])
-
-// opciones reactivas
-const chartByCategory = ref({})
-const chartByValue = ref({})
-const chartByCondition = ref({})
-
-const itemsTotales = ref(0)
-const valorTotal = ref(0)
-const equiposDisponibles = ref(0)
-// cargar datos
 onMounted(async () => {
-    try {
-        const data = await ReportService.getMetrics()
-        itemsTotales.value = data.items_totales
-        valorTotal.value = data.valor_total
-        equiposDisponibles.value = data.equipos_disponibles
-    } catch (error) {
-        console.error('Error cargando métricas:', error)
-    }
-
-
   try {
-const items = await InventoryService.getProducts() 
-console.log('Inventario (productos):', items)
-
-
-    console.log('Inventario (productos):', items)
-
-    const categorias = {}
-    const valores = {}
-    const condiciones = {}
-
-    items.forEach(item => {
-        const categoria = item.categoria || 'Sin categoría'
-        categorias[categoria] = (categorias[categoria] || 0) + 1
-        valores[categoria] = (valores[categoria] || 0) + parseFloat(item.valor_actual || 0)
-        const condicion = item.condicion || 'No definida'
-        condiciones[condicion] = (condiciones[condicion] || 0) + 1
-    })
-
-    chartByCategory.value = {
-        tooltip: { trigger: 'item' },
-        legend: { top: '5%', left: 'center' },
-        series: [
-            {
-            name: 'Equipos',
-            type: 'pie',
-            radius: '60%',
-            data: Object.entries(categorias).map(([name, value]) => ({ name, value }))
-            }
-        ]
-        
-    }
-
-    chartByValue.value = {
-      tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: Object.keys(valores) },
-      yAxis: { type: 'value' },
-      series: [
-        {
-          data: Object.values(valores),
-          type: 'bar',
-          itemStyle: { color: '#3b82f6' }
-        }
-      ]
-    }
-
-    chartByCondition.value = {
-      tooltip: { trigger: 'item' },
-      series: [
-        {
-          name: 'Condición',
-          type: 'pie',
-          radius: '60%',
-          data: Object.entries(condiciones).map(([name, value]) => ({ name, value }))
-        }
-      ]
-    }
+    const data = await InventoryService.getProducts();
+    products.value = Array.isArray(data) ? data : data.data || [];
+    console.log('Inventario cargado:', products.value);
   } catch (error) {
-    console.error('Error cargando inventario:', error)
+    console.error('Error al cargar inventario:', error);
   }
-})
+});
 </script>
+
+<style scoped>
+
+</style>
+
 
 
 

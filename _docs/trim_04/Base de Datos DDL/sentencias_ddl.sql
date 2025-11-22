@@ -119,6 +119,7 @@ SHOW CREATE TABLE cotizacion;
 -- ------------------------------------------------------------------------------------- --
 
 ALTER TABLE renta DROP FOREIGN KEY fk_renta_cliente;
+ALTER TABLE renta add FOREIGN KEY fk_renta_cliente;
 ALTER TABLE detalle_cotizacion DROP FOREIGN KEY fk_detalle_cotizacion;
 
 -- ------------------------------------------------------------------------------------- --

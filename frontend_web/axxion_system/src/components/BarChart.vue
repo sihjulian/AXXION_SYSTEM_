@@ -1,17 +1,17 @@
 <template>
-    <section class="flex flex-col gap-y-8">
+    <section class="flex flex-wrap gap-6">
         <!-- Gráfico por Categoría -->
-        <article v-if="props.mode === 'all' || props.mode === 'category'" class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md p-4 min-w-[300px]">
+        <article v-if="props.mode === 'all' || props.mode === 'category'" class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md pl-4 p-4 flex-1 min-w-[450px]">
             <h2 class="font-bold text-2xl mb-4">Equipos por Categoría</h2>
-            <v-chart :option="chartByCategory" style="height: 300px;" autoresize />
+            <v-chart :option="chartByCategory" style="height: 450px;" autoresize />
         </article>
         <!-- Gráfico por Valor -->
-        <article v-if="props.mode === 'all' || props.mode === 'value'" class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md pl-4 p-4 ">
+        <article v-if="props.mode === 'all' || props.mode === 'value'" class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md pl-4 p-4 flex-1 min-w-[450px] ">
             <h2 class="font-bold text-2xl mb-4">Valor Total por Categoría</h2>
-            <v-chart :option="chartByValue" style="height: 300px;" autoresize />
+            <v-chart :option="chartByValue" style="height: 450px;" autoresize />
         </article>
         <!-- Gráfico por Condición -->
-        <article v-if="props.mode === 'all' || props.mode === 'condition'" class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md p-4 min-w-[300px]">
+        <article v-if="props.mode === 'all' || props.mode === 'condition'" class="bg-gray-800 shadow-xl/30 text-amber-50 rounded-md pl-4 p-4 flex-1 min-w-[300px]">
             <h2 class="font-bold text-2xl mb-4">Equipos por Condición</h2>
             <v-chart :option="chartByCondition" style="height: 300px;" autoresize />
         </article>
@@ -64,7 +64,7 @@ const equiposDisponibles = ref(0)
 const props = defineProps({
     items: { type: Array, default: null },
     metrics: { type: Object, default: null },
-    mode: { type: String, default: 'all' } // 'all' | 'category' | 'value' | 'condition'
+    mode: { type: String, default: 'all' } 
 })
 
 function buildChartsFromItems(items) {

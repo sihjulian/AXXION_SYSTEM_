@@ -71,9 +71,10 @@ class ProductoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Producto $producto)
+    public function show(Producto $id)
     {
         try {
+            $producto = Producto::with('subcategorias', 'inventarioItems', 'solicitudes', 'detallesCotizacion')->find($id);
             return response()->json($producto);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al obtener el producto: ' . $e->getMessage()], 500);

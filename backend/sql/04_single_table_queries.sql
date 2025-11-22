@@ -129,7 +129,9 @@ FROM producto;
 -- 10. ¿Cuáles son los productos de QSC?
 SELECT nombre, modelo, precio_referencia_renta
 FROM producto
-WHERE marca = 'QSC';
+WHERE nombre like '%altavoz%';
+-- invoque
+-- patrones de busqueda
 
 -- 11. ¿Cuáles son los productos ordenados por precio de mayor a menor?
 SELECT nombre, marca, precio_referencia_renta

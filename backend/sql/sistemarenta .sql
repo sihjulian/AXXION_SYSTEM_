@@ -21,6 +21,7 @@ SET time_zone = "+00:00";
 -- Base de datos: `sistemarenta`
 --
 
+<<<<<<< HEAD
 -- --------------------------------------------------------
 
 --
@@ -50,6 +51,11 @@ INSERT INTO `auditoria_inventario` (`id`, `inventario_item_id`, `accion`, `campo
 (5, 21, 'UPDATE_SYNC', 'Sincronización desde producto', 'Estado: alquilado, Ubicación: test', 'Estado: fuera_de_servicio, Ubicación: test', 'root@localhost', '2025-11-19 20:25:35'),
 (6, 19, 'UPDATE_SYNC', 'Sincronización desde producto', NULL, NULL, 'root@localhost', '2025-11-19 20:26:06'),
 (7, 19, 'UPDATE_SYNC', 'Sincronización desde producto', NULL, NULL, 'root@localhost', '2025-11-19 20:37:43');
+=======
+DROP database sistemarenta;
+CREATE DATABASE IF NOT EXISTS `sistemarenta` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `sistemarenta`;
+>>>>>>> 61ba1ea794ea3a93566f2ec29d47b7cfc6fa48d1
 
 -- --------------------------------------------------------
 

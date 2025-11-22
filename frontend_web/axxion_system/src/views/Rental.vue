@@ -1,62 +1,43 @@
 <template>
   <div class="app flex">
     <SideBar />
-    <routerView />
     <main class="container h-screen p-4 flex-1 overflow-y-auto">
       <headerP />
-      <section>
-        <!-- Botón para agregar renta -->
-        <div class="mb-4 flex justify-start">
-          <FwbButton gradient="green-blue" @click="openAdd"><font-awesome-icon class="mr-2" icon="fa-solid fa-plus" />Agregar renta</FwbButton>
+      <section class="flex flex-col">
+        <div class="mb-4 flex items-baseline">
+          <FwbButton gradient="green-blue" @click="rentalStore.openAddModal"><font-awesome-icon class="mr-2" icon="fa-solid fa-plus" />Agregar renta</FwbButton>
         </div>
-
-        <!-- Estado de carga / error -->
-        <div v-if="loading" class="p-4">Cargando rentas...</div>
-        <div v-else-if="error" class="p-4 text-red-600">{{ error }}</div>
-
-        <!-- Grid de tarjetas -->
-        <div v-else class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          <FwbCard v-for="r in rentals" :key="r.id" class="w-sm">
-            <div class="p-5">
-              <h5 class="flex justify-between">
-                <div class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white order-1">Renta #{{ r.id }}</div><div class="order-2 text-xs self-start text-[#39FF14] rounded-xl p-1 bg-[#00401A]">{{ r.estado_renta }}</div> 
+        
+        <div v-if="rentalStore.loading" class="p-4 justify-items-center h-screen text-white"><span class="loader"></span></div>
+        <div v-else-if="rentalStore.error" class="p-4 text-red-500">{{ rentalStore.error }}</div>
+        
+        <div v-else class="flex flex-wrap gap-4 justify-center">
+          <FwbCard v-for="r in rentalStore.rentals" :key="r.id" class="w-sm">
+            <div class="p-5 flex-1 basis-1/3">
+              <h5 class="flex justify-between items-center">
+                <div class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white order-1 ">Renta #{{ r.id }}</div>
+                <div class="order-2 text-xs self-start text-[#39FF14] rounded-xl p-1 bg-[#00401A]">{{ r.estado_renta }}</div> 
               </h5>
-
               <!-- Cliente -->
               <div class="text-sm text-gray-700 dark:text-gray-400 mb-2">
                 <strong>Cliente:</strong>
                 {{ (r.cliente?.nombre || '') + ' ' + (r.cliente?.nombre2 ? r.cliente.nombre2 + ' ' : '') + (r.cliente?.apellido1 || '') + (r.cliente?.apellido2 ? ' ' + r.cliente.apellido2 : '') }}
               </div>
-
               <!-- Fechas -->
-              <div class="text-sm text-gray-700 dark:text-gray-400">
+              <div class="text-sm text-gray-500 dark:text-gray-400">
                 <div><strong>Inicio:</strong> {{ formatDate(r.fecha_inicio) }}</div>
                 <div><strong>Fin prevista:</strong> {{ formatDate(r.fecha_fin_prevista) }}</div>
-                <div><strong>Devolución real:</strong> {{ r.fecha_devolucion_real ? formatDate(r.fecha_devolucion_real) : '-' }}</div>
+                <div><strong>Devolución real:</strong> {{ formatDate(r.fecha_devolucion_real) }}</div>
               </div>
-
               <!-- Montos -->
-              <div class="mt-3 text-sm text-gray-600">
-                <div><strong>Monto total:</strong> {{ formatCurrency(r.monto_total_renta) }}</div>
+              <div class="mt-3 text-sm text-black bg-gray-600 rounded-xl p-2">
+                <div class="flex"><strong>Monto total:</strong><div class="text-[#4CBB17] font-bold">{{ formatCurrency(r.monto_total_renta) }}</div></div>
                 <div><strong>Depósito garantia:</strong> {{ formatCurrency(r.deposito_garantia) }}</div>
               </div>
-
-              <!-- Notas -->
-              <p class="mt-3 font-normal text-gray-700 dark:text-gray-400">
-                <strong>Notas:</strong>
-                {{ r.notas || '-' }}
-              </p>
-
-              <!-- Estado -->
-              <div class="mt-2">
-                <strong>Estado:</strong>
-                <span class="ml-2">{{ r.estado_renta }}</span>
-              </div>
-
-              <!-- Inventario -->
+              <!-- Productos -->
               <div class="mt-3">
-                <strong>Inventario:</strong>
-                <ul class="list-disc list-inside text-sm text-gray-700">
+                <strong class="text-white">Equipos:</strong>
+                <ol class="list-disc list-inside text-sm text-white">
                   <li v-for="item in r.inventario_items || []" :key="item.id" class="mt-2">
                     <div><strong>Producto (serie):</strong> {{ item.numero_serie || item.producto_id }}</div>
                     <div><strong>Estado item:</strong> {{ item.estado_item }}</div>
@@ -64,33 +45,30 @@
                     <div><strong>Condición salida:</strong> {{ item.pivot?.condicion_salida || '-' }}</div>
                     <div v-if="item.pivot?.notas"><strong>Notas item:</strong> {{ item.pivot.notas }}</div>
                   </li>
-                </ul>
+                </ol>
               </div>
-
-              <!-- Acciones -->
-              <div class="mt-4 flex justify-center-safe gap-9">
-                <button @click="openEdit(r)" class="px-3 py-1 bg-linear-to-bl from-yellow-500 to-yellow-300 text-black rounded transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-red-500">
-                  <font-awesome-icon icon="fa-solid fa-pen-to-square" />
-                  <br>
-                  Editar
+              <!-- ... resto de los detalles de la tarjeta ... -->
+              <p class="mt-3 font-normal text-gray-700 dark:text-gray-400"><strong>Notas:</strong> {{ r.notas || '-' }}</p>
+              <div class="mt-4 flex flex-row justify-center gap-9">
+                <button @click="rentalStore.openEditModal(r)" class="px-3 py-1 bg-linear-to-bl from-yellow-500 to-yellow-300 text-black rounded transition ...">
+                  <font-awesome-icon icon="fa-solid fa-pen-to-square" /><br>Editar
                 </button>
-                <button @click="openDeleteConfirm(r.id)" :disabled="actionLoading[r.id]" class="px-3 py-1 bg-linear-to-bl from-red-700 to-red-500 text-white rounded transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-red-500">
-                  <font-awesome-icon icon="fa-solid fa-trash" />
-                  <br>
-                  Eliminar
+                <button @click="rentalStore.openDeleteModal(r)" class="px-3 py-1 bg-linear-to-bl from-red-700 to-red-500 text-white rounded transition ...">
+                  <font-awesome-icon icon="fa-solid fa-trash" /><br>Eliminar
                 </button>
               </div>
             </div>
           </FwbCard>
         </div>
+
         <RentalModal
-          :show="showModal"
-          :mode="modalMode"
-          :target-id="modalTargetId"
-          :payload="modalPayload"
-          :loading="actionLoading[modalTargetId || 'add']"
-          @close="closeModal"
-          @save="saveModal"
+          :show="rentalStore.showModal"
+          :mode="rentalStore.modalMode"
+          :payload="rentalStore.selectedRental"
+          :cliente-options="rentalStore.clienteOptions"
+          @close="rentalStore.closeModal"
+          @save="rentalStore.saveRental"
+          @delete="rentalStore.deleteRental"
         />
       </section>
     </main>
@@ -98,39 +76,47 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { onMounted } from 'vue'
+import { useRentalStore } from '@/stores/rentalStore';
+
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
 import { FwbCard, FwbButton } from 'flowbite-vue'
 import RentalModal from '@/components/RentalModal.vue'
 import RentalService from '@/services/RentalService';
 import ClienteService from '@/services/ClienteService'
+<<<<<<< HEAD
+=======
+  
+import { useCartStore } from '@/stores/cart.js'; // Import Cart Store
+const cartStore = useCartStore(); // Init Cart Store
+  
+import { FwbCard, FwbButton } from 'flowbite-vue';
+import RentalModal from '@/components/RentalModal.vue';
+>>>>>>> 61ba1ea794ea3a93566f2ec29d47b7cfc6fa48d1
 
 
-const rentals = ref([]);
-const loading = ref(false);
-const error = ref(null);
+const rentalStore = useRentalStore();
 
-// Opciones de clientes
-const clientes = ref([])
-const clienteOptions = ref([])
+onMounted(() => {
+  rentalStore.fetchRentals();
+  rentalStore.fetchClientes();
+});
 
-// Cargar clientes desde la API
-const loadClientes = async () => {
-  try {
-    const data = await ClienteService.getAll()
-    console.log('Clientes cargados:', data)
+const formatDate = (iso) => iso ? new Date(iso).toLocaleString() : '-';
+const formatCurrency = (val) => (val === null || val === undefined) ? '-' : Number(val).toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+</script>
 
-    // Si la API devuelve un objeto con data, normalizamos
-    const arr = Array.isArray(data) ? data : data.data || []
-
-    clientes.value = arr
-    clienteOptions.value = arr.map(c => ({
-      value: c.id,
-      label: `${c.nombre} ${c.nombre2 || ''} ${c.apellido1 || ''} ${c.apellido2 || ''}`.trim()
-    }))
-  } catch (error) {
-    console.error('Error cargando clientes:', error)
+<style scoped>
+  .loader {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 6rem;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
   }
 }
 
@@ -272,8 +258,25 @@ const toDateTime = (val) => {
     deposito_garantia: payload.deposito_garantia ? Number(payload.deposito_garantia) : 0,
     notas: payload.notas || "",
     inventarioItems: payload.inventarioItems || []
+  .loader:before,
+  .loader:after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    animation: pulsOut 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 1rem rgba(25,25,112));
   }
-}
+  .loader:before {
+    width: 100%;
+    padding-bottom: 100%;
+    box-shadow: inset 0 0 0 1rem #191970;
+    animation-name: pulsIn;
+  }
+  .loader:after {
+    width: calc(100% - 2rem);
+    padding-bottom: calc(100% - 2rem);
+    box-shadow: 0 0 0 0 #191970;
+  }
 
 
 // Guardar en modal — ahora recibe el payload emitido por el modal
@@ -307,22 +310,26 @@ const saveModal = async (payloadFromModal) => {
     } catch (err) {
       console.error("Error actualizando renta:", err);
       alert("No se pudo actualizar la renta.");
+  @keyframes pulsIn {
+    0% {
+      box-shadow: inset 0 0 0 1rem #191970;
+      opacity: 1;
     }
-  } else if (modalMode.value === 'delete') {
-    const idDel = modalTargetId.value;
-    actionLoading.value = { ...actionLoading.value, [idDel]: true };
-    try {
-      await RentalService.deleteRental(idDel);
-      rentals.value = rentals.value.filter(r => r.id !== idDel);
-      closeModal();
-    } catch (err) {
-      console.error('Error eliminando renta:', err);
-      alert('No se pudo eliminar la renta.');
-    } finally {
-      actionLoading.value = { ...actionLoading.value, [idDel]: false };
+    50%, 100% {
+      box-shadow: inset 0 0 0 0 #191970;
+      opacity: 0;
     }
   }
-};
 
-
-</script>
+  @keyframes pulsOut {
+    0%, 50% {
+      box-shadow: 0 0 0 0 #191970;
+      opacity: 0;
+    }
+    100% {
+      box-shadow: 0 0 0 1rem #191970;
+      opacity: 1;
+    }
+  }
+      
+</style>
