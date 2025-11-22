@@ -1,6 +1,7 @@
 <template>
   <div class="app flex">
     <SideBar/>
+    <CartDrawer />
     <RouterView></RouterView>
 
     <main class="container h-screen p-4 flex-1 overflow-y-auto">
@@ -96,6 +97,16 @@
           >
             <font-awesome-icon icon="fa-solid fa-plus" class="mr-2"/>
             Agregar Equipo
+          </fwb-button>
+
+          <fwb-button 
+            v-if="cartStore.itemCount > 0"
+            gradient="purple-blue" 
+            size="lg" 
+            @click="cartStore.openCart"
+          >
+            <font-awesome-icon icon="fa-solid fa-shopping-cart" class="mr-2"/>
+            Ver Carrito ({{ cartStore.itemCount }})
           </fwb-button>
           
           <fwb-button 
@@ -406,37 +417,6 @@
         </div>
       </template>
     </fwb-modal>
-    
-    <!-- Cart Drawer -->
-    <CartDrawer />
-    
-    <!-- Floating Cart Button (Visible when cart is closed and has items) -->
-    <div v-if="!cartStore.isOpen && cartStore.totalItems > 0" class="fixed bottom-6 right-6 z-40">
-      <button 
-        @click="cartStore.openCart"
-        class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-transform hover:scale-110 flex items-center justify-center relative"
-      >
-        <font-awesome-icon icon="fa-solid fa-shopping-cart" class="text-xl" />
-        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white dark:border-gray-800">
-          {{ cartStore.totalItems }}
-        </span>
-      </button>
-    </div>
-    <!-- Cart Drawer -->
-    <CartDrawer />
-    
-    <!-- Floating Cart Button (Visible when cart is closed and has items) -->
-    <div v-if="!cartStore.isOpen && cartStore.totalItems > 0" class="fixed bottom-6 right-6 z-40">
-      <button 
-        @click="cartStore.openCart"
-        class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-transform hover:scale-110 flex items-center justify-center relative"
-      >
-        <font-awesome-icon icon="fa-solid fa-shopping-cart" class="text-xl" />
-        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white dark:border-gray-800">
-          {{ cartStore.totalItems }}
-        </span>
-      </button>
-    </div>
   </div>
 <!--footer-->
   <footer>
@@ -467,6 +447,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useInventarioItemStore } from '@/stores/inventarioItem.js';
+import { useCartStore } from '@/stores/CartStore'; // Import CartStore
 
 // Nombre del componente para cumplir con reglas de Vue
 defineOptions({
@@ -475,13 +456,12 @@ defineOptions({
 import { useInventoryStore } from '@/stores/inventory.js';
 import { useMaintenanceStore } from '@/stores/maintenance.js';
 import { useUserStore } from '@/stores/user.js';
-import { useCartStore } from '@/stores/cart.js'; // Import Cart Store
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
 import EquipmentCard from '@/components/EquipmentCard.vue';
 import EquipmentForm from '@/components/EquipmentForm.vue';
 import EquipmentDetails from '@/components/EquipmentDetails.vue';
-import CartDrawer from '@/components/CartDrawer.vue'; // Import Cart Drawer
+import CartDrawer from '@/components/CartDrawer.vue'; // Import CartDrawer
 import { 
   FwbAlert,
   FwbButton,
@@ -500,8 +480,7 @@ const inventarioItemStore  = useInventarioItemStore();
 const inventoryStore = useInventoryStore();
 const maintenanceStore = useMaintenanceStore();
 const userStore = useUserStore();
-const cartStore = useCartStore(); // Init Cart Store
-
+const cartStore = useCartStore(); // Initialize CartStore
 
 // Estado local
 const displayedProducts = ref([]);
@@ -903,22 +882,15 @@ async function confirmDelete() {
 }
 
 function rentProduct(product) {
-  // Agregar al carrito en lugar de acción directa
-  cartStore.addItem(product);
-  
-  // Opcional: Mostrar notificación de éxito
-  manualAlerts.value.push({
-    id: `cart-${Date.now()}`,
-    type: 'success',
-    icon: true,
-    title: 'Agregado al Carrito',
-    message: `${product.nombre} se ha agregado al carrito de renta.`
+  cartStore.addToCart(product);
+  // Optional: Show a toast or notification
+  manualAlerts.value.unshift({
+      id: Date.now(),
+      type: 'success',
+      icon: true,
+      title: 'Agregado al Carrito',
+      message: `${product.nombre} agregado al carrito de cotización.`
   });
-  
-  // Remover alerta después de 3 segundos
-  setTimeout(() => {
-    manualAlerts.value = manualAlerts.value.filter(a => a.title !== 'Agregado al Carrito');
-  }, 3000);
 }
 
 function exportReport() {

@@ -220,6 +220,13 @@ Route::middleware(['jwt.auth'])->group(function () {
     // ALERTAS (requiere autenticación)
     // ============================================
 
+    // ============================================
+    // SOLICITUDES (requiere autenticación)
+    // ============================================
+    Route::get('/solicitud', [App\Http\Controllers\Api\SolicitudController::class, 'index']);
+    Route::get('/solicitud/{id}', [App\Http\Controllers\Api\SolicitudController::class, 'show']);
+    Route::post('/solicitud', [App\Http\Controllers\Api\SolicitudController::class, 'store']);
+
     Route::get('/alertas', [AlertaController::class, 'index']);
 
 });

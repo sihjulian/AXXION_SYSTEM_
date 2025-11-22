@@ -42,7 +42,12 @@ class cotizacionController extends Controller
                 'estado_cotizacion' => ['required', 'string', Rule::in(['Borrador','Enviada','Aceptada','Rechazada','Vencida'])],
                 'terminos_condiciones' => ['nullable', 'string'],
                 'notas_internas' => ['nullable', 'string'],
+                'detalles' => ['required', 'array'],
+                'detalles.*.producto_id' => ['required', Rule::exists('producto', 'id')],
+                'detalles.*.cantidad' => ['required', 'integer', 'min:1'],
+                'detalles.*.precio_unitario' => ['required', 'numeric'],
             ]);
+
             if($validator->fails()){
                 $data = [
                     'message' => 'Validation failed',
@@ -51,48 +56,69 @@ class cotizacionController extends Controller
                 ];
                 return response()->json($data, 400);
             }
-            $cotizacion = Cotizacion::create([
-                'cliente_id' => $request->cliente_id,
-                'solicitud_id' => $request->solicitud_id,
-                'fecha_cotizacion' => $request->fecha_cotizacion,
-                'fecha_validez' => $request->fecha_validez,
-                'monto_total' => $request->monto_total,
-                'estado_cotizacion' => $request->estado_cotizacion,
-                'terminos_condiciones' => $request->terminos_condiciones,
-                'notas_internas' => $request->notas_internas,
-            ]);
-            if(!$cotizacion){
+
+            DB::beginTransaction();
+            try {
+                $cotizacion = Cotizacion::create([
+                    'cliente_id' => $request->cliente_id,
+                    'solicitud_id' => $request->solicitud_id,
+                    'fecha_cotizacion' => $request->fecha_cotizacion,
+                    'fecha_validez' => $request->fecha_validez,
+                    'monto_total' => $request->monto_total,
+                    'estado_cotizacion' => $request->estado_cotizacion,
+                    'terminos_condiciones' => $request->terminos_condiciones,
+                    'notas_internas' => $request->notas_internas,
+                ]);
+
+                foreach ($request->detalles as $detalle) {
+                    \App\Models\DetalleCotizacion::create([
+                        'cotizacion_id' => $cotizacion->id,
+                        'producto_id' => $detalle['producto_id'],
+                        'descripcion_item' => $detalle['descripcion_item'] ?? null,
+                        'cantidad' => $detalle['cantidad'],
+                        'precio_unitario' => $detalle['precio_unitario'],
+                    ]);
+                }
+
+                DB::commit();
+
+                $cotizacion->load(['cliente', 'solicitud', 'detalles.producto']);
+                
                 $data = [
-                    'message' => 'Error al crear cotizacion',
-                    'status' => 500
+                    'cotizacion' => $cotizacion,
+                    'status' => 200
                 ];
-                return response()->json($data, 500);
+                return response()->json($data, 200);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Error al crear cotizacion: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Error al crear cotizacion',
+                    'error' => $e->getMessage(),
+                    'status' => 500
+                ], 500);
             }
-            $cotizacion->load(['cliente', 'solicitud']);
-            $data = [
-                'cotizacion' => $cotizacion,
-                'status' => 200
-            ];
-            return response()->json($data, 200);
         }
+
         public function show($id)
-            {
-                try{
-                    $cotizacion = Cotizacion::with('cliente', 'solicitud', 'detalles', 'renta' )->find($id);
-                    if(!$cotizacion){
-                        $data = [
-                            'message' => 'Cotizacion no encontrada',
-                            'status' => 404
-                        ];
-                        return response()->json($data, 404);
-                    }
+        {
+            try{
+                $cotizacion = Cotizacion::with('cliente', 'solicitud', 'detalles.producto', 'renta' )->find($id);
+                if(!$cotizacion){
                     $data = [
-                        'cotizacion' => $cotizacion,
-                        'status' => 200
+                        'message' => 'Cotizacion no encontrada',
+                        'status' => 404
                     ];
-                    return response()->json($data, 200);
-                } catch (\Exception $e) {
-                Log::error('Error al listar Rentas: ' . $e->getMessage());
+                    return response()->json($data, 404);
+                }
+                $data = [
+                    'cotizacion' => $cotizacion,
+                    'status' => 200
+                ];
+                return response()->json($data, 200);
+            } catch (\Exception $e) {
+                Log::error('Error al listar Cotizacion: ' . $e->getMessage());
                 return response()->json([
                     'error' => $e->getMessage(),
                     'status' => 500
