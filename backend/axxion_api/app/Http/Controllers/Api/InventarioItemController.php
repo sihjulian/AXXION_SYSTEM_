@@ -314,4 +314,52 @@ class InventarioItemController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get inventario items with rental status
+     */
+    public function getWithRentalStatus()
+    {
+        try {
+            $inventarioItems = InventarioItem::with([
+                'producto',
+                'mantenimientos' => function($query) {
+                    $query->whereIn('estado_mantenimiento', ['Programado', 'EnProceso'])
+                          ->orderBy('fecha_inicio', 'desc');
+                },
+                'rentas' => function($query) {
+                    $query->whereIn('estado_renta', ['Programada', 'EnCurso'])
+                          ->with('cliente')
+                          ->orderBy('fecha_inicio', 'desc');
+                }
+            ])->get();
+
+            // Enriquecer cada item con información de renta activa
+            $inventarioItems->each(function($item) {
+                $rentaActiva = $item->rentas->first();
+                $item->renta_activa = $rentaActiva ? [
+                    'id' => $rentaActiva->id,
+                    'cliente_nombre' => $rentaActiva->cliente ? 
+                        trim($rentaActiva->cliente->nombre . ' ' . ($rentaActiva->cliente->nombre2 ?? '') . ' ' . 
+                             ($rentaActiva->cliente->apellido1 ?? '') . ' ' . ($rentaActiva->cliente->apellido2 ?? '')) : 
+                        'N/A',
+                    'fecha_inicio' => $rentaActiva->fecha_inicio,
+                    'fecha_fin_prevista' => $rentaActiva->fecha_fin_prevista,
+                    'estado_renta' => $rentaActiva->estado_renta
+                ] : null;
+            });
+
+            return response()->json([
+                'inventario_items' => $inventarioItems,
+                'status' => 200
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Error al obtener inventario items con estado de renta: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Error al obtener los items de inventario con estado de renta: ' . $e->getMessage(),
+                'status' => 500
+            ], 500);
+        }
+    }
 }

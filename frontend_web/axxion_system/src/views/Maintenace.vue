@@ -43,12 +43,12 @@
           </div>
 
           <!-- Action Controls -->
-          <div class="flex flex-wrap gap-4 mb-6">
+          <!-- <div class="flex flex-wrap gap-4 mb-6">
             <fwb-button gradient="green-blue" size="lg" @click="showAddModal">
               <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
               Programar Tarea
             </fwb-button>
-          </div>
+          </div> -->
 
           <!-- Filters and Search -->
           <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
@@ -161,7 +161,7 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Equipo *
             </label>
-            <fwb-select v-model="taskForm.inventario_item_id" required :class="{ 'border-red-500': formErrors.inventario_item_id }">
+            <fwb-select v-model="taskForm.inventario_item_id" required :class="{ 'border-red-500': formErrors.inventario_item_id }" :disabled="isEditMode">
               <option value="">Seleccionar equipo</option>
               <option v-for="item in inventoryOptions" :key="item.value" :value="item.value">
                 {{ item.name }}
@@ -190,6 +190,7 @@
                     label="Fecha de Inicio"
                     type="date"
                     required
+                    :disabled="isEditMode"
                 />
             </div>
             <div>
@@ -491,7 +492,8 @@ function getStatusDisplayName(status) {
   const statusNames = {
     'PROGRAMADO': 'Programado',
     'EN_PROCESO': 'En Proceso',
-    'COMPLETADO': 'Completado',
+    'COMPLETADO': 'Completado', // Coincide con trigger
+    'Finalizado': 'Completado', // Alias para compatibilidad
     'CANCELADO': 'Cancelado',
     'PAUSADO': 'Pausado'
   };
@@ -570,22 +572,38 @@ onMounted(async () => {
   try {
     console.log('Starting to load maintenance data...');
     
-    // Cargar datos secuencialmente para evitar problemas de dependencias
-    console.log('Loading users...');
+    // Cargar datos secuencialmente
     await userStore.fetchUsers();
-    console.log('Users loaded:', users.value?.length);
-    
-    console.log('Loading inventory...');
     await inventoryStore.fetchProducts();
-    console.log('Inventory loaded:', inventoryStore.productList?.length);
-    
-    console.log('Loading maintenances...');
     await maintenanceStore.fetchMaintenances();
-    console.log('Maintenances loaded:', maintenances.value?.length);
     
     console.log('All data loaded successfully');
-    console.log('Filtered tasks:', filteredTasks.value);
     addNotification('Datos cargados exitosamente', 'success');
+
+    // Verificar si hay parámetros en la URL para abrir mantenimiento automáticamente
+    const urlParams = new URLSearchParams(window.location.search);
+    const autoOpenItems = urlParams.get('auto_open_items');
+    
+    if (autoOpenItems) {
+        const itemIds = autoOpenItems.split(',');
+        console.log('Auto-opening maintenance for items:', itemIds);
+        
+        // Buscar el primer mantenimiento programado para estos items (el más reciente)
+        // Asumimos que el trigger acaba de crear uno con estado 'PROGRAMADO'
+        const targetMaintenance = maintenances.value.find(m => 
+            itemIds.includes(String(m.inventario_item_id)) && 
+            (m.estado_mantenimiento === 'PROGRAMADO' || m.estado_mantenimiento === 'Programado')
+        );
+
+        if (targetMaintenance) {
+            console.log('Found target maintenance to auto-open:', targetMaintenance);
+            editTask(targetMaintenance);
+            addNotification('Mantenimiento automático detectado. Por favor complete los detalles.', 'info');
+        } else {
+            console.log('No matching maintenance found for auto-open items');
+        }
+    }
+
   } catch (error) {
     console.error('Error loading initial data:', error);
     addNotification('Error al cargar los datos iniciales: ' + error.message, 'error');
@@ -594,6 +612,7 @@ onMounted(async () => {
 
 // Modal Functions
 function showAddModal() {
+  // Ya no se usa manualmente, pero por si acaso
   isEditMode.value = false;
   taskForm.value = { ...defaultFormState };
   selectedTask.value = null;
@@ -603,12 +622,26 @@ function showAddModal() {
 function editTask(task) {
   isEditMode.value = true;
   taskForm.value = { ...task };
+  // Asegurar fechas en formato correcto para inputs
+  if(taskForm.value.fecha_inicio) taskForm.value.fecha_inicio = taskForm.value.fecha_inicio.split('T')[0];
+  if(taskForm.value.fecha_fin_prevista) taskForm.value.fecha_fin_prevista = taskForm.value.fecha_fin_prevista.split('T')[0];
+  
+  // Asegurar que estado_mantenimiento tenga un valor
+  if (!taskForm.value.estado_mantenimiento) {
+    taskForm.value.estado_mantenimiento = 'PROGRAMADO';
+  }
+  
   selectedTask.value = task;
   isShowModal.value = true;
 }
 
 function closeModal() {
   isShowModal.value = false;
+  // Limpiar query params si existen para evitar que se reabra al recargar
+  if (window.history.pushState) {
+      const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+      window.history.pushState({path:newurl},'',newurl);
+  }
 }
 
 async function saveTask() {

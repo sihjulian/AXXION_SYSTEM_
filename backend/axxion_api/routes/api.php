@@ -216,6 +216,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     // Rutas adicionales para inventario items
     Route::get('/inventario_item/producto/{producto_id}', [InventarioItemController::class, 'getByProducto']);
     Route::get('/inventario_item/estado/{estado}', [InventarioItemController::class, 'getByEstado']);
+    Route::get('/inventario_item_with_rental_status', [InventarioItemController::class, 'getWithRentalStatus']);
 
     // ============================================
     // ALERTAS (requiere autenticación)

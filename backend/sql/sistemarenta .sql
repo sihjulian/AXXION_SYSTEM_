@@ -21,7 +21,6 @@ SET time_zone = "+00:00";
 -- Base de datos: `sistemarenta`
 --
 
-<<<<<<< HEAD
 -- --------------------------------------------------------
 
 --
@@ -51,11 +50,15 @@ INSERT INTO `auditoria_inventario` (`id`, `inventario_item_id`, `accion`, `campo
 (5, 21, 'UPDATE_SYNC', 'Sincronización desde producto', 'Estado: alquilado, Ubicación: test', 'Estado: fuera_de_servicio, Ubicación: test', 'root@localhost', '2025-11-19 20:25:35'),
 (6, 19, 'UPDATE_SYNC', 'Sincronización desde producto', NULL, NULL, 'root@localhost', '2025-11-19 20:26:06'),
 (7, 19, 'UPDATE_SYNC', 'Sincronización desde producto', NULL, NULL, 'root@localhost', '2025-11-19 20:37:43');
-=======
-DROP database sistemarenta;
+
+
+
+
+
+DROP DATABASE IF EXISTS sistemarenta;
 CREATE DATABASE IF NOT EXISTS `sistemarenta` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `sistemarenta`;
->>>>>>> 61ba1ea794ea3a93566f2ec29d47b7cfc6fa48d1
+
 
 -- --------------------------------------------------------
 
@@ -447,7 +450,7 @@ CREATE TRIGGER `trg_producto_after_insert` AFTER INSERT ON `producto` FOR EACH R
         NOW(),
         NOW()
     );
-END
+END;
 $$
 DELIMITER ;
 DELIMITER $$
@@ -483,23 +486,9 @@ CREATE TRIGGER `trg_producto_after_update` AFTER UPDATE ON `producto` FOR EACH R
         WHERE `producto_id` = NEW.id;
         
         -- Registrar en auditoría
-        INSERT INTO `auditoria_inventario` (
-            `inventario_item_id`, 
-            `accion`, 
-            `campos_cambiados`, 
-            `valores_anteriores`, 
-            `valores_nuevos`, 
-            `usuario`
-        ) VALUES (
-            (SELECT id FROM inventario_item WHERE producto_id = NEW.id LIMIT 1),
-            'UPDATE_SYNC',
-            'Sincronización desde producto',
-            CONCAT('Estado: ', OLD.estado, ', Ubicación: ', OLD.ubicacion),
-            CONCAT('Estado: ', NEW.estado, ', Ubicación: ', NEW.ubicacion),
-            USER()
-        );
+        
     END IF;
-END
+END;
 $$
 DELIMITER ;
 
@@ -626,7 +615,109 @@ CREATE TABLE `renta_inventario_item` (
   `notas` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
+--
+-- Disparadores `renta`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_renta_after_insert` AFTER INSERT ON `renta` FOR EACH ROW BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_producto_id INT;
+    DECLARE v_inventario_item_id INT;
+    DECLARE v_precio_renta DECIMAL(10,2);
+    DECLARE v_cantidad INT;
+    
+    -- Cursor para obtener productos de la cotización
+    DECLARE cur_productos CURSOR FOR
+        SELECT dc.producto_id, dc.cantidad, dc.precio_unitario
+        FROM detalle_cotizacion dc
+        WHERE dc.cotizacion_id = NEW.cotizacion_id;
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    -- Solo procesar si hay cotización asociada
+    IF NEW.cotizacion_id IS NOT NULL THEN
+        OPEN cur_productos;
+        
+        read_loop: LOOP
+            FETCH cur_productos INTO v_producto_id, v_cantidad, v_precio_renta;
+            IF done THEN
+                LEAVE read_loop;
+            END IF;
+            
+            -- Buscar items de inventario disponibles para este producto
+            -- Insertar tantos items como cantidad solicitada
+            INSERT INTO renta_inventario_item (
+                renta_id,
+                inventario_item_id,
+                precio_renta_item,
+                condicion_salida,
+                notas
+            )
+            SELECT 
+                NEW.id,
+                ii.id,
+                v_precio_renta,
+                'Buena',
+                CONCAT('Asignado automáticamente desde renta ID: ', NEW.id)
+            FROM inventario_item ii
+            WHERE ii.producto_id = v_producto_id
+                AND ii.estado_item = 'Disponible'
+            LIMIT v_cantidad;
+            
+            -- Actualizar estado de los items asignados a Rentado
+            UPDATE inventario_item ii
+            SET ii.estado_item = 'Rentado',
+                ii.updated_at = NOW()
+            WHERE ii.id IN (
+                SELECT rii.inventario_item_id
+                FROM renta_inventario_item rii
+                WHERE rii.renta_id = NEW.id
+                    AND rii.inventario_item_id IN (
+                        SELECT id FROM inventario_item
+                        WHERE producto_id = v_producto_id
+                    )
+            );
+            
+        END LOOP;
+        
+        CLOSE cur_productos;
+    END IF;
+END;
+$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE TRIGGER `trg_renta_after_update` AFTER UPDATE ON `renta` FOR EACH ROW BEGIN
+    -- Si la renta cambia a estado Finalizada o Cancelada, liberar los items
+    IF (NEW.estado_renta IN ('Finalizada', 'Cancelada')) AND 
+       (OLD.estado_renta NOT IN ('Finalizada', 'Cancelada')) THEN
+        
+        -- Actualizar estado de items a Disponible
+        UPDATE inventario_item ii
+        SET ii.estado_item = 'Disponible',
+            ii.updated_at = NOW()
+        WHERE ii.id IN (
+            SELECT rii.inventario_item_id
+            FROM renta_inventario_item rii
+            WHERE rii.renta_id = NEW.id
+        );
+    END IF;
+    
+    -- Si la renta cambia de Programada a EnCurso, asegurar que items estén Rentado
+    IF (NEW.estado_renta = 'EnCurso') AND (OLD.estado_renta = 'Programada') THEN
+        UPDATE inventario_item ii
+        SET ii.estado_item = 'Rentado',
+            ii.updated_at = NOW()
+        WHERE ii.id IN (
+            SELECT rii.inventario_item_id
+            FROM renta_inventario_item rii
+            WHERE rii.renta_id = NEW.id
+        );
+    END IF;
+END;
+$$
+DELIMITER ;
+
 
 --
 -- Estructura de tabla para la tabla `rol`
@@ -823,7 +914,7 @@ CREATE TABLE `vista_clientes_completa` (
 --
 DROP TABLE IF EXISTS `vista_clientes_completa`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_clientes_completa`  AS SELECT `c`.`id` AS `id`, `c`.`nombre` AS `nombre`, `c`.`nombre2` AS `nombre2`, `c`.`apellido1` AS `apellido1`, `c`.`apellido2` AS `apellido2`, `c`.`rfc` AS `rfc`, `c`.`telefono_principal` AS `telefono_principal`, `c`.`correo_electronico` AS `correo_electronico`, `c`.`tipo_cliente` AS `tipo_cliente`, `c`.`estado_cliente` AS `estado_cliente`, `d`.`calle` AS `calle`, `d`.`numero_exterior` AS `numero_exterior`, `d`.`numero_interior` AS `numero_interior`, `d`.`colonia` AS `colonia`, `d`.`ciudad` AS `ciudad`, `d`.`estado_provincia` AS `estado_provincia`, `d`.`codigo_postal` AS `codigo_postal`, `d`.`pais` AS `pais`, `d`.`referencias` AS `referencias`, `c`.`created_at` AS `created_at`, `c`.`updated_at` AS `updated_at` FROM ((`cliente` `c` left join `cliente_direccion` `cd` on(`c`.`id` = `cd`.`cliente_id` and `cd`.`es_principal` = 1)) left join `direccion` `d` on(`cd`.`direccion_id` = `d`.`id`)) ;
+CREATE VIEW `vista_clientes_completa`  AS SELECT `c`.`id` AS `id`, `c`.`nombre` AS `nombre`, `c`.`nombre2` AS `nombre2`, `c`.`apellido1` AS `apellido1`, `c`.`apellido2` AS `apellido2`, `c`.`rfc` AS `rfc`, `c`.`telefono_principal` AS `telefono_principal`, `c`.`correo_electronico` AS `correo_electronico`, `c`.`tipo_cliente` AS `tipo_cliente`, `c`.`estado_cliente` AS `estado_cliente`, `d`.`calle` AS `calle`, `d`.`numero_exterior` AS `numero_exterior`, `d`.`numero_interior` AS `numero_interior`, `d`.`colonia` AS `colonia`, `d`.`ciudad` AS `ciudad`, `d`.`estado_provincia` AS `estado_provincia`, `d`.`codigo_postal` AS `codigo_postal`, `d`.`pais` AS `pais`, `d`.`referencias` AS `referencias`, `c`.`created_at` AS `created_at`, `c`.`updated_at` AS `updated_at` FROM ((`cliente` `c` left join `cliente_direccion` `cd` on(`c`.`id` = `cd`.`cliente_id` and `cd`.`es_principal` = 1)) left join `direccion` `d` on(`cd`.`direccion_id` = `d`.`id`)) ;
 
 --
 -- Índices para tablas volcadas
@@ -1233,3 +1324,49 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+--
+-- Trigger para crear mantenimiento automático al cambiar estado de item
+--
+DELIMITER //
+CREATE TRIGGER `trg_inventario_item_after_update` AFTER UPDATE ON `inventario_item` FOR EACH ROW BEGIN
+    -- Si cambia a EnMantenimiento, crear registro en mantenimiento
+    IF NEW.estado_item = 'EnMantenimiento' AND OLD.estado_item != 'EnMantenimiento' THEN
+        INSERT INTO `mantenimiento` (
+            `inventario_item_id`,
+            `fecha_inicio`,
+            `fecha_fin_prevista`,
+            `tipo_mantenimiento`,
+            `descripcion_problema`,
+            `estado_mantenimiento`,
+            `responsable`,
+            `created_at`,
+            `updated_at`
+        ) VALUES (
+            NEW.id,
+            NOW(),
+            DATE_ADD(NOW(), INTERVAL 3 DAY),
+            'Correctivo',
+            'Mantenimiento generado automáticamente por cambio de estado',
+            'Programado',
+            'Sistema',
+            NOW(),
+            NOW()
+        );
+    END IF;
+END//
+DELIMITER ;
+
+--
+-- Trigger para liberar item cuando finaliza mantenimiento
+--
+DELIMITER //
+CREATE TRIGGER `trg_mantenimiento_after_update` AFTER UPDATE ON `mantenimiento` FOR EACH ROW BEGIN
+    -- Si cambia a Finalizado, poner item como Disponible
+    IF NEW.estado_mantenimiento = 'Finalizado' AND OLD.estado_mantenimiento != 'Finalizado' THEN
+        UPDATE `inventario_item`
+        SET `estado_item` = 'Disponible'
+        WHERE `id` = NEW.inventario_item_id;
+    END IF;
+END//
+DELIMITER ;

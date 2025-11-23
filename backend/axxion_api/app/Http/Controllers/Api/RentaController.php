@@ -15,7 +15,13 @@ class RentaController extends Controller
     public function index() 
     {
         try {
-            $renta = Renta::with('cliente', 'cotizacion', 'inventarioItems', 'entrega', 'devolucion')->get();
+            $renta = Renta::with([
+                'cliente', 
+                'cotizacion', 
+                'inventarioItems.producto',  // Agregar relación producto
+                'entrega', 
+                'devolucion'
+            ])->get();
             $data = [
                 'renta' => $renta,
                 'status' => 200
@@ -89,7 +95,13 @@ class RentaController extends Controller
     public function show($id)
     {
         try {
-                $renta = Renta::with('cliente', 'cotizacion', 'inventarioItems', 'entrega', 'devolucion')->find($id);
+                $renta = Renta::with([
+                    'cliente', 
+                    'cotizacion', 
+                    'inventarioItems.producto',  // Agregar relación producto
+                    'entrega', 
+                    'devolucion'
+                ])->find($id);
                 if (!$renta) {
                     $data = [
                         'message' => 'Renta no encontrada',
@@ -121,8 +133,24 @@ class RentaController extends Controller
                 ];
                 return response()->json($data, 404);
             }
+            
             DB::transaction(function () use ($renta) {
+                // Obtener IDs de items antes de detach
+                $inventarioItemIds = $renta->inventarioItems->pluck('id')->toArray();
+                
+                // Actualizar estado de items a EnMantenimiento al eliminar renta
+                if (!empty($inventarioItemIds)) {
+                    DB::table('inventario_item')
+                        ->whereIn('id', $inventarioItemIds)
+                        ->update([
+                            'estado_item' => 'EnMantenimiento',
+                            'updated_at' => now()
+                        ]);
+                }
+                
+                // Detach items de la renta
                 $renta->inventarioItems()->detach();
+                
                 if ($renta->entrega) {
                     $renta->entrega()->delete();
                 }
@@ -131,7 +159,9 @@ class RentaController extends Controller
                 }
                 $renta->delete();
             });
+            
             $data = [
+                'message' => 'Renta eliminada y equipos enviados a mantenimiento',
                 'renta' => $renta,
                 'status' => 200
             ];
@@ -208,6 +238,31 @@ class RentaController extends Controller
                 }
             }
             $renta->save();
+
+            // Actualizar estado de items según el estado de la renta
+            $inventarioItemIds = $renta->inventarioItems->pluck('id')->toArray();
+
+            if (!empty($inventarioItemIds)) {
+                if ($request->estado_renta === 'Finalizada') {
+                    // Si la renta finaliza, enviar equipos a mantenimiento
+                    // Esto disparará el trigger trg_inventario_item_after_update
+                    DB::table('inventario_item')
+                        ->whereIn('id', $inventarioItemIds)
+                        ->update([
+                            'estado_item' => 'EnMantenimiento',
+                            'updated_at' => now()
+                        ]);
+                } elseif ($request->estado_renta === 'Cancelada') {
+                    // Si la renta se cancela, poner equipos disponibles
+                    DB::table('inventario_item')
+                        ->whereIn('id', $inventarioItemIds)
+                        ->update([
+                            'estado_item' => 'Disponible',
+                            'updated_at' => now()
+                        ]);
+                }
+            }
+
             $data = [
                 'message' => 'renta actualizada',
                 'renta' => $renta,

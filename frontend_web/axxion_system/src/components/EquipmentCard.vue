@@ -204,11 +204,24 @@ const getSpecifications = computed(() => {
 
 // Obtener alquiler actual
 const getCurrentRental = computed(() => {
-  if (props.equipment.rentas && Array.isArray(props.equipment.rentas)) {
-    return props.equipment.rentas.find(renta => 
-      renta.estado === 'Activa' || renta.estado === 'active' || !renta.fecha_fin
-    ) || null;
+  // Primero verificar si viene renta_activa del backend
+  if (props.equipment.renta_activa) {
+    return {
+      clientName: props.equipment.renta_activa.cliente_nombre,
+      fecha_fin: props.equipment.renta_activa.fecha_fin_prevista,
+      endDate: props.equipment.renta_activa.fecha_fin_prevista,
+      estado: props.equipment.renta_activa.estado_renta
+    };
   }
+  
+  // Fallback al método anterior
+  if (props.equipment.rentas && Array.isArray(props.equipment.rentas)) {
+    const rentaActiva = props.equipment.rentas.find(renta => 
+      renta.estado === 'Activa' || renta.estado === 'active' || !renta.fecha_fin
+    );
+    if (rentaActiva) return rentaActiva;
+  }
+  
   return props.equipment.currentRental || null;
 });
 
@@ -238,6 +251,11 @@ const getCategoryLabel = (category) => {
 
 // Mapear estado para compatibilidad
 const getMappedStatus = (equipment) => {
+  // Verificar primero si hay renta activa
+  if (equipment.renta_activa) {
+    return 'alquilado';
+  }
+  
   // Si tiene estado_item, mapearlo
   if (equipment.estado_item) {
     const estadoMap = {
@@ -248,6 +266,7 @@ const getMappedStatus = (equipment) => {
     };
     return estadoMap[equipment.estado_item] || equipment.estado_item.toLowerCase();
   }
+  
   // Usar estado normal si existe
   return equipment.estado || equipment.status || 'disponible';
 };

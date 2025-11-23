@@ -93,7 +93,7 @@ const props = defineProps({
   payload: Object,
   loading: Boolean
 });
-const emit = defineEmits(['close', 'save']);
+const emit = defineEmits(['close', 'save', 'delete']);
 
 const localPayload = ref({});
 const clientes = ref([]);
@@ -182,8 +182,11 @@ const normalizePayload = () => ({
 });
 
 const save = () => {
-  console.log('Emitendo desde modal (raw):', localPayload.value);
-  emit('save', localPayload.value);
+  console.log('Emitiendo desde modal (raw):', localPayload.value);
+  if (props.mode === 'delete') {
+    emit('delete');
+  } else {
+    emit('save', localPayload.value);
+  }
 }
 </script>
-
