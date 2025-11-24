@@ -90,27 +90,7 @@
   </fwb-modal>
   </div>
 
-  <fwb-footer>
-    <fwb-footer-copyright
-      by="Flowbite™"
-      href="https://flowbite.com/"
-      copyright-message="All Rights Reserved."
-    />
-    <fwb-footer-link-group>
-      <fwb-footer-link href="#">
-        About
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Privacy Policy
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Licensing
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Contact
-      </fwb-footer-link>
-    </fwb-footer-link-group>
-  </fwb-footer>
+  <Footer />
 </template>
 
 <script setup>
@@ -119,18 +99,11 @@ import axios from 'axios';
 import { useUserStore } from '@/stores/user.js';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
+import Footer from '@/components/Footer.vue';
 import Modal from '@/components/modal.vue';
 import UserCard from '@/components/UserCard.vue';
 import UserForm from '@/components/UserForm.vue';
-import {
-  FwbAlert,
-  FwbFooter,
-  FwbFooterCopyright,
-  FwbFooterLink,
-  FwbFooterLinkGroup,
-} from 'flowbite-vue';
-import { FwbButton } from 'flowbite-vue';
-import { FwbModal } from 'flowbite-vue';
+import { FwbAlert, FwbButton, FwbModal } from 'flowbite-vue';
 // Store
 const userStore = useUserStore();
 

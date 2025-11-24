@@ -107,7 +107,7 @@
         <!-- System Modules Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- Categories Module -->
-          <RouterLink to="/categories" class="group">
+          <RouterLink to="/category" class="group">
             <fwb-card class="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
               <div class="p-6 text-center">
                 <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -265,29 +265,7 @@
   </div>
 
 
-  <footer> 
-  <fwb-footer class="mt-auto">
-    <fwb-footer-copyright
-      by="AXION SYSTEM™"
-      href="#"
-      copyright-message="Todos los derechos reservados."
-    />
-    <fwb-footer-link-group>
-      <fwb-footer-link href="#">
-        Acerca de
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Política de Privacidad
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Licencias
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Contacto
-      </fwb-footer-link>
-    </fwb-footer-link-group>
-  </fwb-footer>
-  </footer>
+  <Footer />
   
   <!-- Componente de Debug -->
   <DebugUserInfo />
@@ -298,6 +276,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import SideBar from '@/components/SideBar.vue'
 import headerP from '@/components/headerP.vue'
+import Footer from '@/components/Footer.vue'
 import DebugUserInfo from '@/components/DebugUserInfo.vue'
 import { useInventoryStore } from '@/stores/inventory.js'
 import {
@@ -305,10 +284,6 @@ import {
   FwbButton,
   FwbCard,
   FwbBadge,
-  FwbFooter,
-  FwbFooterCopyright,
-  FwbFooterLink,
-  FwbFooterLinkGroup,
 } from 'flowbite-vue'
 
 /**

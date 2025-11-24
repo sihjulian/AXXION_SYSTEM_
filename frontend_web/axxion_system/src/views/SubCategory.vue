@@ -83,26 +83,7 @@
         </div>
         </div>
         
-        <fwb-footer>
-            <fwb-footer-copyright
-            by="Flowbite™"
-            href="https://flowbite.com/"
-            />
-            <fwb-footer-link-group>
-            <fwb-footer-link href="#">
-                About
-            </fwb-footer-link>
-            <fwb-footer-link href="#">
-                Privacy Policy
-            </fwb-footer-link>
-            <fwb-footer-link href="#">
-                Licensing
-            </fwb-footer-link>
-            <fwb-footer-link href="#">
-                Contact
-            </fwb-footer-link>
-            </fwb-footer-link-group>
-        </fwb-footer>
+        <Footer />
     
 </template>
 
@@ -110,16 +91,10 @@
 import { ref, computed, onMounted } from 'vue';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
+import Footer from '@/components/Footer.vue';
 import CategoryService from '@/services/CategoryService';
-import { FwbButton, FwbModal, FwbAlert, FwbInput } from 'flowbite-vue';
-import { FwbCard } from 'flowbite-vue';
+import { FwbButton, FwbModal, FwbAlert, FwbInput, FwbCard } from 'flowbite-vue';
 import CategoryCard from "@/components/CategoryCard.vue";
-import {
-  FwbFooter,
-  FwbFooterCopyright,
-  FwbFooterLink,
-  FwbFooterLinkGroup,
-} from 'flowbite-vue';
 
 // Estado local
 const displayedCategories = ref([]);

@@ -409,30 +409,7 @@
       </template>
     </fwb-modal>
   </div>
-<!--footer-->
-  <footer>
-  <fwb-footer>
-    <fwb-footer-copyright
-      by="Flowbite™"
-      href="https://flowbite.com/"
-      copyright-message="All Rights Reserved."
-    />
-    <fwb-footer-link-group>
-      <fwb-footer-link href="#">
-        About
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Privacy Policy
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Licensing
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Contact
-      </fwb-footer-link>
-    </fwb-footer-link-group>
-  </fwb-footer>
-</footer>
+  <Footer />
 </template>
 
 <script setup>
@@ -449,21 +426,19 @@ import { useMaintenanceStore } from '@/stores/maintenance.js';
 import { useUserStore } from '@/stores/user.js';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
+import Footer from '@/components/Footer.vue';
 import EquipmentCard from '@/components/EquipmentCard.vue';
 import EquipmentForm from '@/components/EquipmentForm.vue';
 import EquipmentDetails from '@/components/EquipmentDetails.vue';
 import CartDrawer from '@/components/CartDrawer.vue'; // Import CartDrawer
 import { 
   FwbAlert,
+  FwbBadge,
   FwbButton,
   FwbModal,
   FwbCard,
   FwbInput,
-  FwbPagination,
-  FwbFooter,
-  FwbFooterCopyright,
-  FwbFooterLink,
-  FwbFooterLinkGroup
+  FwbPagination
 } from 'flowbite-vue';
 
 // Stores
