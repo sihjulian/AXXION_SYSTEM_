@@ -124,6 +124,17 @@ import SolicitudService from '@/services/SolicitudService';
 import CotizacionService from '@/services/CotizacionService';
 import ClienteService from '@/services/ClienteService';
 
+/**
+ * Componente CartDrawer.
+ * 
+ * Panel deslizante (drawer) que muestra el contenido del carrito de cotización.
+ * Permite al usuario:
+ * - Ver los items seleccionados.
+ * - Ajustar cantidades o eliminar items.
+ * - Seleccionar un cliente y fechas para la cotización.
+ * - Finalizar el proceso generando una Solicitud y una Cotización.
+ */
+
 const cartStore = useCartStore();
 const router = useRouter();
 const clients = ref([]);
@@ -132,6 +143,7 @@ const fechaInicio = ref('');
 const fechaFin = ref('');
 const isProcessing = ref(false);
 
+// Carga la lista de clientes al montar el componente para el selector del checkout.
 onMounted(async () => {
     try {
         const response = await ClienteService.getAll();
@@ -143,11 +155,17 @@ onMounted(async () => {
     }
 });
 
+/**
+ * Formatea un valor numérico a moneda colombiana (COP).
+ * @param {number} value - Valor a formatear.
+ * @returns {string} Valor formateado (ej. $1.000.000 COP).
+ */
 const formatCurrency = (value) => {
     if (!value) return '$0 COP';
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value);
 };
 
+// Métodos para manipular la cantidad de items en el carrito
 const incrementQuantity = (item) => {
     cartStore.updateQuantity(item.id, (item.quantity || 1) + 1);
 };
@@ -156,12 +174,18 @@ const decrementQuantity = (item) => {
     cartStore.updateQuantity(item.id, (item.quantity || 1) - 1);
 };
 
+/**
+ * Procesa el checkout (finalización de la cotización).
+ * 1. Crea una Solicitud con los items del carrito.
+ * 2. Crea una Cotización asociada a esa solicitud.
+ * 3. Limpia el carrito y redirige al detalle de la cotización creada.
+ */
 const checkout = async () => {
     if (!selectedClientId.value || !fechaInicio.value || !fechaFin.value) return;
     
     isProcessing.value = true;
     try {
-        // 1. Create Solicitud
+        // 1. Crear Solicitud
         const solicitudData = {
             cliente_id: selectedClientId.value,
             fecha_solicitud: new Date().toISOString().slice(0, 19).replace('T', ' '),
@@ -177,12 +201,12 @@ const checkout = async () => {
         const solicitudResponse = await SolicitudService.create(solicitudData);
         const solicitudId = solicitudResponse.solicitud ? solicitudResponse.solicitud.id : solicitudResponse.id;
 
-        // 2. Create Cotizacion
+        // 2. Crear Cotización
         const cotizacionData = {
             cliente_id: selectedClientId.value,
             solicitud_id: solicitudId,
             fecha_cotizacion: new Date().toISOString().slice(0, 19).replace('T', ' '),
-            fecha_validez: new Date(new Date().setDate(new Date().getDate() + 15)).toISOString().slice(0, 10), // Valid for 15 days
+            fecha_validez: new Date(new Date().setDate(new Date().getDate() + 15)).toISOString().slice(0, 10), // Válido por 15 días
             monto_total: cartStore.totalPrice,
             estado_cotizacion: 'Borrador',
             terminos_condiciones: 'Términos estándar de alquiler.',
@@ -197,12 +221,12 @@ const checkout = async () => {
 
         const response = await CotizacionService.createCotizacion(cotizacionData);
 
-        // 3. Clear cart and redirect
+        // 3. Limpiar carrito y redirigir
         cartStore.clearCart();
         cartStore.closeCart();
         
         alert('Cotización creada exitosamente!');
-        // Redirect to Quotation Details view
+        // Redirigir a la vista de detalle de cotización
         const cotizacionId = response.cotizacion ? response.cotizacion.id : response.id;
         router.push(`/quotation/${cotizacionId}`);
         

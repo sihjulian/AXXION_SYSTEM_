@@ -13,7 +13,8 @@ use Illuminate\Validation\Rule;
 class InventarioItemController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Muestra el listado de todos los items del inventario.
+     * Carga relaciones con producto, mantenimientos y rentas.
      */
     public function index()
     {
@@ -33,7 +34,8 @@ class InventarioItemController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo item de inventario en la base de datos.
+     * Valida los datos de entrada antes de crear el registro.
      */
     public function store(Request $request)
     {
@@ -80,7 +82,7 @@ class InventarioItemController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra un item específico del inventario por su ID.
      */
     public function show($id)
     {
@@ -109,7 +111,8 @@ class InventarioItemController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza un item de inventario existente.
+     * Requiere validación completa de los campos enviados.
      */
     public function update(Request $request, $id)
     {
@@ -165,7 +168,8 @@ class InventarioItemController extends Controller
     }
 
     /**
-     * Update partial resource in storage.
+     * Actualización parcial de un item de inventario (PATCH).
+     * Solo actualiza los campos presentes en la solicitud.
      */
     public function updatePartial(Request $request, $id)
     {
@@ -221,7 +225,7 @@ class InventarioItemController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un item del inventario.
      */
     public function destroy($id)
     {
@@ -257,7 +261,7 @@ class InventarioItemController extends Controller
     }
 
     /**
-     * Get inventario items by producto
+     * Obtiene todos los items de inventario asociados a un producto específico.
      */
     public function getByProducto($producto_id)
     {
@@ -282,7 +286,7 @@ class InventarioItemController extends Controller
     }
 
     /**
-     * Get inventario items by estado
+     * Filtra los items de inventario por su estado (ej. Disponible, Rentado).
      */
     public function getByEstado($estado)
     {
@@ -316,7 +320,11 @@ class InventarioItemController extends Controller
     }
 
     /**
-     * Get inventario items with rental status
+     * Obtiene items de inventario enriquecidos con el estado de su renta actual.
+     * 
+     * ANALOGÍA: Esta función es como un "Bibliotecario Omnisciente" que no solo sabe qué libros (items) 
+     * hay en la biblioteca, sino que tiene una ficha pegada en cada uno diciendo exactamente 
+     * quién lo tiene prestado ahora mismo y cuándo promete devolverlo.
      */
     public function getWithRentalStatus()
     {

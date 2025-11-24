@@ -15,6 +15,9 @@ use Illuminate\Validation\Rule;
 
 class cotizacionController extends Controller
 {
+    /**
+     * Lista todas las cotizaciones con sus detalles.
+     */
         public function index()
         {
             try {
@@ -32,6 +35,13 @@ class cotizacionController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Crea una nueva cotización y sus detalles.
+     * 
+     * ANALOGÍA: Esta función es como redactar un presupuesto formal. 
+     * Se suman los precios de todos los productos que el cliente quiere, 
+     * se aplican impuestos y descuentos, y se genera un documento con fecha de validez.
+     */
         public function store(Request $request){
             $validator = Validator::make($request->all(),[
                 'cliente_id' => ['required', Rule::exists('cliente','id')],
@@ -101,6 +111,9 @@ class cotizacionController extends Controller
             }
         }
 
+    /**
+     * Muestra una cotización específica con todos sus items.
+     */
         public function show($id)
         {
             try{
@@ -125,6 +138,9 @@ class cotizacionController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Elimina una cotización.
+     */
         public function destroy($id)
         {
             try {
@@ -151,6 +167,9 @@ class cotizacionController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Actualiza una cotización existente.
+     */
         public function update(Request $request, $id)
 {
     // 1) Buscar
@@ -232,6 +251,9 @@ class cotizacionController extends Controller
     ], 200);
 }
 
+    /**
+     * Actualización parcial de una cotización.
+     */
         public function updatePartial(Request $request, $id){
             $cotizacion = Cotizacion::find($id);
             if(!$cotizacion){

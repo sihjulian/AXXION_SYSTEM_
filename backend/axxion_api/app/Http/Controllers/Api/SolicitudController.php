@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Log;
 
 class SolicitudController extends Controller
 {
+    /**
+     * Lista todas las solicitudes registradas con sus clientes y productos.
+     */
     public function index()
     {
         try {
@@ -28,6 +31,13 @@ class SolicitudController extends Controller
         }
     }
 
+    /**
+     * Crea una nueva solicitud de productos.
+     * 
+     * ANALOGÍA: Esta función es como llenar un formulario de pedido en un restaurante: 
+     * el cliente (usuario) dice qué quiere comer (productos) y el mesero (sistema) 
+     * anota todo para pasarlo a la cocina.
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -94,6 +104,9 @@ class SolicitudController extends Controller
         }
     }
 
+    /**
+     * Muestra los detalles de una solicitud específica.
+     */
     public function show($id)
     {
         try {

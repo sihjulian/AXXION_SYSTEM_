@@ -18,6 +18,9 @@ class UsuarioController extends Controller
 {
 
 
+    /**
+     * Lista todos los usuarios del sistema con sus roles.
+     */
     public function index()
     {
         $usuarios = Usuario::with('roles')->get();
@@ -25,7 +28,8 @@ class UsuarioController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Registra un nuevo usuario en el sistema.
+     * Encripta la contraseña y asigna roles.
      */
     public function store(Request $request)
     {
@@ -80,7 +84,7 @@ class UsuarioController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los detalles de un usuario específico.
      */
     public function show(string $id)
     {
@@ -89,6 +93,13 @@ class UsuarioController extends Controller
     }
      
 
+    /**
+     * Autentica a un usuario y genera un token de acceso.
+     * 
+     * ANALOGÍA: Esta función actúa como el guardia de seguridad en la entrada de un edificio exclusivo. 
+     * Verifica tu identificación (credenciales) y si es válida, te da un pase temporal (token) 
+     * para que puedas moverte por las instalaciones.
+     */
     public function login(Request $request) {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
@@ -152,7 +163,7 @@ class UsuarioController extends Controller
      */
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un usuario del sistema.
      */
     public function destroy(string $id)
     {
@@ -162,6 +173,10 @@ class UsuarioController extends Controller
         return response()->json(status: 204);
     }
 
+    /**
+     * Actualiza la información de un usuario.
+     * Permite cambiar contraseña y roles.
+     */
     public function update(Request $request, string $id)
     {
         $usuario = Usuario::findOrFail($id);
@@ -222,6 +237,9 @@ class UsuarioController extends Controller
 
     }
 
+    /**
+     * Cierra la sesión del usuario invalidando su token.
+     */
     public function logout(){
         JWTAuth::invalidate(JWTAuth::getToken());
         return response()->json(['message' => 'Logged out successfully'], 200);

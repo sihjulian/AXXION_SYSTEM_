@@ -11,10 +11,50 @@
           {{ rentalStore.error }}
         </div>
         
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+        <div v-else>
+          <!-- Filtros -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 mx-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Buscar
+                </label>
+                <fwb-input 
+                  v-model="searchQuery"
+                  placeholder="Cliente o Equipo..."
+                  icon="fa-solid fa-search"
+                />
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Fecha de Renta
+                </label>
+                <input 
+                  type="date" 
+                  v-model="dateFilter"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                />
+              </div>
+              
+              <div class="flex items-end">
+                <fwb-button 
+                  gradient="red-yellow" 
+                  size="lg" 
+                  @click="clearFilters"
+                  class="w-full"
+                >
+                  <font-awesome-icon icon="fa-solid fa-times" class="mr-2"/>
+                  Limpiar Filtros
+                </fwb-button>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
           <!-- Tarjeta de Renta Moderna -->
           <div 
-            v-for="r in rentalStore.rentals" 
+            v-for="r in filteredRentals" 
             :key="r.id" 
             class="rental-card bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-3xl border border-gray-700"
           >
@@ -133,6 +173,8 @@
           </div>
         </div>
 
+        </div>
+
         <RentalModal
           :show="rentalStore.showModal"
           :mode="rentalStore.modalMode"
@@ -148,20 +190,54 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRentalStore } from '@/stores/rentalStore';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
 import RentalModal from '@/components/RentalModal.vue';
+import { FwbInput, FwbButton } from 'flowbite-vue';
 
 const rentalStore = useRentalStore();
 const router = useRouter();
+
+const searchQuery = ref('');
+const dateFilter = ref('');
 
 onMounted(() => {
   rentalStore.fetchRentals();
   rentalStore.fetchClientes();
 });
+
+const filteredRentals = computed(() => {
+  let rentals = rentalStore.rentals;
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    rentals = rentals.filter(r => {
+      const clientName = `${r.cliente?.nombre || ''} ${r.cliente?.nombre2 || ''} ${r.cliente?.apellido1 || ''} ${r.cliente?.apellido2 || ''}`.toLowerCase();
+      const equipmentMatch = r.inventario_items?.some(item => 
+        (item.producto?.nombre || '').toLowerCase().includes(query) || 
+        (item.numero_serie || '').toLowerCase().includes(query)
+      );
+      return clientName.includes(query) || equipmentMatch;
+    });
+  }
+
+  if (dateFilter.value) {
+    rentals = rentals.filter(r => {
+      if (!r.fecha_inicio) return false;
+      return r.fecha_inicio.startsWith(dateFilter.value);
+    });
+  }
+
+  return rentals;
+});
+
+const clearFilters = () => {
+  searchQuery.value = '';
+  dateFilter.value = '';
+};
 
 const handleSaveRental = async (payload) => {
     console.log('handleSaveRental called with payload:', payload);
@@ -238,57 +314,7 @@ const getStatusClass = (status) => {
 </script>
 
 <style scoped>
-.loader {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 6rem;
-  margin-top: 3rem;
-  margin-bottom: 3rem;
-}
-.loader:before,
-.loader:after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  animation: pulsOut 1.8s ease-in-out infinite;
-  filter: drop-shadow(0 0 1rem rgba(25,25,112));
-}
-.loader:before {
-  width: 100%;
-  padding-bottom: 100%;
-  box-shadow: inset 0 0 0 1rem #191970;
-  animation-name: pulsIn;
-}
-.loader:after {
-  width: calc(100% - 2rem);
-  padding-bottom: calc(100% - 2rem);
-  box-shadow: 0 0 0 0 #191970;
-}
 
-@keyframes pulsIn {
-  0% {
-    box-shadow: inset 0 0 0 1rem #191970;
-    opacity: 1;
-  }
-  50%, 100% {
-    box-shadow: inset 0 0 0 0 #191970;
-    opacity: 0;
-  }
-}
-
-@keyframes pulsOut {
-  0%, 50% {
-    box-shadow: 0 0 0 0 #191970;
-    opacity: 0;
-  }
-  100% {
-    box-shadow: 0 0 0 1rem #191970;
-    opacity: 1;
-  }
-}
 
 .rental-card {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

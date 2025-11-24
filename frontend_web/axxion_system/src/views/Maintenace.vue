@@ -63,23 +63,29 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Estado
                 </label>
-                <fwb-select v-model="statusFilter">
+                <select 
+                  v-model="statusFilter"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
                   <option value="">Todos</option>
                   <option v-for="status in statusOptions" :key="status.value" :value="status.value">
                     {{ status.name }}
                   </option>
-                </fwb-select>
+                </select>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Técnico Asignado
                 </label>
-                <fwb-select v-model="technicianFilter">
+                <select 
+                  v-model="technicianFilter"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
                   <option value="">Todos</option>
                   <option v-for="technician in technicianOptions" :key="technician.value" :value="technician.value">
                     {{ technician.name }}
                   </option>
-                </fwb-select>
+                </select>
               </div>
               <div class="flex items-end">
                 <fwb-button gradient="red-yellow" size="lg" @click="clearFilters" class="w-full">
@@ -128,8 +134,8 @@
                 </fwb-table-row>
                 <fwb-table-row v-if="filteredTasks.length === 0">
                    <fwb-table-cell colspan="6" class="text-center py-8 text-gray-500">
-                     <div v-if="isLoading" class="flex items-center justify-center">
-                       <font-awesome-icon icon="fa-solid fa-spinner" class="mr-2 animate-spin" />
+                     <div v-if="isLoading" class="flex items-center justify-center flex-col">
+                       <span class="loader mb-2"></span>
                        Cargando mantenimientos...
                      </div>
                      <div v-else>
@@ -206,22 +212,30 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Responsable *
                 </label>
-                <fwb-select v-model="taskForm.responsable" required>
+                <select 
+                  v-model="taskForm.responsable" 
+                  required
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
                   <option value="">Seleccionar responsable</option>
                   <option v-for="technician in technicianOptions" :key="technician.value" :value="technician.value">
                     {{ technician.name }}
                   </option>
-                </fwb-select>
+                </select>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Estado *
                 </label>
-                <fwb-select v-model="taskForm.estado_mantenimiento" required>
+                <select 
+                  v-model="taskForm.estado_mantenimiento" 
+                  required
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
                   <option v-for="status in statusOptions" :key="status.value" :value="status.value">
                     {{ status.name }}
                   </option>
-                </fwb-select>
+                </select>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -229,11 +243,15 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Tipo de Mantenimiento *
                 </label>
-                <fwb-select v-model="taskForm.tipo_mantenimiento" required>
+                <select 
+                  v-model="taskForm.tipo_mantenimiento" 
+                  required
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
                   <option v-for="type in typeOptions" :key="type.value" :value="type.value">
                     {{ type.name }}
                   </option>
-                </fwb-select>
+                </select>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -588,8 +606,12 @@ onMounted(async () => {
         const itemIds = autoOpenItems.split(',');
         console.log('Auto-opening maintenance for items:', itemIds);
         
+        // Esperar un poco más para asegurar que los datos se cargaron
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        console.log('Maintenances disponibles:', maintenances.value);
+        
         // Buscar el primer mantenimiento programado para estos items (el más reciente)
-        // Asumimos que el trigger acaba de crear uno con estado 'PROGRAMADO'
         const targetMaintenance = maintenances.value.find(m => 
             itemIds.includes(String(m.inventario_item_id)) && 
             (m.estado_mantenimiento === 'PROGRAMADO' || m.estado_mantenimiento === 'Programado')
@@ -597,10 +619,20 @@ onMounted(async () => {
 
         if (targetMaintenance) {
             console.log('Found target maintenance to auto-open:', targetMaintenance);
+            console.log('Inventario item en mantenimiento:', targetMaintenance.inventario_item);
+            
+            // Esperar un tick para que las opciones se rendericen
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             editTask(targetMaintenance);
-            addNotification('Mantenimiento automático detectado. Por favor complete los detalles.', 'info');
+            addNotification('Mantenimiento automático detectado. Por favor complete los detalles.', 'success');
         } else {
             console.log('No matching maintenance found for auto-open items');
+            console.log('Available maintenances:', maintenances.value.map(m => ({
+                id: m.id,
+                inventario_item_id: m.inventario_item_id,
+                estado: m.estado_mantenimiento
+            })));
         }
     }
 
@@ -620,16 +652,40 @@ function showAddModal() {
 }
 
 function editTask(task) {
+  console.log('editTask called with task:', task);
+  
   isEditMode.value = true;
   taskForm.value = { ...task };
+  
+  console.log('taskForm after copy:', taskForm.value);
+  
   // Asegurar fechas en formato correcto para inputs
-  if(taskForm.value.fecha_inicio) taskForm.value.fecha_inicio = taskForm.value.fecha_inicio.split('T')[0];
-  if(taskForm.value.fecha_fin_prevista) taskForm.value.fecha_fin_prevista = taskForm.value.fecha_fin_prevista.split('T')[0];
+  if(taskForm.value.fecha_inicio) {
+    taskForm.value.fecha_inicio = taskForm.value.fecha_inicio.split('T')[0];
+  }
+  if(taskForm.value.fecha_fin_prevista) {
+    taskForm.value.fecha_fin_prevista = taskForm.value.fecha_fin_prevista.split('T')[0];
+  }
   
   // Asegurar que estado_mantenimiento tenga un valor
   if (!taskForm.value.estado_mantenimiento) {
     taskForm.value.estado_mantenimiento = 'PROGRAMADO';
   }
+  
+  // Asegurar que tipo_mantenimiento tenga un valor
+  if (!taskForm.value.tipo_mantenimiento) {
+    taskForm.value.tipo_mantenimiento = 'CORRECTIVO';
+  }
+  
+  // Asegurar que responsable tenga un valor
+  if (!taskForm.value.responsable) {
+    taskForm.value.responsable = 'Sistema';
+  }
+  
+  console.log('taskForm final:', taskForm.value);
+  console.log('Available users:', users.value);
+  console.log('Available statuses:', statusOptions.value);
+  console.log('Available types:', typeOptions.value);
   
   selectedTask.value = task;
   isShowModal.value = true;
@@ -655,13 +711,19 @@ async function saveTask() {
 
     try {
         isSaving.value = true;
+        
+        // Asegurar que los campos enum estén en mayúsculas para la API
+        const payload = { ...taskForm.value };
+        if (payload.tipo_mantenimiento) payload.tipo_mantenimiento = payload.tipo_mantenimiento.toUpperCase();
+        if (payload.estado_mantenimiento) payload.estado_mantenimiento = payload.estado_mantenimiento.toUpperCase();
+        
         if (isEditMode.value && selectedTask.value) {
             // Update existing task
-            await maintenanceStore.updateMaintenance(selectedTask.value.id, taskForm.value);
+            await maintenanceStore.updateMaintenance(selectedTask.value.id, payload);
             addNotification('Mantenimiento actualizado exitosamente', 'success');
         } else {
             // Add new task
-            await maintenanceStore.createMaintenance(taskForm.value);
+            await maintenanceStore.createMaintenance(payload);
             addNotification('Mantenimiento creado exitosamente', 'success');
         }
         closeModal();

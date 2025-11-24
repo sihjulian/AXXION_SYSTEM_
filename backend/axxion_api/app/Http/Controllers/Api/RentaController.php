@@ -12,6 +12,9 @@ use Illuminate\Validation\Rule;
 
 class RentaController extends Controller
 {
+    /**
+     * Lista todas las rentas con sus detalles completos (cliente, cotización, equipos, entrega, devolución).
+     */
     public function index() 
     {
         try {
@@ -35,6 +38,12 @@ class RentaController extends Controller
                 ], 500);
             }
     }
+    /**
+     * Crea una nueva renta en el sistema.
+     * 
+     * ANALOGÍA: Es como firmar un contrato de alquiler. Se validan las fechas, el cliente, 
+     * el dinero (depósito y total) y se entregan las llaves (equipos).
+     */
     public function store(Request $request) 
     {
         try {
@@ -92,6 +101,9 @@ class RentaController extends Controller
                 ], 500);
             }
     }
+    /**
+     * Muestra los detalles de una renta específica.
+     */
     public function show($id)
     {
         try {
@@ -122,6 +134,13 @@ class RentaController extends Controller
                 ], 500);
             }
     }
+    /**
+     * Elimina una renta y gestiona el estado de los equipos asociados.
+     * 
+     * ANALOGÍA: Esta función es como cancelar una reserva de hotel: no solo se borra la reserva, 
+     * sino que la habitación (equipo) se envía a limpieza (mantenimiento) para asegurar que 
+     * esté lista para el siguiente huésped.
+     */
     public function destroy($id)
     {
         try {
@@ -174,6 +193,10 @@ class RentaController extends Controller
                 ], 500);
         }
     }
+    /**
+     * Actualiza una renta existente y sincroniza los equipos.
+     * Maneja lógica compleja para cambiar el estado de los equipos según si la renta finaliza o se cancela.
+     */
     public function update(Request $request, $id) 
     {
         try {
@@ -277,6 +300,9 @@ class RentaController extends Controller
                 ], 500);
             }
     }
+    /**
+     * Actualización parcial de una renta (PATCH).
+     */
     public function updatePartial(Request $request, $id)
     {
         try {

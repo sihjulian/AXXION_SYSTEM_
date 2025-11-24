@@ -162,6 +162,17 @@ import { computed } from 'vue';
 import { FwbCard, FwbButton } from 'flowbite-vue';
 import StatusBadge from './StatusBadge.vue';
 
+/**
+ * Componente EquipmentCard.
+ * 
+ * Tarjeta rica en información para mostrar un equipo individual en el inventario.
+ * Muestra:
+ * - Imagen y estado (badge).
+ * - Detalles técnicos (procesador, RAM, etc.).
+ * - Información financiera y de rentas activas.
+ * - Botones de acción (alquilar, mantener, editar, eliminar).
+ */
+
 // Props
 const props = defineProps({
   equipment: {
@@ -171,15 +182,18 @@ const props = defineProps({
 });
 
 // Emits
+// Emits: Eventos que dispara la tarjeta hacia el componente padre
 const emit = defineEmits([
-  'view-details',
-  'edit-equipment', 
-  'delete-equipment',
-  'rent-equipment',
-  'maintenance-equipment'
+  'view-details',        // Ver detalles completos
+  'edit-equipment',      // Abrir modal de edición
+  'delete-equipment',    // Solicitar eliminación
+  'rent-equipment',      // Iniciar flujo de renta
+  'maintenance-equipment' // Iniciar flujo de mantenimiento
 ]);
 
 // Computed
+// Computed: Gestiona la imagen del equipo.
+// Si no hay imagen cargada, devuelve una por defecto basada en la categoría.
 const equipmentImage = computed(() => {
   if (props.equipment.images && props.equipment.images.length > 0) {
     return props.equipment.images[0];
@@ -203,6 +217,8 @@ const getSpecifications = computed(() => {
 });
 
 // Obtener alquiler actual
+// Computed: Identifica si el equipo está actualmente alquilado.
+// Intenta obtener la información de 'renta_activa' (backend) o buscar en el array de rentas.
 const getCurrentRental = computed(() => {
   // Primero verificar si viene renta_activa del backend
   if (props.equipment.renta_activa) {
@@ -250,6 +266,8 @@ const getCategoryLabel = (category) => {
 };
 
 // Mapear estado para compatibilidad
+// Normaliza el estado del equipo para que coincida con los valores esperados por StatusBadge.
+// Prioriza 'renta_activa', luego 'estado_item' y finalmente 'estado'/'status'.
 const getMappedStatus = (equipment) => {
   // Verificar primero si hay renta activa
   if (equipment.renta_activa) {
