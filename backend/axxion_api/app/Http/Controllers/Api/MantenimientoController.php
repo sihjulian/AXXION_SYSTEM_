@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 class MantenimientoController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Lista todos los mantenimientos registrados.
      */
     public function index()
     {
@@ -25,7 +25,10 @@ class MantenimientoController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Registra un nuevo mantenimiento en el sistema.
+     * 
+     * ANALOGÍA: Es como abrir una "Orden de Trabajo" en un taller mecánico. 
+     * Se anotan los datos del vehículo (item), qué se le va a hacer, quién lo hará y cuándo.
      */
     public function store(Request $request)
     {
@@ -72,13 +75,12 @@ class MantenimientoController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los detalles de un mantenimiento específico.
      */
     public function show($id)
     {
         try {
             $mantenimiento = Mantenimiento::with('inventarioItem')->find($id);
-
             if (!$mantenimiento) {
                 return response()->json(['error' => 'Mantenimiento no encontrado'], 404);
             }
@@ -91,7 +93,7 @@ class MantenimientoController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza la información de un mantenimiento completo.
      */
     public function update(Request $request, $id)
     {
@@ -144,7 +146,8 @@ class MantenimientoController extends Controller
     }
 
     /**
-     * Update partial resource in storage.
+     * Actualiza parcialmente un registro de mantenimiento.
+     * Útil para cambiar solo el estado o agregar costos finales sin re-enviar todo.
      */
     public function updatePartial(Request $request, $id)
     {
@@ -197,7 +200,7 @@ class MantenimientoController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un registro de mantenimiento.
      */
     public function destroy($id)
     {
@@ -227,7 +230,7 @@ class MantenimientoController extends Controller
     }
 
     /**
-     * Get mantenimientos by inventario item
+     * Obtiene el historial de mantenimientos de un item específico.
      */
     public function getByInventarioItem($inventario_item_id)
     {
@@ -247,7 +250,7 @@ class MantenimientoController extends Controller
     }
 
     /**
-     * Get mantenimientos by estado
+     * Filtra mantenimientos por su estado actual (ej. PROGRAMADO, EN_PROCESO).
      */
     public function getByEstado($estado)
     {
@@ -273,7 +276,7 @@ class MantenimientoController extends Controller
     }
 
     /**
-     * Get mantenimientos by tipo
+     * Filtra mantenimientos por tipo (ej. PREVENTIVO, CORRECTIVO).
      */
     public function getByTipo($tipo)
     {

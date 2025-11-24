@@ -90,12 +90,24 @@ import WorksheetMant from '@/components/WorksheetMant.vue'
 
 use([CanvasRenderer, PieChart, TitleComponent, TooltipComponent, LegendComponent])
 
+/**
+ * Vista ReportMaintenances.
+ * 
+ * Genera reportes detallados sobre las actividades de mantenimiento.
+ * Funcionalidades:
+ * - Visualización del costo total de mantenimientos.
+ * - Gráfico circular (Pie Chart) de mantenimientos por estado.
+ * - Tabla detallada con información de costos, fechas, tipos y responsables.
+ * - Exportación de datos a Excel mediante WorksheetMant.
+ */
+
 const mantenimientos = ref([])
 const costoTotal = ref(0)
 const chartByEstado = ref({})
 const mantenimiento = ref([]);
 
 // cargar datos
+// Obtiene los mantenimientos del servicio, calcula costos totales y prepara datos para el gráfico.
 onMounted(async () => {
   try {
     const response = await ReportService.getMaintenances()

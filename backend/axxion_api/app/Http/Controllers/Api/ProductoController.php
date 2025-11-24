@@ -7,11 +7,12 @@ use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProductoController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Muestra el catálogo completo de productos.
      */
     public function index()
     {
@@ -24,7 +25,11 @@ class ProductoController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Registra un nuevo producto en el sistema.
+     * 
+     * ANALOGÍA: Esta función actúa como el encargado de almacén que recibe un nuevo producto, 
+     * verifica que venga con toda su documentación (validación) y lo registra en el sistema 
+     * asignándole un lugar (estado).
      */
     public function store(Request $request)
     {
@@ -69,11 +74,12 @@ class ProductoController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los detalles de un producto específico, incluyendo sus relaciones.
      */
-    public function show(Producto $producto)
+    public function show(Producto $id)
     {
         try {
+            $producto = Producto::with('subcategorias', 'inventarioItems', 'solicitudes', 'detallesCotizacion')->find($id);
             return response()->json($producto);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al obtener el producto: ' . $e->getMessage()], 500);
@@ -81,7 +87,7 @@ class ProductoController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza la información de un producto existente.
      */
     public function update(Request $request, $id)
     {
@@ -142,7 +148,7 @@ class ProductoController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un producto del sistema.
      */
     public function destroy($id)
     {

@@ -16,23 +16,33 @@
                     </p>
                 </div>
             </fwb-card>
-            <fwb-card class="w-sm flex-1 min-w-[300px]">
+            <fwb-card class="w-sm flex-1 min-w-[300px] bg-linear-to-br from-[#9914fb] to-[#ac45ff]">
                 <div class="p-5">
                     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900  dark:text-white">
                         Valor Total del Inventario
                     </h5>
-                    <p class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">
-                        ${{ valorTotal.toLocaleString() }}
+                    <p class="text-3xl font-extrabold text-white flex justify-between">
+                        <b>
+                            ${{ valorTotal.toLocaleString() }}
+                        </b>
+                        <b class="bg-[#b254ff] rounded-full p-2">
+                            <font-awesome-icon icon="fa-solid fa-dollar-sign" />
+                        </b>
                     </p>
                 </div>
             </fwb-card>
-            <fwb-card class="w-sm flex-1 min-w-[300px]">
+            <fwb-card class="w-sm flex-1 min-w-[300px] bg-linear-to-br from-[#f44a01] to-[#fe6900]">
                 <div class="p-5">
                     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900  dark:text-white">
                         Equipos disponibles
                     </h5>
-                    <p class="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400">
-                        {{ equiposDisponibles }}
+                    <p class="text-4xl font-extrabold text-white flex justify-between" >
+                        <f>
+                            {{ equiposDisponibles }}
+                        </f>
+                        <f class="bg-[#fb7532] rounded-full p-2">
+                            <font-awesome-icon icon="fa-solid fa-screwdriver-wrench" />
+                        </f>
                     </p>
                 </div>
             </fwb-card>

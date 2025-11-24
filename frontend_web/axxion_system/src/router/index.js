@@ -150,6 +150,15 @@ const routes = [
       title: 'Reporte de Alertas',
     },
   },
+  {
+    path: '/quotation/:id',
+    name: 'QuotationDetails',
+    component: () => import('@/views/QuotationDetails.vue'),
+    meta: {
+      requiresAuth: true,
+      title: 'Detalle de Cotización'
+    }
+  }
 ]
 
 const router = createRouter({

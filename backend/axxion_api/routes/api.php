@@ -18,10 +18,20 @@ use App\Http\Controllers\Api\ReporteController;
 use App\Http\Controllers\Api\AlertaController;
 use App\Http\Controllers\Api\InventarioItemController;
 
+/**
+ * ANALOGÍA: Este archivo actúa como el 'Mapa de Rutas' o el 'Directorio Telefónico' de la API. 
+ * Define qué URLs están disponibles y a qué controlador (operador) se debe dirigir cada llamada.
+ */
+
 // ============================================
 // RUTAS PÚBLICAS (sin autenticación)
 // ============================================
+// ============================================
+// RUTAS PÚBLICAS (sin autenticación)
+// ============================================
+// Permite a los usuarios iniciar sesión y obtener un token.
 Route::post('/login', [UsuarioController::class, 'login']);
+// Permite registrar un nuevo usuario inicial (abierto temporalmente).
 Route::post('/usuarios', [UsuarioController::class, 'store']); // Registro de usuarios
 
 // ============================================
@@ -30,6 +40,7 @@ Route::post('/usuarios', [UsuarioController::class, 'store']); // Registro de us
 Route::middleware(['jwt.auth'])->group(function () {
     
     // Ruta de logout
+    // Ruta de logout: Invalida el token actual.
     Route::post('/logout', [UsuarioController::class, 'logout']);
     
     // ============================================
@@ -41,6 +52,8 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/usuario/{id}', [UsuarioController::class, 'update']);
     
     // Solo administradores pueden eliminar usuarios
+    // Solo administradores pueden eliminar usuarios.
+    // Middleware 'check.role:ADMIN' asegura que solo usuarios con rol ADMIN accedan.
     Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
@@ -55,10 +68,12 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::patch('/producto/{id}', [ProductoController::class, 'updatePartial']);
     
     // Solo administradores pueden eliminar productos
+    // Solo administradores pueden eliminar productos del catálogo.
     Route::delete('/producto/{id}', [ProductoController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
     // ROLES (solo administradores)
+    // Gestión de los roles de usuario (ej. Admin, Vendedor).
     // ============================================
     Route::get('/rol', [rolController::class, 'index'])->middleware('check.role:ADMIN');
     Route::post('/rol', [rolController::class, 'store'])->middleware('check.role:ADMIN');
@@ -69,6 +84,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     // ============================================
     // CATEGORÍAS (requiere autenticación)
+    // Gestión de categorías de productos.
     // ============================================
     Route::get('/categoria', [categoriaController::class, 'index']);
     Route::get('/categoria/{id}', [categoriaController::class, 'show']);
@@ -81,6 +97,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     // ============================================
     // SUBCATEGORÍAS (requiere autenticación)
+    // Gestión de subcategorías para una clasificación más detallada.
     // ============================================
     Route::get('/subcategoria', [subcategoriaController::class, 'index']);
     Route::get('/subcategoria/{id}', [subcategoriaController::class, 'show']);
@@ -93,6 +110,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     // ============================================
     // CLIENTES (requiere autenticación)
+    // Gestión de la base de datos de clientes.
     // ============================================
     Route::get('/cliente', [clienteController::class, 'index']);
     Route::get('/cliente/{id}', [clienteController::class, 'show']);
@@ -105,6 +123,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     // ============================================
     // COTIZACIONES (requiere autenticación)
+    // Creación y gestión de presupuestos para clientes.
     // ============================================
     Route::get('/cotizacion', [cotizacionController::class, 'index']);
     Route::get('/cotizacion/{id}', [cotizacionController::class, 'show']);
@@ -117,6 +136,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     // ============================================
     // DETALLE COTIZACIÓN (requiere autenticación)
+    // Gestión de los ítems individuales dentro de una cotización.
     // ============================================
     Route::get('/detalleCotizacion', [detalleCotizacionController::class, 'index']);
     Route::get('/detalleCotizacion/{id}', [detalleCotizacionController::class, 'show']);
@@ -129,6 +149,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     // ============================================
     // DEVOLUCIONES (requiere autenticación)
+    // Registro y gestión del retorno de equipos rentados.
     // ============================================
     Route::get('/devolucion', [devolucionController::class, 'index']);
     Route::get('/devolucion/{id}', [devolucionController::class, 'show']);
@@ -141,6 +162,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     // ============================================
     // DIRECCIONES (requiere autenticación)
+    // Gestión de direcciones de clientes y entregas.
     // ============================================
     Route::get('/direccion', [direccionController::class, 'index']);
     Route::get('/direccion/{id}', [direccionController::class, 'show']);
@@ -153,6 +175,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     // ============================================
     // ENTREGAS (requiere autenticación)
+    // Gestión logística de envíos de equipos.
     // ============================================
     Route::get('/entrega', [entregaController::class, 'index']);
     Route::get('/entrega/{id}', [entregaController::class, 'show']);
@@ -165,6 +188,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     // ============================================
     // MANTENIMIENTOS (requiere autenticación)
+    // Gestión del ciclo de vida de mantenimiento de los equipos.
     // ============================================
     Route::get('/mantenimiento', [MantenimientoController::class, 'index']);
     Route::get('/mantenimiento/{id}', [MantenimientoController::class, 'show']);
@@ -182,15 +206,18 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     // ============================================
     // REPORTES (requiere autenticación)
+    // Generación de reportes y métricas del sistema.
     // ============================================
 
     Route::get('/reportes/inventario', [ReporteController::class, 'inventario']);
     Route::get('/reportes/usuarios', [ReporteController::class, 'usuarios']);
     Route::get('/reportes/rentas', [ReporteController::class, 'rentas']);
     Route::get('/reportes/metrics', [ReporteController::class, 'metrics']);
+    Route::get('/reportes/metricsAlq', [ReporteController::class, 'metricsAlq']);
 
     // ============================================
     // ALQUILER (requiere autenticación)
+    // Gestión principal de contratos de renta.
     // ============================================
 
     Route::get('/renta', [RentaController::class, 'index']);
@@ -202,6 +229,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     // ============================================
     // INVENTARIO ITEMS (requiere autenticación)
+    // Gestión de unidades físicas individuales de productos.
     // ============================================
     Route::get('/inventario_item', [InventarioItemController::class, 'index']);
     Route::get('/inventario_item/{id}', [InventarioItemController::class, 'show']);
@@ -215,10 +243,20 @@ Route::middleware(['jwt.auth'])->group(function () {
     // Rutas adicionales para inventario items
     Route::get('/inventario_item/producto/{producto_id}', [InventarioItemController::class, 'getByProducto']);
     Route::get('/inventario_item/estado/{estado}', [InventarioItemController::class, 'getByEstado']);
+    Route::get('/inventario_item_with_rental_status', [InventarioItemController::class, 'getWithRentalStatus']);
 
     // ============================================
     // ALERTAS (requiere autenticación)
+    // Sistema de notificaciones sobre estados críticos (mantenimientos, rentas vencidas).
     // ============================================
+
+    // ============================================
+    // SOLICITUDES (requiere autenticación)
+    // Gestión de solicitudes iniciales de clientes.
+    // ============================================
+    Route::get('/solicitud', [App\Http\Controllers\Api\SolicitudController::class, 'index']);
+    Route::get('/solicitud/{id}', [App\Http\Controllers\Api\SolicitudController::class, 'show']);
+    Route::post('/solicitud', [App\Http\Controllers\Api\SolicitudController::class, 'store']);
 
     Route::get('/alertas', [AlertaController::class, 'index']);
 
