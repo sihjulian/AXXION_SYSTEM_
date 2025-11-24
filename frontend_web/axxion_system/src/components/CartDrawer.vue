@@ -22,6 +22,18 @@
                   </div>
                 </div>
 
+                <!-- Alert Component -->
+                <div v-if="alertState.show" class="mt-4">
+                  <fwb-alert 
+                    :type="alertState.type" 
+                    closable 
+                    @close="alertState.show = false"
+                    :icon="true"
+                  >
+                    {{ alertState.message }}
+                  </fwb-alert>
+                </div>
+
                 <div class="mt-8">
                   <div class="flow-root">
                     <ul role="list" class="-my-6 divide-y divide-gray-200">
@@ -123,6 +135,7 @@ import { useCartStore } from '@/stores/CartStore';
 import SolicitudService from '@/services/SolicitudService';
 import CotizacionService from '@/services/CotizacionService';
 import ClienteService from '@/services/ClienteService';
+import { FwbAlert } from 'flowbite-vue';
 
 /**
  * Componente CartDrawer.
@@ -142,6 +155,22 @@ const selectedClientId = ref('');
 const fechaInicio = ref('');
 const fechaFin = ref('');
 const isProcessing = ref(false);
+
+// Estado para la alerta
+const alertState = ref({
+  show: false,
+  type: 'info',
+  message: ''
+});
+
+// Función helper para mostrar alertas
+const showAlert = (type, message) => {
+  alertState.value = {
+    show: true,
+    type,
+    message
+  };
+};
 
 // Carga la lista de clientes al montar el componente para el selector del checkout.
 onMounted(async () => {
@@ -184,6 +213,8 @@ const checkout = async () => {
     if (!selectedClientId.value || !fechaInicio.value || !fechaFin.value) return;
     
     isProcessing.value = true;
+    alertState.value.show = false; // Ocultar alertas previas
+
     try {
         // 1. Crear Solicitud
         const solicitudData = {
@@ -221,18 +252,23 @@ const checkout = async () => {
 
         const response = await CotizacionService.createCotizacion(cotizacionData);
 
-        // 3. Limpiar carrito y redirigir
-        cartStore.clearCart();
-        cartStore.closeCart();
-        
-        alert('Cotización creada exitosamente!');
-        // Redirigir a la vista de detalle de cotización
-        const cotizacionId = response.cotizacion ? response.cotizacion.id : response.id;
-        router.push(`/quotation/${cotizacionId}`);
+        // Mostrar éxito
+        showAlert('success', 'Cotización creada exitosamente! Redirigiendo...');
+
+        // Esperar un momento antes de cerrar y redirigir
+        setTimeout(() => {
+            // 3. Limpiar carrito y redirigir
+            cartStore.clearCart();
+            cartStore.closeCart();
+            
+            // Redirigir a la vista de detalle de cotización
+            const cotizacionId = response.cotizacion ? response.cotizacion.id : response.id;
+            router.push(`/quotation/${cotizacionId}`);
+        }, 1500);
         
     } catch (error) {
         console.error("Error during checkout", error);
-        alert('Error al procesar la solicitud. Por favor intente nuevamente.');
+        showAlert('danger', 'Error al procesar la solicitud. Por favor intente nuevamente.');
     } finally {
         isProcessing.value = false;
     }

@@ -14,6 +14,18 @@
       </div>
 
       <div v-else-if="cotizacion" class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <!-- Alert Component -->
+        <div v-if="alertState.show" class="mb-4">
+          <fwb-alert 
+            :type="alertState.type" 
+            closable 
+            @close="alertState.show = false"
+            :icon="true"
+          >
+            {{ alertState.message }}
+          </fwb-alert>
+        </div>
+
         <!-- Header -->
         <div class="flex justify-between items-center mb-6 border-b pb-4">
           <div>
@@ -128,7 +140,18 @@ import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
 import CotizacionService from '@/services/CotizacionService';
 import RentalService from '@/services/RentalService';
-import { FwbButton } from 'flowbite-vue';
+import { FwbButton, FwbAlert } from 'flowbite-vue';
+
+/**
+ * Vista QuotationDetails.
+ * 
+ * Muestra los detalles completos de una cotización específica.
+ * Permite visualizar:
+ * - Información del cliente.
+ * - Items cotizados con precios y subtotales.
+ * - Estado actual de la cotización.
+ * - Opción para convertir la cotización en una renta (si es aplicable).
+ */
 
 const route = useRoute();
 const router = useRouter();
@@ -137,6 +160,29 @@ const loading = ref(true);
 const error = ref(null);
 const isConverting = ref(false);
 
+// Estado para la alerta
+const alertState = ref({
+  show: false,
+  type: 'info',
+  message: ''
+});
+
+// Función helper para mostrar alertas
+const showAlert = (type, message) => {
+  alertState.value = {
+    show: true,
+    type,
+    message
+  };
+  // Auto-ocultar después de 5 segundos si es éxito
+  if (type === 'success') {
+    setTimeout(() => {
+      alertState.value.show = false;
+    }, 5000);
+  }
+};
+
+// Carga los detalles de la cotización basada en el ID de la URL.
 const loadCotizacion = async () => {
   try {
     const id = route.params.id;
@@ -152,10 +198,14 @@ const loadCotizacion = async () => {
   }
 };
 
+// Convierte la cotización actual en una nueva renta.
+// Prepara los datos iniciales y redirige al módulo de rentas tras la creación.
 const convertToRental = async () => {
   if (!cotizacion.value) return;
   
   isConverting.value = true;
+  alertState.value.show = false; // Ocultar alertas previas
+
   try {
     // Prepare rental data from quotation
     // Assuming default dates or prompting user would be better, but for now using defaults/current
@@ -179,12 +229,16 @@ const convertToRental = async () => {
     console.log('Creating rental with data:', rentalData);
     await RentalService.createRental(rentalData);
     
-    alert('Renta creada exitosamente!');
-    router.push('/Rental');
+    showAlert('success', 'Renta creada exitosamente! Redirigiendo...');
+    
+    // Pequeña pausa para que el usuario vea el mensaje antes de redirigir
+    setTimeout(() => {
+      router.push('/Rental');
+    }, 1500);
     
   } catch (err) {
     console.error('Error converting to rental:', err);
-    alert('Error al convertir a renta: ' + (err.response?.data?.message || err.message));
+    showAlert('danger', 'Error al convertir a renta: ' + (err.response?.data?.message || err.message));
   } finally {
     isConverting.value = false;
   }

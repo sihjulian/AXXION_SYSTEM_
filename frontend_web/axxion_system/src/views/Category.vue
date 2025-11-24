@@ -111,9 +111,20 @@ import {
   FwbFooterLinkGroup,
 } from 'flowbite-vue'
 
+/**
+ * Vista Category.
+ * 
+ * Gestión principal de categorías y subcategorías.
+ * Permite:
+ * - Listar categorías existentes.
+ * - Ver detalles y subcategorías de una categoría seleccionada.
+ * - CRUD completo (Crear, Leer, Actualizar, Eliminar) para categorías y subcategorías mediante modales.
+ */
+
 const categoryStore = useCategoryStore();
 
 onMounted(() => {
+  // Carga inicial de todas las categorías.
   categoryStore.fetchCategorias();
 });
 </script>

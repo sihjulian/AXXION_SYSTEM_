@@ -1,5 +1,17 @@
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-6">
+    <!-- Alert Component -->
+    <div v-if="alertState.show" class="mb-4">
+      <fwb-alert 
+        :type="alertState.type" 
+        closable 
+        @close="alertState.show = false"
+        :icon="true"
+      >
+        {{ alertState.message }}
+      </fwb-alert>
+    </div>
+
     <!-- Información Básica -->
     <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -350,7 +362,8 @@ import CategoryService from '@/services/CategoryService.js';
 import { 
   FwbInput, 
   FwbTextarea, 
-  FwbButton 
+  FwbButton,
+  FwbAlert
 } from 'flowbite-vue';
 
 /**
@@ -394,6 +407,13 @@ const isSubmitting = ref(false);
 const errors = ref({});
 const categories = ref([]);
 const loadingCategories = ref(false);
+
+// Estado para la alerta
+const alertState = ref({
+  show: false,
+  type: 'info',
+  message: ''
+});
 
 // Estados disponibles
 const availableStates = ref([
@@ -490,6 +510,8 @@ const handleSubmit = async () => {
   console.log('Datos del formulario:', form);
   console.log('Equipo seleccionado:', props.selectedEquipment);
   
+  alertState.value.show = false; // Ocultar alertas previas
+
   if (!validateForm()) {
     console.log('Validación falló, errores:', errors.value);
     return;
@@ -579,7 +601,11 @@ const handleSubmit = async () => {
   } catch (error) {
     console.error('Error al guardar producto:', error);
     const errorMessage = error.response?.data?.message || error.message || 'Error desconocido';
-    alert('Error al guardar el producto: ' + errorMessage);
+    alertState.value = {
+      show: true,
+      type: 'danger',
+      message: 'Error al guardar el producto: ' + errorMessage
+    };
   } finally {
     isSubmitting.value = false;
   }

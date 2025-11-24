@@ -108,16 +108,7 @@
             <font-awesome-icon icon="fa-solid fa-shopping-cart" class="mr-2"/>
             Ver Carrito ({{ cartStore.itemCount }})
           </fwb-button>
-          
-          <fwb-button 
-            gradient="purple-blue" 
-            size="lg" 
-            @click="showMaintenanceModal"
-          >
-            <font-awesome-icon icon="fa-solid fa-tools" class="mr-2"/>
-            Programar Mantenimiento
-          </fwb-button>
-          
+                  
           <fwb-button 
             gradient="purple" 
             size="lg" 
@@ -482,6 +473,19 @@ const maintenanceStore = useMaintenanceStore();
 const userStore = useUserStore();
 const cartStore = useCartStore(); // Initialize CartStore
 
+/**
+ * Vista Inventory.
+ * 
+ * Gestión completa del inventario de equipos.
+ * Funcionalidades principales:
+ * - Listado de equipos con paginación y filtrado (búsqueda, estado, categoría).
+ * - Dashboard de KPIs (disponibles, alquilados, mantenimiento, ingresos).
+ * - Alertas automáticas para mantenimientos y devoluciones.
+ * - CRUD de equipos (Crear, Leer, Actualizar, Eliminar) mediante modales.
+ * - Programación directa de mantenimientos desde el inventario.
+ * - Integración con carrito de compras para alquileres.
+ */
+
 // Estado local
 const displayedProducts = ref([]);
 const isShowModal = ref(false);
@@ -514,6 +518,7 @@ const maintenanceForm = ref({
 const maintenanceTypes = computed(() => maintenanceStore.getAvailableTypes());
 const maintenancePriorities = computed(() => maintenanceStore.getAvailablePriorities());
 
+// Computed: Opciones de técnicos filtradas por rol (Técnico o Administrador).
 const technicianOptions = computed(() => {
   const users = userStore.users || [];
   return users
@@ -525,6 +530,7 @@ const technicianOptions = computed(() => {
 });
 
 // Computed del store - Transformar inventario_items a formato compatible con EquipmentCard
+// Mapea los datos crudos del backend a una estructura unificada para la vista.
 const products = computed(() => {
   return inventarioItemStore.inventarioItems.map(item => {
     const producto = item.producto || {};
@@ -580,6 +586,7 @@ const products = computed(() => {
 const isLoading = computed(() => inventarioItemStore.loading);
 
 // Métricas del panel de control
+// Calcula KPIs en tiempo real basados en los productos filtrados y su estado.
 const metrics = computed(() => {
   // Usar los productos transformados
   const productsWithMaintenanceStatus = products.value.map(product => {
@@ -627,6 +634,7 @@ const dismissedAlerts = ref([]); // IDs de alertas cerradas manualmente
 const manualAlerts = ref([]); // Alertas agregadas manualmente (éxito/error)
 
 // Alertas dinámicas basadas en datos reales
+// Genera alertas automáticas para mantenimientos activos y devoluciones pendientes.
 const systemAlerts = computed(() => {
   const alertsList = [];
   
@@ -664,6 +672,7 @@ const systemAlerts = computed(() => {
 const alerts = computed(() => [...manualAlerts.value, ...systemAlerts.value]);
 
 // Filtros y búsqueda
+// Aplica filtros de búsqueda, estado y categoría sobre la lista de productos.
 const filteredProducts = computed(() => {
   // Usar los productos transformados y sincronizar estados con mantenimientos activos
   let filtered = products.value.map(product => {
@@ -793,6 +802,7 @@ function resetMaintenanceForm() {
   };
 }
 
+// Programa un nuevo mantenimiento para un equipo.
 async function scheduleMaintenance() {
   try {
     // Validar que haya un equipo seleccionado o en el formulario

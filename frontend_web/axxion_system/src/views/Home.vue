@@ -171,7 +171,7 @@
           </RouterLink>
 
           <!-- Reports Module -->
-          <a href="reportes.html" class="group">
+          <RouterLink to="/Reports" class="group">
             <fwb-card class="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-gray-800 dark:to-gray-700">
               <div class="p-6 text-center">
                 <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -184,7 +184,7 @@
                 </div>
               </div>
             </fwb-card>
-          </a>
+          </RouterLink>
 
           <!-- Suppliers Module -->
           <a href="#" class="group">
@@ -311,10 +311,20 @@ import {
   FwbFooterLinkGroup,
 } from 'flowbite-vue'
 
+/**
+ * Vista Home.
+ * 
+ * Página de inicio y dashboard principal del sistema.
+ * Muestra:
+ * - Resumen estadístico (KPIs) de equipos, rentas y finanzas.
+ * - Accesos directos a los módulos principales (Categorías, Inventario, Usuarios, etc.).
+ * - Actividad reciente y alertas del sistema.
+ */
+
 const router = useRouter()
 const inventoryStore = useInventoryStore()
 
-// Reactive data for statistics
+// Datos reactivos para las estadísticas del dashboard.
 const stats = ref({
   available: 0,
   rented: 0,
@@ -322,7 +332,7 @@ const stats = ref({
   monthlyRevenue: 0
 })
 
-// Computed properties for real-time stats
+// Computed: Calcula estadísticas en tiempo real basadas en la lista de productos.
 const products = computed(() => inventoryStore.productList)
 
 const computedStats = computed(() => ({
@@ -334,13 +344,13 @@ const computedStats = computed(() => ({
     .reduce((sum, p) => sum + (p.precio_alquiler_dia * 30), 0)
 }))
 
-// Navigation methods
+// Métodos de navegación a las diferentes secciones del sistema.
 function goToInventory() {
   router.push('/Inventory')
 }
 
 function goToUsers() {
-  router.push('/User')
+  router.push('/User') 
 }
 
 function goToMaintenance() {
@@ -348,10 +358,10 @@ function goToMaintenance() {
 }
 
 function goToReports() {
-  window.location.href = 'reportes.html'
+ router.push('/Reportes')
 }
 
-// Load data on component mount
+// Carga inicial de datos (productos y categorías) para alimentar el dashboard.
 onMounted(async () => {
   try {
     await inventoryStore.fetchProducts()

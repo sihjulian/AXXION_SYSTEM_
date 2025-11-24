@@ -373,6 +373,19 @@ const maintenanceStore = useMaintenanceStore();
 const userStore = useUserStore();
 const inventoryStore = useInventoryStore();
 
+/**
+ * Vista Maintenance.
+ * 
+ * Gestión centralizada de tareas de mantenimiento.
+ * Funcionalidades:
+ * - Tablero de control de mantenimientos (programados, en proceso, completados).
+ * - Filtrado por estado, técnico responsable y búsqueda general.
+ * - CRUD de tareas de mantenimiento (Crear, Editar, Eliminar).
+ * - Asignación de técnicos y equipos a tareas.
+ * - Registro de costos estimados vs reales y descripción del trabajo realizado.
+ * - Detección automática de mantenimientos desde otras vistas (ej. al finalizar renta).
+ */
+
 // Estado reactivo de los stores usando storeToRefs para mantener reactividad
 const { maintenances, isLoading } = storeToRefs(maintenanceStore);
 const { users } = storeToRefs(userStore);
@@ -405,6 +418,7 @@ const defaultFormState = {
 };
 
 // Options for Selects - Computed para reactividad
+// Genera opciones para los selectores de técnicos (filtrados por rol), estados e inventario.
 const technicianOptions = computed(() => {
   return users.value
     .filter(user => user.rol && (user.rol.nombre === 'Técnico' || user.rol.nombre === 'Administrador'))
@@ -434,6 +448,7 @@ const searchQuery = ref('');
 const statusFilter = ref('');
 const technicianFilter = ref('');
 
+// Filtra las tareas de mantenimiento según los criterios seleccionados por el usuario.
 const filteredTasks = computed(() => {
   console.log('filteredTasks computed - maintenances:', maintenances.value);
   console.log('filteredTasks computed - maintenances length:', maintenances.value?.length);
@@ -586,6 +601,7 @@ function validateForm() {
 }
 
 // Lifecycle
+// Carga inicial de datos y manejo de apertura automática de modal si hay parámetros en la URL.
 onMounted(async () => {
   try {
     console.log('Starting to load maintenance data...');
@@ -700,6 +716,7 @@ function closeModal() {
   }
 }
 
+// Guarda (crea o actualiza) una tarea de mantenimiento.
 async function saveTask() {
     if (isSaving.value) return;
 

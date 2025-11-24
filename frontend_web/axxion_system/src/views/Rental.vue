@@ -7,8 +7,10 @@
         <div v-if="rentalStore.loading" class="p-4 justify-items-center h-screen text-white">
           <span class="loader"></span>
         </div>
-        <div v-else-if="rentalStore.error" class="p-4 text-red-500">
-          {{ rentalStore.error }}
+        <div v-else-if="rentalStore.error" class="mb-4">
+          <fwb-alert type="danger" icon>
+            {{ rentalStore.error }}
+          </fwb-alert>
         </div>
         
         <div v-else>
@@ -196,7 +198,19 @@ import { useRentalStore } from '@/stores/rentalStore';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
 import RentalModal from '@/components/RentalModal.vue';
-import { FwbInput, FwbButton } from 'flowbite-vue';
+import { FwbInput, FwbButton, FwbAlert } from 'flowbite-vue';
+
+/**
+ * Vista Rental.
+ * 
+ * Gestión de alquileres (Rentas).
+ * Funcionalidades:
+ * - Listado de rentas con tarjetas detalladas (cliente, equipos, fechas, montos).
+ * - Filtrado por búsqueda (cliente/equipo) y fecha.
+ * - Creación y edición de rentas mediante modal.
+ * - Finalización de rentas con redirección automática a mantenimiento si es necesario.
+ * - Visualización de estado y detalles financieros de cada renta.
+ */
 
 const rentalStore = useRentalStore();
 const router = useRouter();
@@ -204,11 +218,13 @@ const router = useRouter();
 const searchQuery = ref('');
 const dateFilter = ref('');
 
+// Carga inicial de rentas y clientes.
 onMounted(() => {
   rentalStore.fetchRentals();
   rentalStore.fetchClientes();
 });
 
+// Filtra las rentas según la búsqueda y la fecha seleccionada.
 const filteredRentals = computed(() => {
   let rentals = rentalStore.rentals;
 
@@ -239,6 +255,9 @@ const clearFilters = () => {
   dateFilter.value = '';
 };
 
+// Maneja el guardado de una renta.
+// Si la renta se finaliza, redirige automáticamente a la vista de mantenimiento
+// preseleccionando los equipos devueltos para su revisión.
 const handleSaveRental = async (payload) => {
     console.log('handleSaveRental called with payload:', payload);
     console.log('Estado de la renta:', payload.estado_renta);
