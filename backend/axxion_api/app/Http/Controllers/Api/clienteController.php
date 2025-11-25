@@ -13,6 +13,9 @@ use Illuminate\Validation\Rule;
 
 class clienteController extends Controller
     {
+    /**
+     * Lista todos los clientes con sus relaciones (direcciones, solicitudes, etc.).
+     */
         public function index()
         {
             try{ 
@@ -30,6 +33,12 @@ class clienteController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Registra un nuevo cliente en el sistema.
+     * 
+     * ANALOGÍA: Esta función actúa como el recepcionista que registra a un nuevo huésped en el hotel. 
+     * Pide sus datos personales, verifica que no esté ya registrado (validación) y le crea un perfil.
+     */
         public function store(Request $request)
         {
             try {
@@ -83,6 +92,9 @@ class clienteController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Muestra la información detallada de un cliente.
+     */
         public function show($id)
         {
             try {
@@ -107,6 +119,9 @@ class clienteController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Elimina un cliente del sistema.
+     */
         public function destroy($id){
             $cliente = Cliente::find($id);
             if(!$cliente){
@@ -122,6 +137,9 @@ class clienteController extends Controller
             ];
             return response()->json(null, 204);
         }
+    /**
+     * Actualiza la información de un cliente existente.
+     */
         public function update(Request $request, $id)
         {
             try {
@@ -176,6 +194,9 @@ class clienteController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Actualización parcial de un cliente.
+     */
         public function updatePartial(Request $request, $id){
             $cliente = Cliente::find($id);
             if(!$cliente){

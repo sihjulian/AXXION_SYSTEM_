@@ -28,11 +28,19 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
+/**
+ * Componente headerP.
+ * 
+ * Encabezado principal de la aplicación (versión alternativa o específica).
+ * Muestra el título del sistema, el rol del usuario actual y el botón de cerrar sesión.
+ */
+
 const router = useRouter();
 const authStore = useAuthStore();
 
 const user = ref([]);
 
+// Recupera los datos del usuario desde el almacenamiento local.
 const getuserdata = () => {
     const userData = localStorage.getItem('user');
     return userData ? JSON.parse(userData) : null;
@@ -55,6 +63,10 @@ const logout = async () => {
     // El store ya debería estar limpio gracias al 'finally' en tu acción de logout.
     router.push({ name: 'Login' });
   }
+// Cierra la sesión del usuario y redirige al login.
+const logout = () => {
+    authStore.logout();
+    router.push('/login');
 };
 
 

@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Log;
 
 class categoriaController extends Controller
     {
+    /**
+     * Lista todas las categorías con sus subcategorías.
+     */
         public function index()
         {
             try {
@@ -28,6 +31,12 @@ class categoriaController extends Controller
                     ], 500);
                 }
         }
+    /**
+     * Crea una nueva categoría.
+     * 
+     * ANALOGÍA: Esta función es como crear una nueva sección en una biblioteca. 
+     * Le pones un nombre (ej. 'Ciencia Ficción') y decides qué estantes (subcategorías) irán dentro.
+     */
         public function store(Request $request)
         {
             try {
@@ -74,6 +83,9 @@ class categoriaController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Muestra una categoría específica.
+     */
         public function show($id)
         {
             try {
@@ -98,6 +110,9 @@ class categoriaController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Elimina una categoría.
+     */
         public function destroy($id)
         {
             try {
@@ -123,6 +138,9 @@ class categoriaController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Actualiza una categoría existente.
+     */
         public function update(Request $request, $id)
         {
             try {
@@ -170,6 +188,9 @@ class categoriaController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Actualización parcial de una categoría.
+     */
         public function updatePartial(Request $request, $id)
         {
             try {

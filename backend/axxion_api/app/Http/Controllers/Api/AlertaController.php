@@ -12,10 +12,19 @@ use Illuminate\Support\Facades\Log;
 
 class AlertaController extends Controller
 {
-public function index()
+    /**
+     * Muestra una lista de alertas generadas por el sistema.
+     * 
+     * ANALOGÍA: Esta función actúa como una "Torre de Control" que escanea constantemente 
+     * tres radares diferentes: Productos (equipos antiguos), Mantenimientos (pendientes/atrasados) 
+     * y Rentas (programadas/atrasadas) para notificar al operador sobre cualquier anomalía.
+     */
+    public function index()
     {
         try {
             $hoy = now();
+            // Busca productos comprados hace mucho tiempo (antigüedad)
+            // Regla: Si es día 24 o más, da 15 días de margen, si no, 7 días.
             $producto = Producto::whereDate('fecha_compra', '<=', $hoy->copy()->addDays($hoy->day >= 24 ? 15 : 7))
                 ->get()
                 ->map(function($item) {
@@ -28,6 +37,8 @@ public function index()
                         'fecha' => $item->fecha_compra,
                     ];
                 });
+            
+            // Busca mantenimientos programados para hoy o antes, o en proceso pero atrasados
             $mantenimientos = Mantenimiento::where('estado_mantenimiento', 'Programado')
                 ->whereDate('fecha_inicio', '<=', $hoy)
                 ->orWhere(function($q) use ($hoy) {
@@ -45,6 +56,8 @@ public function index()
                         'fecha' => $m->fecha_inicio,
                     ];
                 });
+
+            // Busca rentas programadas para hoy o antes, o en curso pero atrasadas
             $rentas = Renta::where('estado_renta', 'Programada')
                 ->whereDate('fecha_inicio', '<=', $hoy)
                 ->orWhere(function($q) use ($hoy) {
@@ -62,6 +75,8 @@ public function index()
                         'fecha' => $r->fecha_inicio,
                     ];
                 });                
+            
+            // Combina todas las alertas en una sola colección
             $alertas = $producto->merge($mantenimientos)->merge($rentas);
             return response()->json([
                 'alertas' => $alertas,

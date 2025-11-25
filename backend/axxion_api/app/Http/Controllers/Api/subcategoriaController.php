@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Log;
 
 class subcategoriaController extends Controller
     {
+    /**
+     * Lista todas las subcategorías.
+     */
         public function index()
         {
             try {
@@ -28,6 +31,12 @@ class subcategoriaController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Crea una nueva subcategoría.
+     * 
+     * ANALOGÍA: Esta función es como añadir un estante específico dentro de una sección de la biblioteca. 
+     * Si la sección es 'Ciencia', aquí creamos el estante de 'Física Cuántica' y lo asociamos a esa sección.
+     */
         public function store(Request $request)
         {
             try {
@@ -72,6 +81,9 @@ class subcategoriaController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Muestra una subcategoría específica.
+     */
         public function show($id)
         {
             try {
@@ -96,6 +108,9 @@ class subcategoriaController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Elimina una subcategoría.
+     */
         public function destroy($id)
         {
                 try {
@@ -122,6 +137,9 @@ class subcategoriaController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Actualiza una subcategoría existente.
+     */
         public function update(Request $request, $id)
         {
             try {
@@ -167,6 +185,9 @@ class subcategoriaController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Actualización parcial de una subcategoría.
+     */
         public function updatePartial(Request $request, $id){
             try {
             $subcategoria = Subcategoria::with('categorias')->find($id);

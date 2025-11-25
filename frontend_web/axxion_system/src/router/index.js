@@ -43,6 +43,120 @@ const routes = [
   //     title: 'Página no encontrada'
   //   },
   // },
+  {
+    path: '/User',
+    name: 'usuarios',
+    component: User,
+    meta: { 
+      requiresAuth: true,
+      title: 'Gestión de Usuarios',
+      roles: ['ADMIN'] // Solo administradores pueden gestionar usuarios
+    },
+  },
+  {
+    path: '/Inventory',
+    name: 'Inventory',
+    component: Inventory,
+    meta: { 
+      requiresAuth: true,
+      title: 'Inventario'
+    },
+  },
+  {
+    path: '/Mantenace',
+    name: 'Mantenimiento',
+    component: Maintenace,
+    meta: { 
+      requiresAuth: true,
+      title: 'Mantenimiento',
+      roles: ['ADMIN', 'TECNICO'] // Solo admin y técnicos
+    },
+  },
+  {
+    path: '/Category',
+    name: 'Category',
+    component: Category,
+    meta: { 
+      requiresAuth: true,
+      title: 'Categorías'
+    },
+  },
+  {
+    path: '/SubCategory',
+    name: 'SubCategory',
+    component: SubCategory,
+    meta: { 
+      requiresAuth: true,
+      title: 'Subcategorías'
+    },
+  },
+  {
+    path: '/Reports',
+    name: 'Reports',
+    component: Reports,
+    meta:{ 
+      requiresAuth: true,
+      title: 'Reportes'
+    },
+  },
+  {
+    path: '/ReportUsers',
+    name: 'ReportUsers',
+    component: ReportUsers,
+    meta:{ 
+      requiresAuth: true,
+      title: 'Gestión de Usuarios',
+      roles: ['ADMIN']
+    },
+  },
+  {
+    path: '/ReportMaintenance',
+    name: 'ReportMaintenance',
+    component: ReportMaintenances,
+    meta: { 
+      requiresAuth: true,
+      title: 'Reporte de Mantenimientos',
+      roles: ['ADMIN', 'TECNICO'] // Solo admin y técnicos
+    },
+  },
+  {
+    path: '/ReportAlquiler',
+    name: 'ReportAlquiler',
+    component: ReportAlquiler,
+    meta: { 
+      requiresAuth: true,
+      title: 'Reporte de Alquileres',
+      
+    },
+  },
+  {
+    path: '/Rental',
+    name: 'Rental',
+    component: Rental,
+    meta: { 
+      requiresAuth: true,
+      title: 'Reporte de Alquileres',
+      
+    },
+  },
+  {
+    path: '/Alerts',
+    name: 'Alerts',
+    component: Alerts,
+    meta: { 
+      requiresAuth: true,
+      title: 'Reporte de Alertas',
+    },
+  },
+  {
+    path: '/quotation/:id',
+    name: 'QuotationDetails',
+    component: () => import('@/views/QuotationDetails.vue'),
+    meta: {
+      requiresAuth: true,
+      title: 'Detalle de Cotización'
+    }
+  }
 ]
 
 const router = createRouter({

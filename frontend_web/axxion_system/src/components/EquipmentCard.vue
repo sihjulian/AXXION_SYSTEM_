@@ -162,6 +162,17 @@ import { computed } from 'vue';
 import { FwbCard, FwbButton } from 'flowbite-vue';
 import StatusBadge from './StatusBadge.vue';
 
+/**
+ * Componente EquipmentCard.
+ * 
+ * Tarjeta rica en información para mostrar un equipo individual en el inventario.
+ * Muestra:
+ * - Imagen y estado (badge).
+ * - Detalles técnicos (procesador, RAM, etc.).
+ * - Información financiera y de rentas activas.
+ * - Botones de acción (alquilar, mantener, editar, eliminar).
+ */
+
 // Props
 const props = defineProps({
   equipment: {
@@ -171,15 +182,18 @@ const props = defineProps({
 });
 
 // Emits
+// Emits: Eventos que dispara la tarjeta hacia el componente padre
 const emit = defineEmits([
-  'view-details',
-  'edit-equipment', 
-  'delete-equipment',
-  'rent-equipment',
-  'maintenance-equipment'
+  'view-details',        // Ver detalles completos
+  'edit-equipment',      // Abrir modal de edición
+  'delete-equipment',    // Solicitar eliminación
+  'rent-equipment',      // Iniciar flujo de renta
+  'maintenance-equipment' // Iniciar flujo de mantenimiento
 ]);
 
 // Computed
+// Computed: Gestiona la imagen del equipo.
+// Si no hay imagen cargada, devuelve una por defecto basada en la categoría.
 const equipmentImage = computed(() => {
   if (props.equipment.images && props.equipment.images.length > 0) {
     return props.equipment.images[0];
@@ -203,12 +217,27 @@ const getSpecifications = computed(() => {
 });
 
 // Obtener alquiler actual
+// Computed: Identifica si el equipo está actualmente alquilado.
+// Intenta obtener la información de 'renta_activa' (backend) o buscar en el array de rentas.
 const getCurrentRental = computed(() => {
-  if (props.equipment.rentas && Array.isArray(props.equipment.rentas)) {
-    return props.equipment.rentas.find(renta => 
-      renta.estado === 'Activa' || renta.estado === 'active' || !renta.fecha_fin
-    ) || null;
+  // Primero verificar si viene renta_activa del backend
+  if (props.equipment.renta_activa) {
+    return {
+      clientName: props.equipment.renta_activa.cliente_nombre,
+      fecha_fin: props.equipment.renta_activa.fecha_fin_prevista,
+      endDate: props.equipment.renta_activa.fecha_fin_prevista,
+      estado: props.equipment.renta_activa.estado_renta
+    };
   }
+  
+  // Fallback al método anterior
+  if (props.equipment.rentas && Array.isArray(props.equipment.rentas)) {
+    const rentaActiva = props.equipment.rentas.find(renta => 
+      renta.estado === 'Activa' || renta.estado === 'active' || !renta.fecha_fin
+    );
+    if (rentaActiva) return rentaActiva;
+  }
+  
   return props.equipment.currentRental || null;
 });
 
@@ -237,7 +266,14 @@ const getCategoryLabel = (category) => {
 };
 
 // Mapear estado para compatibilidad
+// Normaliza el estado del equipo para que coincida con los valores esperados por StatusBadge.
+// Prioriza 'renta_activa', luego 'estado_item' y finalmente 'estado'/'status'.
 const getMappedStatus = (equipment) => {
+  // Verificar primero si hay renta activa
+  if (equipment.renta_activa) {
+    return 'alquilado';
+  }
+  
   // Si tiene estado_item, mapearlo
   if (equipment.estado_item) {
     const estadoMap = {
@@ -248,6 +284,7 @@ const getMappedStatus = (equipment) => {
     };
     return estadoMap[equipment.estado_item] || equipment.estado_item.toLowerCase();
   }
+  
   // Usar estado normal si existe
   return equipment.estado || equipment.status || 'disponible';
 };

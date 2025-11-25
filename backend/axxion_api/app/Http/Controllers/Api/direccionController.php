@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Validator;
 
 class direccionController extends Controller
     {
+    /**
+     * Lista todas las direcciones registradas.
+     */
         public function index(){
         $direccion = Direccion::all();
         $data = [
@@ -17,6 +20,13 @@ class direccionController extends Controller
         ];
         return response()->json($data, 200);
         }
+    /**
+     * Registra una nueva dirección en el sistema.
+     * 
+     * ANALOGÍA: Esta función actúa como el catastro municipal. 
+     * Registra una nueva ubicación física con todos sus detalles (calle, número, colonia) 
+     * para que el sistema sepa dónde entregar o recoger equipos.
+     */
         public function store(Request $request){
             $validator = Validator::make($request->all(),[
                 'calle' => 'required',
@@ -61,6 +71,9 @@ class direccionController extends Controller
             ];
             return response()->json($data, 200);
         }
+    /**
+     * Muestra los detalles de una dirección específica.
+     */
         public function show($id){
             $direccion = Direccion::find($id);
             if(!$direccion){
@@ -76,6 +89,9 @@ class direccionController extends Controller
             ];
             return response()->json($data, 200);
         }
+    /**
+     * Elimina una dirección del sistema.
+     */
         public function destroy($id){
             $direccion = Direccion::find($id);
             if(!$direccion){
@@ -92,6 +108,9 @@ class direccionController extends Controller
             ];
             return response()->json($data, 200);
         }
+    /**
+     * Actualiza la información de una dirección.
+     */
         public function update(Request $request, $id){
             $direccion = Direccion::find($id);
             if(!$direccion){
@@ -137,6 +156,9 @@ class direccionController extends Controller
             ];
             return response()->json($data, 200);
         }
+    /**
+     * Actualización parcial de una dirección.
+     */
         public function updatePartial(Request $request, $id){
             $direccion = Direccion::find($id);
             if(!$direccion){

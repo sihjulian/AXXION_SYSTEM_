@@ -1,6 +1,7 @@
 <template>
   <div class="app flex">
     <SideBar/>
+    <CartDrawer />
     <RouterView></RouterView>
 
     <main class="container h-screen p-4 flex-1 overflow-y-auto">
@@ -97,16 +98,17 @@
             <font-awesome-icon icon="fa-solid fa-plus" class="mr-2"/>
             Agregar Equipo
           </fwb-button>
-          
+
           <fwb-button 
+            v-if="cartStore.itemCount > 0"
             gradient="purple-blue" 
             size="lg" 
-            @click="showMaintenanceModal"
+            @click="cartStore.openCart"
           >
-            <font-awesome-icon icon="fa-solid fa-tools" class="mr-2"/>
-            Programar Mantenimiento
+            <font-awesome-icon icon="fa-solid fa-shopping-cart" class="mr-2"/>
+            Ver Carrito ({{ cartStore.itemCount }})
           </fwb-button>
-          
+                  
           <fwb-button 
             gradient="purple" 
             size="lg" 
@@ -406,67 +408,14 @@
         </div>
       </template>
     </fwb-modal>
-    
-    <!-- Cart Drawer -->
-    <CartDrawer />
-    
-    <!-- Floating Cart Button (Visible when cart is closed and has items) -->
-    <div v-if="!cartStore.isOpen && cartStore.totalItems > 0" class="fixed bottom-6 right-6 z-40">
-      <button 
-        @click="cartStore.openCart"
-        class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-transform hover:scale-110 flex items-center justify-center relative"
-      >
-        <font-awesome-icon icon="fa-solid fa-shopping-cart" class="text-xl" />
-        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white dark:border-gray-800">
-          {{ cartStore.totalItems }}
-        </span>
-      </button>
-    </div>
-    <!-- Cart Drawer -->
-    <CartDrawer />
-    
-    <!-- Floating Cart Button (Visible when cart is closed and has items) -->
-    <div v-if="!cartStore.isOpen && cartStore.totalItems > 0" class="fixed bottom-6 right-6 z-40">
-      <button 
-        @click="cartStore.openCart"
-        class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-transform hover:scale-110 flex items-center justify-center relative"
-      >
-        <font-awesome-icon icon="fa-solid fa-shopping-cart" class="text-xl" />
-        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white dark:border-gray-800">
-          {{ cartStore.totalItems }}
-        </span>
-      </button>
-    </div>
   </div>
-<!--footer-->
-  <footer>
-  <fwb-footer>
-    <fwb-footer-copyright
-      by="Flowbite™"
-      href="https://flowbite.com/"
-      copyright-message="All Rights Reserved."
-    />
-    <fwb-footer-link-group>
-      <fwb-footer-link href="#">
-        About
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Privacy Policy
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Licensing
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Contact
-      </fwb-footer-link>
-    </fwb-footer-link-group>
-  </fwb-footer>
-</footer>
+  <Footer />
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useInventarioItemStore } from '@/stores/inventarioItem.js';
+import { useCartStore } from '@/stores/CartStore'; // Import CartStore
 
 // Nombre del componente para cumplir con reglas de Vue
 defineOptions({
@@ -475,24 +424,21 @@ defineOptions({
 import { useInventoryStore } from '@/stores/inventory.js';
 import { useMaintenanceStore } from '@/stores/maintenance.js';
 import { useUserStore } from '@/stores/user.js';
-import { useCartStore } from '@/stores/cart.js'; // Import Cart Store
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
+import Footer from '@/components/Footer.vue';
 import EquipmentCard from '@/components/EquipmentCard.vue';
 import EquipmentForm from '@/components/EquipmentForm.vue';
 import EquipmentDetails from '@/components/EquipmentDetails.vue';
-import CartDrawer from '@/components/CartDrawer.vue'; // Import Cart Drawer
+import CartDrawer from '@/components/CartDrawer.vue'; // Import CartDrawer
 import { 
   FwbAlert,
+  FwbBadge,
   FwbButton,
   FwbModal,
   FwbCard,
   FwbInput,
-  FwbPagination,
-  FwbFooter,
-  FwbFooterCopyright,
-  FwbFooterLink,
-  FwbFooterLinkGroup
+  FwbPagination
 } from 'flowbite-vue';
 
 // Stores
@@ -500,8 +446,20 @@ const inventarioItemStore  = useInventarioItemStore();
 const inventoryStore = useInventoryStore();
 const maintenanceStore = useMaintenanceStore();
 const userStore = useUserStore();
-const cartStore = useCartStore(); // Init Cart Store
+const cartStore = useCartStore(); // Initialize CartStore
 
+/**
+ * Vista Inventory.
+ * 
+ * Gestión completa del inventario de equipos.
+ * Funcionalidades principales:
+ * - Listado de equipos con paginación y filtrado (búsqueda, estado, categoría).
+ * - Dashboard de KPIs (disponibles, alquilados, mantenimiento, ingresos).
+ * - Alertas automáticas para mantenimientos y devoluciones.
+ * - CRUD de equipos (Crear, Leer, Actualizar, Eliminar) mediante modales.
+ * - Programación directa de mantenimientos desde el inventario.
+ * - Integración con carrito de compras para alquileres.
+ */
 
 // Estado local
 const displayedProducts = ref([]);
@@ -535,6 +493,7 @@ const maintenanceForm = ref({
 const maintenanceTypes = computed(() => maintenanceStore.getAvailableTypes());
 const maintenancePriorities = computed(() => maintenanceStore.getAvailablePriorities());
 
+// Computed: Opciones de técnicos filtradas por rol (Técnico o Administrador).
 const technicianOptions = computed(() => {
   const users = userStore.users || [];
   return users
@@ -546,6 +505,7 @@ const technicianOptions = computed(() => {
 });
 
 // Computed del store - Transformar inventario_items a formato compatible con EquipmentCard
+// Mapea los datos crudos del backend a una estructura unificada para la vista.
 const products = computed(() => {
   return inventarioItemStore.inventarioItems.map(item => {
     const producto = item.producto || {};
@@ -601,6 +561,7 @@ const products = computed(() => {
 const isLoading = computed(() => inventarioItemStore.loading);
 
 // Métricas del panel de control
+// Calcula KPIs en tiempo real basados en los productos filtrados y su estado.
 const metrics = computed(() => {
   // Usar los productos transformados
   const productsWithMaintenanceStatus = products.value.map(product => {
@@ -648,6 +609,7 @@ const dismissedAlerts = ref([]); // IDs de alertas cerradas manualmente
 const manualAlerts = ref([]); // Alertas agregadas manualmente (éxito/error)
 
 // Alertas dinámicas basadas en datos reales
+// Genera alertas automáticas para mantenimientos activos y devoluciones pendientes.
 const systemAlerts = computed(() => {
   const alertsList = [];
   
@@ -685,6 +647,7 @@ const systemAlerts = computed(() => {
 const alerts = computed(() => [...manualAlerts.value, ...systemAlerts.value]);
 
 // Filtros y búsqueda
+// Aplica filtros de búsqueda, estado y categoría sobre la lista de productos.
 const filteredProducts = computed(() => {
   // Usar los productos transformados y sincronizar estados con mantenimientos activos
   let filtered = products.value.map(product => {
@@ -814,6 +777,7 @@ function resetMaintenanceForm() {
   };
 }
 
+// Programa un nuevo mantenimiento para un equipo.
 async function scheduleMaintenance() {
   try {
     // Validar que haya un equipo seleccionado o en el formulario
@@ -903,22 +867,15 @@ async function confirmDelete() {
 }
 
 function rentProduct(product) {
-  // Agregar al carrito en lugar de acción directa
-  cartStore.addItem(product);
-  
-  // Opcional: Mostrar notificación de éxito
-  manualAlerts.value.push({
-    id: `cart-${Date.now()}`,
-    type: 'success',
-    icon: true,
-    title: 'Agregado al Carrito',
-    message: `${product.nombre} se ha agregado al carrito de renta.`
+  cartStore.addToCart(product);
+  // Optional: Show a toast or notification
+  manualAlerts.value.unshift({
+      id: Date.now(),
+      type: 'success',
+      icon: true,
+      title: 'Agregado al Carrito',
+      message: `${product.nombre} agregado al carrito de cotización.`
   });
-  
-  // Remover alerta después de 3 segundos
-  setTimeout(() => {
-    manualAlerts.value = manualAlerts.value.filter(a => a.title !== 'Agregado al Carrito');
-  }, 3000);
 }
 
 function exportReport() {
@@ -1078,49 +1035,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.loader {
-  width: 60px;
-  height: 40px;
-  position: relative;
-  display: inline-block;
-  --base-color: #263238;
-}
-.loader::before {
-  content: '';  
-  left: 0;
-  top: 0;
-  position: absolute;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: #FFF;
-  background-image: radial-gradient(circle 8px at 18px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 18px 0px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 0px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 36px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 18px 36px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 5px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 5px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 30px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 5px 30px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 5px 5px, var(--base-color) 100%, transparent 0);
-  background-repeat: no-repeat;
-  box-sizing: border-box;
-  animation: rotationBack 3s linear infinite;
-}
-.loader::after {
-  content: '';  
-  left: 35px;
-  top: 15px;
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: #FFF;
-  background-image: radial-gradient(circle 5px at 12px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 12px 0px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 0px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 24px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 12px 24px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 3px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 3px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 20px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 3px 20px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 3px 3px, var(--base-color) 100%, transparent 0);
-  background-repeat: no-repeat;
-  box-sizing: border-box;
-  animation: rotationBack 4s linear infinite reverse;
-}
-@keyframes rotationBack {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(-360deg);
-  }
-}  
+  
 .overlay {
   position: relative;
   top: 100px; 

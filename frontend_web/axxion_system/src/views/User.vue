@@ -90,27 +90,7 @@
   </fwb-modal>
   </div>
 
-  <fwb-footer>
-    <fwb-footer-copyright
-      by="Flowbite™"
-      href="https://flowbite.com/"
-      copyright-message="All Rights Reserved."
-    />
-    <fwb-footer-link-group>
-      <fwb-footer-link href="#">
-        About
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Privacy Policy
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Licensing
-      </fwb-footer-link>
-      <fwb-footer-link href="#">
-        Contact
-      </fwb-footer-link>
-    </fwb-footer-link-group>
-  </fwb-footer>
+  <Footer />
 </template>
 
 <script setup>
@@ -119,18 +99,11 @@ import axios from 'axios';
 import { useUserStore } from '@/stores/user.js';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
+import Footer from '@/components/Footer.vue';
 import Modal from '@/components/modal.vue';
 import UserCard from '@/components/UserCard.vue';
 import UserForm from '@/components/UserForm.vue';
-import {
-  FwbAlert,
-  FwbFooter,
-  FwbFooterCopyright,
-  FwbFooterLink,
-  FwbFooterLinkGroup,
-} from 'flowbite-vue';
-import { FwbButton } from 'flowbite-vue';
-import { FwbModal } from 'flowbite-vue';
+import { FwbAlert, FwbButton, FwbModal } from 'flowbite-vue';
 // Store
 const userStore = useUserStore();
 
@@ -202,49 +175,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.loader {
-  width: 60px;
-  height: 40px;
-  position: relative;
-  display: inline-block;
-  --base-color: #263238; /*use your base color*/
-}
-.loader::before {
-  content: '';  
-  left: 0;
-  top: 0;
-  position: absolute;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: #FFF;
-  background-image: radial-gradient(circle 8px at 18px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 18px 0px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 0px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 36px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 18px 36px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 5px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 5px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 30px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 5px 30px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 5px 5px, var(--base-color) 100%, transparent 0);
-  background-repeat: no-repeat;
-  box-sizing: border-box;
-  animation: rotationBack 3s linear infinite;
-}
-.loader::after {
-  content: '';  
-  left: 35px;
-  top: 15px;
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: #FFF;
-  background-image: radial-gradient(circle 5px at 12px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 12px 0px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 0px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 24px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 12px 24px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 3px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 3px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 20px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 3px 20px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 3px 3px, var(--base-color) 100%, transparent 0);
-  background-repeat: no-repeat;
-  box-sizing: border-box;
-  animation: rotationBack 4s linear infinite reverse;
-}
-@keyframes rotationBack {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(-360deg);
-  }
-}  
 /* overlay to center the loader */
 .overlay {
   position: relative;

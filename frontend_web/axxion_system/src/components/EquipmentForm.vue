@@ -1,5 +1,17 @@
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-6">
+    <!-- Alert Component -->
+    <div v-if="alertState.show" class="mb-4">
+      <fwb-alert 
+        :type="alertState.type" 
+        closable 
+        @close="alertState.show = false"
+        :icon="true"
+      >
+        {{ alertState.message }}
+      </fwb-alert>
+    </div>
+
     <!-- Información Básica -->
     <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -335,11 +347,7 @@
         type="submit"
         :disabled="isSubmitting"
       >
-        <font-awesome-icon 
-          v-if="isSubmitting" 
-          icon="fa-solid fa-spinner" 
-          class="animate-spin mr-2"
-        />
+        <div v-if="isSubmitting" class="loader mr-2 w-4 h-4 border-2"></div>
         {{ mode === 'add' ? 'Agregar Equipo' : 'Actualizar Equipo' }}
       </fwb-button>
     </div>
@@ -354,10 +362,27 @@ import CategoryService from '@/services/CategoryService.js';
 import { 
   FwbInput, 
   FwbTextarea, 
-  FwbButton 
+  FwbButton,
+  FwbAlert
 } from 'flowbite-vue';
 
+/**
+ * Componente EquipmentForm.
+ * 
+ * Este componente proporciona un formulario completo para crear y editar equipos en el inventario.
+ * Maneja la validación de datos, la carga de categorías y estados, y la comunicación con
+ * los stores de Pinia para persistir los cambios.
+ * 
+ * Funcionalidades principales:
+ * - Creación y edición de equipos.
+ * - Validación de campos obligatorios.
+ * - Carga dinámica de categorías desde el backend.
+ * - Mapeo de datos para coincidir con la estructura de la base de datos.
+ */
+
 // Props
+// mode: Determina si el formulario está en modo 'add' (agregar) o 'edit' (editar).
+// selectedEquipment: Objeto con los datos del equipo a editar (solo en modo 'edit').
 const props = defineProps({
   mode: {
     type: String,
@@ -382,6 +407,13 @@ const isSubmitting = ref(false);
 const errors = ref({});
 const categories = ref([]);
 const loadingCategories = ref(false);
+
+// Estado para la alerta
+const alertState = ref({
+  show: false,
+  type: 'info',
+  message: ''
+});
 
 // Estados disponibles
 const availableStates = ref([
@@ -428,6 +460,12 @@ const form = reactive({
 });
 
 // Métodos
+
+/**
+ * Valida los campos del formulario antes del envío.
+ * Verifica que los campos obligatorios (nombre, marca, modelo, serie, categoría, estado, tarifa) no estén vacíos.
+ * @returns {boolean} True si el formulario es válido, False si hay errores.
+ */
 const validateForm = () => {
   errors.value = {};
   
@@ -462,11 +500,18 @@ const validateForm = () => {
   return Object.keys(errors.value).length === 0;
 };
 
+/**
+ * Maneja el envío del formulario.
+ * Realiza la validación, mapea los datos al formato esperado por el backend
+ * y llama a la acción correspondiente del store (createProduct o updateProduct).
+ */
 const handleSubmit = async () => {
   console.log('handleSubmit iniciado, modo:', props.mode);
   console.log('Datos del formulario:', form);
   console.log('Equipo seleccionado:', props.selectedEquipment);
   
+  alertState.value.show = false; // Ocultar alertas previas
+
   if (!validateForm()) {
     console.log('Validación falló, errores:', errors.value);
     return;
@@ -556,12 +601,21 @@ const handleSubmit = async () => {
   } catch (error) {
     console.error('Error al guardar producto:', error);
     const errorMessage = error.response?.data?.message || error.message || 'Error desconocido';
-    alert('Error al guardar el producto: ' + errorMessage);
+    alertState.value = {
+      show: true,
+      type: 'danger',
+      message: 'Error al guardar el producto: ' + errorMessage
+    };
   } finally {
     isSubmitting.value = false;
   }
 };
 
+/**
+ * Carga los datos del equipo seleccionado en el formulario para su edición.
+ * Mapea los campos del objeto `selectedEquipment` a las propiedades reactivas del formulario.
+ * Maneja la normalización de datos como fechas y estados.
+ */
 const loadEquipmentData = () => {
   console.log('loadEquipmentData llamado con:', props.selectedEquipment);
   console.log('Modo actual:', props.mode);
@@ -632,6 +686,10 @@ const loadEquipmentData = () => {
   }
 };
 
+/**
+ * Restablece el formulario a su estado inicial (limpio).
+ * Se utiliza al cambiar de modo o al finalizar una operación.
+ */
 const resetForm = () => {
   Object.assign(form, {
     name: '',
@@ -679,6 +737,10 @@ watch(() => inventoryStore.categoryList, (newCategories) => {
 }, { immediate: true, deep: true });
 
 // Función para cargar categorías
+/**
+ * Carga la lista de categorías disponibles desde el store o la API.
+ * Utiliza datos de prueba como respaldo si la carga falla, asegurando que el formulario sea funcional.
+ */
 const loadCategories = async () => {
   loadingCategories.value = true;
   

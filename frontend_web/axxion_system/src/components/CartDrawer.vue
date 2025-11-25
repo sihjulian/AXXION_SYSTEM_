@@ -1,133 +1,127 @@
 <template>
-  <div class="relative z-50">
-    <!-- Overlay -->
-    <transition
-      enter-active-class="ease-in-out duration-500"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="ease-in-out duration-500"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div 
-        v-if="cartStore.isOpen" 
-        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
-        @click="cartStore.closeCart"
-      ></div>
-    </transition>
+  <div v-if="cartStore.isOpen" class="relative z-50" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <!-- Background backdrop, show/hide based on slide-over state. -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" @click="cartStore.closeCart"></div>
 
-    <!-- Drawer -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="fixed inset-0 overflow-hidden">
       <div class="absolute inset-0 overflow-hidden">
         <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-          <transition
-            enter-active-class="transform transition ease-in-out duration-500 sm:duration-700"
-            enter-from-class="translate-x-full"
-            enter-to-class="translate-x-0"
-            leave-active-class="transform transition ease-in-out duration-500 sm:duration-700"
-            leave-from-class="translate-x-0"
-            leave-to-class="translate-x-full"
-          >
-            <div v-if="cartStore.isOpen" class="pointer-events-auto w-screen max-w-md">
-              <div class="flex h-full flex-col overflow-y-scroll bg-white dark:bg-gray-800 shadow-xl">
-                <div class="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
-                  <div class="flex items-start justify-between">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-white">Carrito de Renta</h2>
-                    <div class="ml-3 flex h-7 items-center">
-                      <button 
-                        type="button" 
-                        class="relative -m-2 p-2 text-gray-400 hover:text-gray-500"
-                        @click="cartStore.closeCart"
-                      >
-                        <span class="absolute -inset-0.5"></span>
-                        <span class="sr-only">Cerrar panel</span>
-                        <font-awesome-icon icon="fa-solid fa-times" class="h-6 w-6" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="mt-8">
-                    <div v-if="cartStore.items.length === 0" class="text-center py-10">
-                      <font-awesome-icon icon="fa-solid fa-shopping-cart" class="text-4xl text-gray-300 mb-4" />
-                      <p class="text-gray-500 dark:text-gray-400">El carrito está vacío</p>
-                    </div>
-                    <div v-else class="flow-root">
-                      <ul role="list" class="-my-6 divide-y divide-gray-200 dark:divide-gray-700">
-                        <li v-for="item in cartStore.items" :key="item.id" class="flex py-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors rounded-lg px-2 -mx-2">
-                          <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 dark:border-gray-600">
-                            <img 
-                              v-if="item.images && item.images.length > 0" 
-                              :src="item.images[0].url || item.images[0]" 
-                              :alt="item.nombre" 
-                              class="h-full w-full object-cover object-center"
-                            >
-                            <div v-else class="h-full w-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                              <font-awesome-icon icon="fa-solid fa-image" class="text-gray-400" />
-                            </div>
-                          </div>
-
-                          <div class="ml-4 flex flex-1 flex-col">
-                            <div>
-                              <div class="flex justify-between text-base font-medium text-gray-900 dark:text-white">
-                                <h3>
-                                  <a href="#">{{ item.nombre }}</a>
-                                </h3>
-                                <p class="ml-4">{{ formatCurrency(item.precio_alquiler_dia) }}</p>
-                              </div>
-                              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ item.marca }} - {{ item.modelo }}</p>
-                            </div>
-                            <div class="flex flex-1 items-end justify-between text-sm">
-                              <p class="text-gray-500 dark:text-gray-400">Serie: {{ item.numero_serie }}</p>
-
-                              <div class="flex">
-                                <button 
-                                  type="button" 
-                                  class="font-medium text-red-600 hover:text-red-500"
-                                  @click="cartStore.removeItem(item.id)"
-                                >
-                                  Eliminar
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </li>
-                      </ul>
-                    </div>
+          <div class="pointer-events-auto w-screen max-w-md">
+            <div class="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
+              <div class="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+                <div class="flex items-start justify-between">
+                  <h2 class="text-lg font-medium text-gray-900" id="slide-over-title">Carrito de Cotización</h2>
+                  <div class="ml-3 flex h-7 items-center">
+                    <button type="button" class="relative -m-2 p-2 text-gray-400 hover:text-gray-500" @click="cartStore.closeCart">
+                      <span class="absolute -inset-0.5"></span>
+                      <span class="sr-only">Cerrar panel</span>
+                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
 
-                <div class="border-t border-gray-200 dark:border-gray-700 px-4 py-6 sm:px-6">
-                  <div class="flex justify-between text-base font-medium text-gray-900 dark:text-white">
-                    <p>Subtotal (por día)</p>
-                    <p>{{ formatCurrency(cartStore.totalPrice) }}</p>
-                  </div>
-                  <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Impuestos y envío calculados al finalizar.</p>
-                  <div class="mt-6">
-                    <button
-                      @click="proceedToCheckout"
-                      :disabled="cartStore.items.length === 0"
-                      class="flex w-full items-center justify-center rounded-md border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Proceder a Rentar
-                    </button>
-                  </div>
-                  <div class="mt-6 flex justify-center text-center text-sm text-gray-500 dark:text-gray-400">
-                    <p>
-                      o
-                      <button 
-                        type="button" 
-                        class="font-medium text-blue-600 hover:text-blue-500"
-                        @click="cartStore.closeCart"
-                      >
-                        Continuar Explorando
-                        <span aria-hidden="true"> &rarr;</span>
-                      </button>
-                    </p>
+                <!-- Alert Component -->
+                <div v-if="alertState.show" class="mt-4">
+                  <fwb-alert 
+                    :type="alertState.type" 
+                    closable 
+                    @close="alertState.show = false"
+                    :icon="true"
+                  >
+                    {{ alertState.message }}
+                  </fwb-alert>
+                </div>
+
+                <div class="mt-8">
+                  <div class="flow-root">
+                    <ul role="list" class="-my-6 divide-y divide-gray-200">
+                      <li v-for="item in cartStore.items" :key="item.id" class="flex py-6">
+                        <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                          <img :src="item.imagen || 'https://via.placeholder.com/150'" :alt="item.nombre" class="h-full w-full object-cover object-center">
+                        </div>
+
+                        <div class="ml-4 flex flex-1 flex-col">
+                          <div>
+                            <div class="flex justify-between text-base font-medium text-gray-900">
+                              <h3>
+                                <a href="#">{{ item.nombre }}</a>
+                              </h3>
+                              <p class="ml-4">{{ formatCurrency(item.precio_alquiler_dia || item.precio_referencia_renta) }}</p>
+                            </div>
+                            <p class="mt-1 text-sm text-gray-500">{{ item.marca }} - {{ item.modelo }}</p>
+                          </div>
+                          <div class="flex flex-1 items-end justify-between text-sm">
+                            <div class="flex items-center border border-gray-300 rounded">
+                                <button @click="decrementQuantity(item)" class="px-2 py-1 hover:bg-gray-100">-</button>
+                                <p class="px-2 text-gray-500">{{ item.quantity }}</p>
+                                <button @click="incrementQuantity(item)" class="px-2 py-1 hover:bg-gray-100">+</button>
+                            </div>
+
+                            <div class="flex">
+                              <button type="button" @click="cartStore.removeFromCart(item.id)" class="font-medium text-indigo-600 hover:text-indigo-500">Eliminar</button>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                      <li v-if="cartStore.items.length === 0" class="py-6 text-center text-gray-500">
+                        No hay items en el carrito.
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>
+
+              <div class="border-t border-gray-200 px-4 py-6 sm:px-6">
+                <div class="flex justify-between text-base font-medium text-gray-900">
+                  <p>Subtotal (Estimado)</p>
+                  <p>{{ formatCurrency(cartStore.totalPrice) }}</p>
+                </div>
+                <p class="mt-0.5 text-sm text-gray-500">El precio final se calculará en la cotización.</p>
+                
+                <!-- Checkout Form -->
+                <div v-if="cartStore.items.length > 0" class="mt-6 space-y-4">
+                    <div>
+                        <label for="cliente" class="block text-sm font-medium text-gray-700">Cliente</label>
+                        <select id="cliente" v-model="selectedClientId" class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                            <option value="" disabled>Seleccione un cliente</option>
+                            <option v-for="client in clients" :key="client.id" :value="client.id">
+                                {{ client.nombre }} {{ client.apellido1 }}
+                            </option>
+                        </select>
+                    </div>
+                     <div>
+                        <label for="fecha_inicio" class="block text-sm font-medium text-gray-700">Fecha Inicio</label>
+                        <input type="datetime-local" id="fecha_inicio" v-model="fechaInicio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                     <div>
+                        <label for="fecha_fin" class="block text-sm font-medium text-gray-700">Fecha Fin</label>
+                        <input type="datetime-local" id="fecha_fin" v-model="fechaFin" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                  <button 
+                    @click="checkout" 
+                    :disabled="isProcessing || cartStore.items.length === 0 || !selectedClientId || !fechaInicio || !fechaFin"
+                    class="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {{ isProcessing ? 'Procesando...' : 'Generar Cotización' }}
+                  </button>
+                </div>
+                <div class="mt-6 flex justify-center text-center text-sm text-gray-500">
+                  <p>
+                    o
+                    <button type="button" class="font-medium text-indigo-600 hover:text-indigo-500" @click="cartStore.closeCart">
+                      Continuar Explorando
+                      <span aria-hidden="true"> &rarr;</span>
+                    </button>
+                  </p>
+                </div>
+              </div>
             </div>
-          </transition>
+          </div>
         </div>
       </div>
     </div>
@@ -135,21 +129,148 @@
 </template>
 
 <script setup>
-import { useCartStore } from '@/stores/cart.js';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useCartStore } from '@/stores/CartStore';
+import SolicitudService from '@/services/SolicitudService';
+import CotizacionService from '@/services/CotizacionService';
+import ClienteService from '@/services/ClienteService';
+import { FwbAlert } from 'flowbite-vue';
+
+/**
+ * Componente CartDrawer.
+ * 
+ * Panel deslizante (drawer) que muestra el contenido del carrito de cotización.
+ * Permite al usuario:
+ * - Ver los items seleccionados.
+ * - Ajustar cantidades o eliminar items.
+ * - Seleccionar un cliente y fechas para la cotización.
+ * - Finalizar el proceso generando una Solicitud y una Cotización.
+ */
 
 const cartStore = useCartStore();
 const router = useRouter();
+const clients = ref([]);
+const selectedClientId = ref('');
+const fechaInicio = ref('');
+const fechaFin = ref('');
+const isProcessing = ref(false);
 
-const formatCurrency = (val) => {
-  if (val === null || val === undefined || val === '') return '-';
-  const num = Number(val);
-  if (Number.isNaN(num)) return val;
-  return num.toLocaleString(undefined, { style: 'currency', currency: 'MXN' });
+// Estado para la alerta
+const alertState = ref({
+  show: false,
+  type: 'info',
+  message: ''
+});
+
+// Función helper para mostrar alertas
+const showAlert = (type, message) => {
+  alertState.value = {
+    show: true,
+    type,
+    message
+  };
 };
 
-const proceedToCheckout = () => {
-  cartStore.closeCart();
-  router.push({ name: 'Rental' }); // Asegúrate de que la ruta se llame 'Rental' o ajusta según router
+// Carga la lista de clientes al montar el componente para el selector del checkout.
+onMounted(async () => {
+    try {
+        const response = await ClienteService.getAll();
+        // Response structure is { cliente: [...], status: 200 }
+        clients.value = response.cliente || response.data || response; 
+        console.log('Clients loaded:', clients.value);
+    } catch (error) {
+        console.error("Error loading clients", error);
+    }
+});
+
+/**
+ * Formatea un valor numérico a moneda colombiana (COP).
+ * @param {number} value - Valor a formatear.
+ * @returns {string} Valor formateado (ej. $1.000.000 COP).
+ */
+const formatCurrency = (value) => {
+    if (!value) return '$0 COP';
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value);
+};
+
+// Métodos para manipular la cantidad de items en el carrito
+const incrementQuantity = (item) => {
+    cartStore.updateQuantity(item.id, (item.quantity || 1) + 1);
+};
+
+const decrementQuantity = (item) => {
+    cartStore.updateQuantity(item.id, (item.quantity || 1) - 1);
+};
+
+/**
+ * Procesa el checkout (finalización de la cotización).
+ * 1. Crea una Solicitud con los items del carrito.
+ * 2. Crea una Cotización asociada a esa solicitud.
+ * 3. Limpia el carrito y redirige al detalle de la cotización creada.
+ */
+const checkout = async () => {
+    if (!selectedClientId.value || !fechaInicio.value || !fechaFin.value) return;
+    
+    isProcessing.value = true;
+    alertState.value.show = false; // Ocultar alertas previas
+
+    try {
+        // 1. Crear Solicitud
+        const solicitudData = {
+            cliente_id: selectedClientId.value,
+            fecha_solicitud: new Date().toISOString().slice(0, 19).replace('T', ' '),
+            cantidad_solicitada: cartStore.itemCount,
+            descripcion_necesidad: `Solicitud generada desde carrito web. Fechas: ${fechaInicio.value} a ${fechaFin.value}`,
+            estado_solicitud: 'Nueva',
+            productos: cartStore.items.map(item => ({
+                producto_id: item.producto_id,
+                cantidad: item.quantity
+            }))
+        };
+        
+        const solicitudResponse = await SolicitudService.create(solicitudData);
+        const solicitudId = solicitudResponse.solicitud ? solicitudResponse.solicitud.id : solicitudResponse.id;
+
+        // 2. Crear Cotización
+        const cotizacionData = {
+            cliente_id: selectedClientId.value,
+            solicitud_id: solicitudId,
+            fecha_cotizacion: new Date().toISOString().slice(0, 19).replace('T', ' '),
+            fecha_validez: new Date(new Date().setDate(new Date().getDate() + 15)).toISOString().slice(0, 10), // Válido por 15 días
+            monto_total: cartStore.totalPrice,
+            estado_cotizacion: 'Borrador',
+            terminos_condiciones: 'Términos estándar de alquiler.',
+            notas_internas: 'Generado automáticamente.',
+            detalles: cartStore.items.map(item => ({
+                producto_id: item.producto_id,
+                cantidad: item.quantity,
+                precio_unitario: item.precio_alquiler_dia || item.precio_referencia_renta || 0,
+                descripcion_item: item.nombre
+            }))
+        };
+
+        const response = await CotizacionService.createCotizacion(cotizacionData);
+
+        // Mostrar éxito
+        showAlert('success', 'Cotización creada exitosamente! Redirigiendo...');
+
+        // Esperar un momento antes de cerrar y redirigir
+        setTimeout(() => {
+            // 3. Limpiar carrito y redirigir
+            cartStore.clearCart();
+            cartStore.closeCart();
+            
+            // Redirigir a la vista de detalle de cotización
+            const cotizacionId = response.cotizacion ? response.cotizacion.id : response.id;
+            router.push(`/quotation/${cotizacionId}`);
+        }, 1500);
+        
+    } catch (error) {
+        console.error("Error during checkout", error);
+        showAlert('danger', 'Error al procesar la solicitud. Por favor intente nuevamente.');
+    } finally {
+        isProcessing.value = false;
+    }
 };
 </script>

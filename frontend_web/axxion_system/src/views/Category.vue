@@ -72,27 +72,7 @@
         />
       </main>
     </div>
-    <fwb-footer>
-      <fwb-footer-copyright
-        by="Flowbite™"
-        href="https://flowbite.com/"
-        copyright-message="All Rights Reserved."
-      />
-      <fwb-footer-link-group>
-        <fwb-footer-link href="#">
-          About
-        </fwb-footer-link>
-        <fwb-footer-link href="#">
-          Privacy Policy
-        </fwb-footer-link>
-        <fwb-footer-link href="#">
-          Licensing
-        </fwb-footer-link>
-        <fwb-footer-link href="#">
-          Contact
-        </fwb-footer-link>
-      </fwb-footer-link-group>
-    </fwb-footer>
+    <Footer />
   </div>
 </template>
 
@@ -101,55 +81,31 @@ import { onMounted } from 'vue';
 import { useCategoryStore } from '@/stores/category';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
+import Footer from '@/components/Footer.vue';
 import CategoryModal from '@/components/CategoryModal.vue';
 import SubcategoryModal from '@/components/SubcategoryModal.vue';
 import { FwbButton } from 'flowbite-vue';
-import {
-  FwbFooter,
-  FwbFooterCopyright,
-  FwbFooterLink,
-  FwbFooterLinkGroup,
-} from 'flowbite-vue'
+
+/**
+ * Vista Category.
+ * 
+ * Gestión principal de categorías y subcategorías.
+ * Permite:
+ * - Listar categorías existentes.
+ * - Ver detalles y subcategorías de una categoría seleccionada.
+ * - CRUD completo (Crear, Leer, Actualizar, Eliminar) para categorías y subcategorías mediante modales.
+ */
 
 const categoryStore = useCategoryStore();
 
 onMounted(() => {
+  // Carga inicial de todas las categorías.
   categoryStore.fetchCategorias();
 });
 </script>
 
 <style scoped>
-.loader {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: inline-block;
-  border-top: 4px solid #FFF;
-  border-right: 4px solid transparent;
-  box-sizing: border-box;
-  animation: rotation 1s linear infinite;
-}
-.loader::after {
-  content: '';  
-  box-sizing: border-box;
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border-left: 4px solid #FF3D00;
-  border-bottom: 4px solid transparent;
-  animation: rotation 0.5s linear infinite reverse;
-}
-@keyframes rotation {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-} 
+ 
 </style>
 
 

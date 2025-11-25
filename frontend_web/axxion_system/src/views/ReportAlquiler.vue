@@ -18,6 +18,13 @@ import { onMounted, ref } from 'vue';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
 import GraphAlq from '@/components/Graficos/GraphAlq.vue';
+
+/**
+ * Vista ReportAlquiler.
+ * 
+ * Muestra reportes y gráficos específicos relacionados con los alquileres.
+ * Utiliza el componente GraphAlq para visualizar la información.
+ */
 </script>
 
 <style>
