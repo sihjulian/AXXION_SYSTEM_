@@ -61,4 +61,11 @@ class Usuario extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(Rol::class, 'usuario_rol');
     }
+
+    public function refreshTokens()
+{
+    return $this->hasMany(RefreshToken::class);
 }
+}
+
+

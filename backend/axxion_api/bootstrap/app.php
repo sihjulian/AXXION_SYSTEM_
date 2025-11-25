@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role.admin' => \App\Http\Middleware\RoleAdminMiddleware::class,
             'role.auxiliar' => \App\Http\Middleware\RoleAuxiliarMiddleware::class,
             'role.tecnico' => \App\Http\Middleware\RoleTecnicoMiddleware::class,
+            'jwt' => \App\Http\Middleware\JwtMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

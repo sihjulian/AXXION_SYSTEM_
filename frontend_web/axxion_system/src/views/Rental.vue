@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRentalStore } from '@/stores/rentalStore';
 
 import SideBar from '@/components/SideBar.vue';
@@ -85,41 +85,22 @@ import { FwbCard, FwbButton } from 'flowbite-vue'
 import RentalModal from '@/components/RentalModal.vue'
 import RentalService from '@/services/RentalService';
 import ClienteService from '@/services/ClienteService'
-  
 import { useCartStore } from '@/stores/cart.js'; // Import Cart Store
-const cartStore = useCartStore(); // Init Cart Store
-  
-import { FwbCard, FwbButton } from 'flowbite-vue';
-import RentalModal from '@/components/RentalModal.vue';
-
 
 const rentalStore = useRentalStore();
+const cartStore = useCartStore(); // Init Cart Store
 
-onMounted(() => {
-  rentalStore.fetchRentals();
-  rentalStore.fetchClientes();
-});
+const loading = ref(false);
+const error = ref(null);
+const rentals = ref([]);
+const actionLoading = ref({});
+const showModal = ref(false);
+const modalMode = ref('');
+const modalPayload = ref({});
+const modalTargetId = ref(null);
 
 const formatDate = (iso) => iso ? new Date(iso).toLocaleString() : '-';
 const formatCurrency = (val) => (val === null || val === undefined) ? '-' : Number(val).toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
-</script>
-
-<style scoped>
-  .loader {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-width: 6rem;
-    margin-top: 3rem;
-    margin-bottom: 3rem;
-  }
-}
-
-
-
-
 
 const loadRentals = async () => {
   loading.value = true;
@@ -157,48 +138,29 @@ const loadRentals = async () => {
   }
 };
 
+const loadClientes = async () => {
+  try {
+    await rentalStore.fetchClientes();
+  } catch (err) {
+    console.error('Error al cargar clientes:', err);
+  }
+};
+
 onMounted(() => {
+  rentalStore.fetchRentals();
+  rentalStore.fetchClientes();
   loadRentals();
   loadClientes();
-  
-  // Verificar si hay items en el carrito
+
   if (cartStore.items.length > 0) {
     openAddWithCart();
   }
 });
 
-// Helpers de formato
-const formatDate = (iso) => {
-  if (!iso) return '-';
-  try {
-    const d = new Date(iso);
-    return d.toLocaleString();
-  } catch (e) {
-    return iso;
-  }
-};
-
-const formatCurrency = (val) => {
-  if (val === null || val === undefined || val === '') return '-';
-  const num = Number(val);
-  if (Number.isNaN(num)) return val;
-  return num.toLocaleString(undefined, { style: 'currency', currency: 'MXN' });
-};
-
-// Estado del modal
-const actionLoading = ref({});
-const showModal = ref(false);
-const modalMode = ref(''); // 'add' | 'edit' | 'delete'
-const modalPayload = ref({});
-const modalTargetId = ref(null);
-
-// Acciones para abrir modal
 const openAddWithCart = () => {
   modalMode.value = 'add';
-  
-  // Calcular totales
   const total = cartStore.totalPrice;
-  const deposit = total * 0.1; // 10% depósito por defecto
+  const deposit = total * 0.1;
 
   modalPayload.value = {
     cliente_id: '',
@@ -219,7 +181,7 @@ const openAddWithCart = () => {
 const openAdd = () => {
   modalMode.value = 'add';
   modalPayload.value = {
-    cliente_id: '',            // 🔹 pon vacío, no null
+    cliente_id: '',
     cotizacion_id: null,
     fecha_inicio: '',
     fecha_fin_prevista: '',
@@ -269,7 +231,7 @@ const toDateTime = (val) => {
   return val.replace("T", " ") + ":00";
 };
 
-  const normalizePayload = (payload) => {
+const normalizePayload = (payload) => {
   return {
     cliente_id: payload.cliente_id ? Number(payload.cliente_id) : null,
     cotizacion_id: payload.cotizacion_id ?? null,
@@ -281,35 +243,12 @@ const toDateTime = (val) => {
     deposito_garantia: payload.deposito_garantia ? Number(payload.deposito_garantia) : 0,
     notas: payload.notas || "",
     inventarioItems: payload.inventarioItems || []
-  .loader:before,
-  .loader:after {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-    animation: pulsOut 1.8s ease-in-out infinite;
-    filter: drop-shadow(0 0 1rem rgba(25,25,112));
-  }
-  .loader:before {
-    width: 100%;
-    padding-bottom: 100%;
-    box-shadow: inset 0 0 0 1rem #191970;
-    animation-name: pulsIn;
-  }
-  .loader:after {
-    width: calc(100% - 2rem);
-    padding-bottom: calc(100% - 2rem);
-    box-shadow: 0 0 0 0 #191970;
-  }
+  };
+};
 
-
-// Guardar en modal — ahora recibe el payload emitido por el modal
 const saveModal = async (payloadFromModal) => {
-  // si el modal no mandó payload (por compatibilidad), fallback al modalPayload.value
   const sourcePayload = payloadFromModal ?? modalPayload.value;
-
-  // normalizamos lo que viniera (fechas, números, etc.)
   const normalized = normalizePayload(sourcePayload);
-
   const id = modalTargetId.value;
 
   console.log("Payload recibido del modal:", sourcePayload);
@@ -319,12 +258,10 @@ const saveModal = async (payloadFromModal) => {
     try {
       const created = await RentalService.createRental(normalized);
       rentals.value.unshift(created.renta ?? created);
-      
-      // Limpiar carrito si se usaron items del carrito
+
       if (normalized.inventarioItems && normalized.inventarioItems.length > 0) {
         cartStore.clearCart();
       }
-      
       closeModal();
     } catch (err) {
       console.error("Error creando renta:", err);
@@ -339,26 +276,73 @@ const saveModal = async (payloadFromModal) => {
     } catch (err) {
       console.error("Error actualizando renta:", err);
       alert("No se pudo actualizar la renta.");
-  @keyframes pulsIn {
-    0% {
-      box-shadow: inset 0 0 0 1rem #191970;
-      opacity: 1;
     }
-    50%, 100% {
-      box-shadow: inset 0 0 0 0 #191970;
-      opacity: 0;
+  } else if (modalMode.value === 'delete') {
+    try {
+      await RentalService.deleteRental(modalTargetId.value);
+      rentals.value = rentals.value.filter(r => r.id !== modalTargetId.value);
+      closeModal();
+    } catch (err) {
+      console.error("Error eliminando renta:", err);
+      alert("No se pudo eliminar la renta.");
     }
   }
+};
+</script>
 
-  @keyframes pulsOut {
-    0%, 50% {
-      box-shadow: 0 0 0 0 #191970;
-      opacity: 0;
-    }
-    100% {
-      box-shadow: 0 0 0 1rem #191970;
-      opacity: 1;
-    }
+<style scoped>
+.loader {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 6rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
+.loader:before,
+.loader:after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  animation: pulsOut 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 1rem rgba(25,25,112));
+}
+
+.loader:before {
+  width: 100%;
+  padding-bottom: 100%;
+  box-shadow: inset 0 0 0 1rem #191970;
+  animation-name: pulsIn;
+}
+
+.loader:after {
+  width: calc(100% - 2rem);
+  padding-bottom: calc(100% - 2rem);
+  box-shadow: 0 0 0 0 #191970;
+}
+
+@keyframes pulsIn {
+  0% {
+    box-shadow: inset 0 0 0 1rem #191970;
+    opacity: 1;
   }
-      
+  50%, 100% {
+    box-shadow: inset 0 0 0 0 #191970;
+    opacity: 0;
+  }
+}
+
+@keyframes pulsOut {
+  0%, 50% {
+    box-shadow: 0 0 0 0 #191970;
+    opacity: 0;
+  }
+  100% {
+    box-shadow: 0 0 0 1rem #191970;
+    opacity: 1;
+  }
+}
 </style>

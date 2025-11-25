@@ -22,9 +22,12 @@ use([CanvasRenderer, BarChart, PieChart, TitleComponent, TooltipComponent, Legen
 
 
 const app = createApp(App)
+const pinia = createPinia()
 app.component('v-chart', ECharts)
-app.use(createPinia())
 app.component('font-awesome-icon' , FontAwesomeIcon)
+app.use(pinia) 
 app.use(router)
 app.mount('#app')
+
+
 

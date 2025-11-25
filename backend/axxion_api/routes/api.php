@@ -17,20 +17,22 @@ use App\Http\Controllers\Api\MantenimientoController;
 use App\Http\Controllers\Api\ReporteController;
 use App\Http\Controllers\Api\AlertaController;
 use App\Http\Controllers\Api\InventarioItemController;
+use App\Http\Controllers\Api\AuthController;
 
 // ============================================
 // RUTAS PÚBLICAS (sin autenticación)
 // ============================================
-Route::post('/login', [UsuarioController::class, 'login']);
+// Route::post('/login', [UsuarioController::class, 'login']);
 Route::post('/usuarios', [UsuarioController::class, 'store']); // Registro de usuarios
+
 
 // ============================================
 // RUTAS PROTEGIDAS (requieren autenticación)
 // ============================================
-Route::middleware(['jwt.auth'])->group(function () {
+// Route::middleware(['jwt.auth'])->group(function () {
     
     // Ruta de logout
-    Route::post('/logout', [UsuarioController::class, 'logout']);
+    // Route::post('/logout', [UsuarioController::class, 'logout']);
     
     // ============================================
     // GESTIÓN DE USUARIOS (requiere autenticación)
@@ -223,5 +225,20 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     Route::get('/alertas', [AlertaController::class, 'index']);
 
+// });
+
+
+Route::prefix('auth')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
 });
 
+// Rutas protegidass
+Route::middleware(['jwt'])->group(function () {
+    Route::prefix('auth')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', [AuthController::class, 'me']);
+    });
+
+
+});
