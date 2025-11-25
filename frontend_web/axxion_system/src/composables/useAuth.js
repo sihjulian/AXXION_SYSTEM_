@@ -1,93 +1,164 @@
-import { computed } from 'vue';
+// composables/useAuth.js
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia';
+import axios from '@/plugins/axios';
 import { useAuthStore } from '@/stores/auth';
-import { useRouter } from 'vue-router';
+
+
+// Estado global compartido
+const accessToken = ref(null)
+const user = ref(null)
+const isRefreshing = ref(false)
+let refreshSubscribers = []
 
 export function useAuth() {
+
+
   const authStore = useAuthStore();
-  const router = useRouter();
 
-  // Getters reactivos
-  const isAuthenticated = computed(() => authStore.isAuthenticated);
-  const user = computed(() => authStore.user);
-  const token = computed(() => authStore.token);
+  
 
-  // Métodos de autenticación
-  const login = async (credentials) => {
+  // Computed
+  const isAuthenticated = computed(() => !!accessToken.value)
+  
+
+  /**
+   * Login del usuario
+   */
+  const login = async (email, password, deviceName = 'Web Browser') => {
     try {
-      const success = await authStore.login(credentials);
-      if (success) {
-        router.push('/Home');
-        return { success: true };
-      } else {
-        return { 
-          success: false, 
-          error: authStore.error || 'Error de autenticación' 
-        };
+      const response = await axios.post('/api/auth/login', {
+        email,
+        password,
+        device_name: deviceName,
+      }, {
+        withCredentials: true, // IMPORTANTE: envía y recibe cookies
+      })
+
+      if (response.data.success) {
+        accessToken.value = response.data.data.access_token
+        user.value = response.data.data.user
+        
+        return {
+          success: true,
+          user: user.value,
+        }
+      }
+
+      return {
+        success: false,
+        message: 'Error en el login',
       }
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.message || 'Error de conexión' 
-      };
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error de conexión',
+      }
     }
-  };
+  }
 
-  const logout = () => {
-    authStore.logout();
-    router.push('/login');
-  };
+  /**
+   * Refresca el Access Token usando el Refresh Token de la cookie
+   */
+  const refreshAccessToken = async () => {
+    if (isRefreshing.value) {
+      // Si ya estamos refrescando, esperar a que termine
+      return new Promise((resolve) => {
+        refreshSubscribers.push((token) => {
+          resolve(token)
+        })
+      })
+    }
 
-  // Métodos de verificación de roles
-  const hasRole = (roleName) => {
-    return authStore.hasRole(roleName);
-  };
+    isRefreshing.value = true
 
-  const hasAnyRole = (roleNames) => {
-    return authStore.hasAnyRole(roleNames);
-  };
+    try {
+      const response = await axios.post('/api/auth/refresh', {}, {
+        withCredentials: true,
+      })
 
-  // Verificar si el usuario puede acceder a una ruta específica
-  const canAccessRoute = (routeName) => {
-    const route = router.getRoutes().find(r => r.name === routeName);
-    if (!route || !route.meta.roles) return true;
-    
-    return hasAnyRole(route.meta.roles);
-  };
+      if (response.data.success) {
+        accessToken.value = response.data.data.access_token
+        
+        // Notificar a todos los suscriptores
+        refreshSubscribers.forEach(callback => callback(accessToken.value))
+        refreshSubscribers = []
+        
+        return accessToken.value
+      }
 
-  // Método para verificar permisos específicos
-  const hasPermission = (permission) => {
-    if (!user.value) return false;
-    
-    // Lógica de permisos basada en roles
-    const rolePermissions = {
-      'ADMIN': ['*'], // Admin tiene todos los permisos
-      'TECNICO': ['read_products', 'update_products', 'read_maintenance'],
-      'AUXILIAR': ['read_products', 'read_clients']
-    };
+      throw new Error('No se pudo refrescar el token')
+    } catch (error) {
+      // Si falla el refresh, hacer logout
+      await logout()
+      router.push('/login')
+      throw error
+    } finally {
+      isRefreshing.value = false
+    }
+  }
 
-    const userRoles = user.value.roles || [];
-    
-    return userRoles.some(role => {
-      const permissions = rolePermissions[role.codigo] || [];
-      return permissions.includes('*') || permissions.includes(permission);
-    });
-  };
+  /**
+   * Logout del usuario
+   */
+  const logout = async () => {
+    try {
+      await axios.post('/api/auth/logout', {}, {
+        withCredentials: true,
+      })
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error)
+    } finally {
+      accessToken.value = null
+      user.value = null
+      router.push('/login')
+    }
+  }
+
+  /**
+   * Obtiene el usuario actual
+   */
+  const getUser = async () => {
+    try {
+      const response = await axios.get('/api/auth/me')
+      
+      if (response.data.success) {
+        user.value = response.data.data
+        return user.value
+      }
+    } catch (error) {
+      console.error('Error al obtener usuario:', error)
+    }
+  }
+
+  /**
+   * Verifica si hay sesión activa (intenta refrescar el token)
+   */
+  const checkAuth = async () => {
+    if (accessToken.value) {
+      return true
+    }
+
+    try {
+      await refreshAccessToken()
+      return true
+    } catch (error) {
+      return false
+    }
+  }
 
   return {
     // Estado
+    accessToken: computed(() => accessToken.value),
+    user: computed(() => user.value),
     isAuthenticated,
-    user,
-    token,
     
     // Métodos
     login,
     logout,
-    hasRole,
-    hasAnyRole,
-    canAccessRoute,
-    hasPermission,
-    
-    // Utilidades
-    checkAuth: () => authStore.checkAuth()
-  };
+    refreshAccessToken,
+    getUser,
+    checkAuth,
+  }
 }

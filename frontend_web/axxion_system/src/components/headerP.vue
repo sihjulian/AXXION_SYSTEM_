@@ -46,6 +46,23 @@ const getuserdata = () => {
     return userData ? JSON.parse(userData) : null;
 };
 
+const logout = async () => {
+  try {
+    // Espera a que la acción de logout del store se complete.
+    // Esto es importante si la acción realiza llamadas a la API.
+    await authStore.logout();
+    
+    // Una vez completado el logout, redirige al usuario a la página de login.
+    router.push({ name: 'Login' }); // Usar el nombre de la ruta es más robusto
+
+  } catch (error) {
+    // Aunque el logout en el cliente casi nunca falla, es bueno tener un manejo de errores.
+    console.error("Ocurrió un error durante el logout:", error);
+    
+    // Incluso si hay un error (ej. la API de logout falla), nos aseguramos de redirigir.
+    // El store ya debería estar limpio gracias al 'finally' en tu acción de logout.
+    router.push({ name: 'Login' });
+  }
 // Cierra la sesión del usuario y redirige al login.
 const logout = () => {
     authStore.logout();

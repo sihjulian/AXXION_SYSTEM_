@@ -192,11 +192,66 @@
 </template>
 
 <script setup>
+import { onMounted, ref } from 'vue'
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRentalStore } from '@/stores/rentalStore';
 import SideBar from '@/components/SideBar.vue';
 import headerP from '@/components/headerP.vue';
+import { FwbCard, FwbButton } from 'flowbite-vue'
+import RentalModal from '@/components/RentalModal.vue'
+import RentalService from '@/services/RentalService';
+import ClienteService from '@/services/ClienteService'
+import { useCartStore } from '@/stores/cart.js'; // Import Cart Store
+
+const rentalStore = useRentalStore();
+const cartStore = useCartStore(); // Init Cart Store
+
+const loading = ref(false);
+const error = ref(null);
+const rentals = ref([]);
+const actionLoading = ref({});
+const showModal = ref(false);
+const modalMode = ref('');
+const modalPayload = ref({});
+const modalTargetId = ref(null);
+
+const formatDate = (iso) => iso ? new Date(iso).toLocaleString() : '-';
+const formatCurrency = (val) => (val === null || val === undefined) ? '-' : Number(val).toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+
+const loadRentals = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const data = await RentalService.getRental();
+    console.log('Rental API raw response in view:', data);
+
+    // Extraer array de forma segura
+    const extractArrayFromResponse = (obj) => {
+      if (Array.isArray(obj)) return obj;
+      if (!obj || typeof obj !== 'object') return [];
+      if ('id' in obj) return [obj];
+      for (const key of Object.keys(obj)) {
+        if (Array.isArray(obj[key])) return obj[key];
+      }
+      for (const key of Object.keys(obj)) {
+        const val = obj[key];
+        if (val && typeof val === 'object') {
+          for (const subKey of Object.keys(val)) {
+            if (Array.isArray(val[subKey])) return val[subKey];
+          }
+        }
+      }
+      return [];
+    };
+
+    rentals.value = extractArrayFromResponse(data);
+    console.log('Parsed rentals:', rentals.value);
+  } catch (err) {
+    console.error('Error al cargar rentas:', err);
+    error.value = 'No se pudieron cargar las rentas';
+  } finally {
+    loading.value = false;
 import RentalModal from '@/components/RentalModal.vue';
 import { FwbInput, FwbButton, FwbAlert } from 'flowbite-vue';
 
@@ -247,6 +302,63 @@ const filteredRentals = computed(() => {
     });
   }
 
+const loadClientes = async () => {
+  try {
+    await rentalStore.fetchClientes();
+  } catch (err) {
+    console.error('Error al cargar clientes:', err);
+  }
+};
+
+onMounted(() => {
+  rentalStore.fetchRentals();
+  rentalStore.fetchClientes();
+  loadRentals();
+  loadClientes();
+
+  if (cartStore.items.length > 0) {
+    openAddWithCart();
+  }
+});
+
+const openAddWithCart = () => {
+  modalMode.value = 'add';
+  const total = cartStore.totalPrice;
+  const deposit = total * 0.1;
+
+  modalPayload.value = {
+    cliente_id: '',
+    cotizacion_id: null,
+    fecha_inicio: '',
+    fecha_fin_prevista: '',
+    fecha_devolucion_real: '',
+    estado_renta: 'Programada',
+    monto_total_renta: total,
+    deposito_garantia: deposit,
+    notas: 'Renta generada desde el carrito',
+    inventarioItems: [...cartStore.items]
+  };
+  modalTargetId.value = null;
+  showModal.value = true;
+};
+
+const openAdd = () => {
+  modalMode.value = 'add';
+  modalPayload.value = {
+    cliente_id: '',
+    cotizacion_id: null,
+    fecha_inicio: '',
+    fecha_fin_prevista: '',
+    fecha_devolucion_real: '',
+    estado_renta: 'Programada',
+    monto_total_renta: '',
+    deposito_garantia: '',
+    notas: '',
+    inventarioItems: []
+  };
+  modalTargetId.value = null;
+  showModal.value = true;
+};
   return rentals;
 });
 
@@ -339,6 +451,121 @@ const getStatusClass = (status) => {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+const normalizePayload = (payload) => {
+  return {
+    cliente_id: payload.cliente_id ? Number(payload.cliente_id) : null,
+    cotizacion_id: payload.cotizacion_id ?? null,
+    fecha_inicio: payload.fecha_inicio ? payload.fecha_inicio.replace("T", " ") + ":00" : null,
+    fecha_fin_prevista: payload.fecha_fin_prevista ? payload.fecha_fin_prevista.replace("T", " ") + ":00" : null,
+    fecha_devolucion_real: payload.fecha_devolucion_real ? payload.fecha_devolucion_real.replace("T", " ") + ":00" : null,
+    estado_renta: payload.estado_renta || "Programada",
+    monto_total_renta: payload.monto_total_renta ? Number(payload.monto_total_renta) : 0,
+    deposito_garantia: payload.deposito_garantia ? Number(payload.deposito_garantia) : 0,
+    notas: payload.notas || "",
+    inventarioItems: payload.inventarioItems || []
+  };
+};
+
+const saveModal = async (payloadFromModal) => {
+  const sourcePayload = payloadFromModal ?? modalPayload.value;
+  const normalized = normalizePayload(sourcePayload);
+  const id = modalTargetId.value;
+
+  console.log("Payload recibido del modal:", sourcePayload);
+  console.log("Payload normalizado:", normalized);
+
+  if (modalMode.value === 'add') {
+    try {
+      const created = await RentalService.createRental(normalized);
+      rentals.value.unshift(created.renta ?? created);
+
+      if (normalized.inventarioItems && normalized.inventarioItems.length > 0) {
+        cartStore.clearCart();
+      }
+      closeModal();
+    } catch (err) {
+      console.error("Error creando renta:", err);
+      alert("No se pudo crear la renta.");
+    }
+  } else if (modalMode.value === 'edit') {
+    try {
+      const updated = await RentalService.updateRental(modalTargetId.value, normalized);
+      const idx = rentals.value.findIndex(r => r.id === modalTargetId.value);
+      if (idx !== -1) rentals.value[idx] = { ...rentals.value[idx], ...updated.renta };
+      closeModal();
+    } catch (err) {
+      console.error("Error actualizando renta:", err);
+      alert("No se pudo actualizar la renta.");
+    }
+  } else if (modalMode.value === 'delete') {
+    try {
+      await RentalService.deleteRental(modalTargetId.value);
+      rentals.value = rentals.value.filter(r => r.id !== modalTargetId.value);
+      closeModal();
+    } catch (err) {
+      console.error("Error eliminando renta:", err);
+      alert("No se pudo eliminar la renta.");
+    }
+  }
+};
+</script>
+
+<style scoped>
+.loader {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 6rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
+.loader:before,
+.loader:after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  animation: pulsOut 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 1rem rgba(25,25,112));
+}
+
+.loader:before {
+  width: 100%;
+  padding-bottom: 100%;
+  box-shadow: inset 0 0 0 1rem #191970;
+  animation-name: pulsIn;
+}
+
+.loader:after {
+  width: calc(100% - 2rem);
+  padding-bottom: calc(100% - 2rem);
+  box-shadow: 0 0 0 0 #191970;
+}
+
+@keyframes pulsIn {
+  0% {
+    box-shadow: inset 0 0 0 1rem #191970;
+    opacity: 1;
+  }
+  50%, 100% {
+    box-shadow: inset 0 0 0 0 #191970;
+    opacity: 0;
+  }
+}
+
+@keyframes pulsOut {
+  0%, 50% {
+    box-shadow: 0 0 0 0 #191970;
+    opacity: 0;
+  }
+  100% {
+    box-shadow: 0 0 0 1rem #191970;
+    opacity: 1;
+  }
+}
+</style>
 .rental-card:hover {
   transform: translateY(-8px);
 }
