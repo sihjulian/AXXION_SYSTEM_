@@ -27,26 +27,25 @@ use App\Http\Controllers\Api\AuthController;
 // ============================================
 // RUTAS PÚBLICAS (sin autenticación)
 // ============================================
-// ============================================
-// RUTAS PÚBLICAS (sin autenticación)
-// ============================================
-// Route::post('/login', [UsuarioController::class, 'login']);
 // Permite a los usuarios iniciar sesión y obtener un token.
-Route::post('/login', [UsuarioController::class, 'login']);
-// Permite registrar un nuevo usuario inicial (abierto temporalmente).
+Route::prefix('auth')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
+});
 Route::post('/usuarios', [UsuarioController::class, 'store']); // Registro de usuarios
+// Permite registrar un nuevo usuario inicial (abierto temporalmente).
 
 
 // ============================================
 // RUTAS PROTEGIDAS (requieren autenticación)
 // ============================================
-// Route::middleware(['jwt.auth'])->group(function () {
-    
-    // Ruta de logout
-    // Route::post('/logout', [UsuarioController::class, 'logout']);
-    // Ruta de logout: Invalida el token actual.
-    Route::post('/logout', [UsuarioController::class, 'logout']);
-    
+
+// Rutas protegidass
+Route::middleware(['jwt'])->group(function () {
+    Route::prefix('auth')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', [AuthController::class, 'me']);
+    });
     // ============================================
     // GESTIÓN DE USUARIOS (requiere autenticación)
     // ============================================
@@ -56,7 +55,6 @@ Route::post('/usuarios', [UsuarioController::class, 'store']); // Registro de us
     Route::patch('/usuario/{id}', [UsuarioController::class, 'update']);
     
     // Solo administradores pueden eliminar usuarios
-    // Solo administradores pueden eliminar usuarios.
     // Middleware 'check.role:ADMIN' asegura que solo usuarios con rol ADMIN accedan.
     Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy'])->middleware('check.role:ADMIN');
 
@@ -72,14 +70,13 @@ Route::post('/usuarios', [UsuarioController::class, 'store']); // Registro de us
     Route::patch('/producto/{id}', [ProductoController::class, 'updatePartial']);
     
     // Solo administradores pueden eliminar productos
-    // Solo administradores pueden eliminar productos del catálogo.
     Route::delete('/producto/{id}', [ProductoController::class, 'destroy'])->middleware('check.role:ADMIN');
 
     // ============================================
     // ROLES (solo administradores)
     // Gestión de los roles de usuario (ej. Admin, Vendedor).
     // ============================================
-    Route::get('/rol', [rolController::class, 'index'])->middleware('check.role:ADMIN');
+    Route::get('/rol', [rolController::class, 'index']);
     Route::post('/rol', [rolController::class, 'store'])->middleware('check.role:ADMIN');
     Route::get('/rol/{id}', [rolController::class, 'show'])->middleware('check.role:ADMIN');
     Route::delete('/rol/{id}', [rolController::class, 'destroy'])->middleware('check.role:ADMIN');
@@ -264,20 +261,9 @@ Route::post('/usuarios', [UsuarioController::class, 'store']); // Registro de us
 
     Route::get('/alertas', [AlertaController::class, 'index']);
 
-// });
-
-
-Route::prefix('auth')->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/refresh', [AuthController::class, 'refresh']);
 });
 
-// Rutas protegidass
-Route::middleware(['jwt'])->group(function () {
-    Route::prefix('auth')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/me', [AuthController::class, 'me']);
-    });
 
 
-});
+
+

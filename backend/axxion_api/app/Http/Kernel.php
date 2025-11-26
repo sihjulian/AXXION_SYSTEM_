@@ -31,6 +31,5 @@ class Kernel extends HttpKernel
      */
     protected $middlewareAliases = [
         // Los middlewares personalizados ahora se registran en bootstrap/app.php
-        'jwt' => \App\Http\Middleware\JwtMiddleware::class,
     ];
 }

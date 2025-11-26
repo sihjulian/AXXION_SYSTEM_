@@ -76,7 +76,7 @@ class AuthController extends Controller
         // ¡Adjunta la nueva cookie a la respuesta!
         return response()->json([
             'access_token' => $result['access_token'],
-            // ... otros datos si los tienes
+            'user'         => $result['user'],
         ])->withCookie($result['cookie']);
         } catch (\Exception $e) {
             return response()->json([

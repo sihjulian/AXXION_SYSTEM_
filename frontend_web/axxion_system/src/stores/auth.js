@@ -1,6 +1,6 @@
 // stores/auth.js
 import { defineStore } from 'pinia';
-import axios from '@/plugins/axios'; // O tu instancia de axios
+import axios from '@/plugins/axios'; 
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => !!state.accessToken,
   },
   actions: {
-        async tryToRefresh() {
+    async tryToRefresh() {
       if (this.authReady) return; 
       try {
         await this.refreshAccessToken();
@@ -27,7 +27,7 @@ export const useAuthStore = defineStore('auth', {
 
     async login(email, password) {
       try {
-        const response = await axios.post('/api/auth/login', { email, password });
+        const response = await axios.post('/auth/login', { email, password });
       const authData = response.data.data;
       // Usamos el objeto authData para asignar los valores
       this.accessToken = authData.access_token;
@@ -45,7 +45,7 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       try {
-        await axios.post('/api/auth/logout');
+        await axios.post('/auth/logout');
       } catch (error) {
         console.error('El logout en el servidor falló, pero se limpiará la sesión localmente.', error);
       } finally {
@@ -64,13 +64,12 @@ export const useAuthStore = defineStore('auth', {
       this.isRefreshing = true;
 
       try {
-        const response = await axios.post('/api/auth/refresh');
+        const response = await axios.post('/auth/refresh');
         const authData = response.data.data || response.data;
         
         this.accessToken = authData.access_token;
-
-
-        this.user = authData.user;
+        // Actualizamos el usuario con los datos que nos llegan.
+        this.user = authData.user; 
         
         this.refreshSubscribers.forEach(callback => callback(this.accessToken));
         return this.accessToken;

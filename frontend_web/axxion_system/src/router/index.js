@@ -34,15 +34,6 @@ const routes = [
       title: 'Inicio'
     },
   },
-  // {
-  //   path: '/:pathMatch(.*)*',
-  //   name: 'NotFound',
-  //   component: () => import('@/views/NotFoundView.vue'),
-  //   meta: { 
-  //     requiresAuth: false,
-  //     title: 'Página no encontrada'
-  //   },
-  // },
   {
     path: '/User',
     name: 'usuarios',
@@ -50,7 +41,7 @@ const routes = [
     meta: { 
       requiresAuth: true,
       title: 'Gestión de Usuarios',
-      roles: ['ADMIN'] // Solo administradores pueden gestionar usuarios
+      
     },
   },
   {
@@ -69,7 +60,7 @@ const routes = [
     meta: { 
       requiresAuth: true,
       title: 'Mantenimiento',
-      roles: ['ADMIN', 'TECNICO'] // Solo admin y técnicos
+      
     },
   },
   {
@@ -106,7 +97,7 @@ const routes = [
     meta:{ 
       requiresAuth: true,
       title: 'Gestión de Usuarios',
-      roles: ['ADMIN']
+      
     },
   },
   {
@@ -116,7 +107,7 @@ const routes = [
     meta: { 
       requiresAuth: true,
       title: 'Reporte de Mantenimientos',
-      roles: ['ADMIN', 'TECNICO'] // Solo admin y técnicos
+      
     },
   },
   {
@@ -230,22 +221,7 @@ console.log(`[Router Guard] ACCESO PERMITIDO.`);
 
 export default router
 
-// //create web sirve para un histoial de las vistas mas visitadas
-// import { createRouter, createWebHistory } from 'vue-router'
-// import { useAuthStore } from '@/stores/auth'
-// import Home from '/src/views/Home.vue'
-// import User from '@/views/User.vue'
-// import Login from '@/views/login.vue'
-// import Inventory from '@/views/Inventory.vue'
-// import Maintenace from '@/views/Maintenace.vue'
-// import Category from '@/views/Category.vue'
-// import SubCategory from '@/views/SubCategory.vue'
-// import Reports from '@/views/Reports.vue'
-// import ReportUsers from '@/views/ReportUsers.vue'
-// import ReportMaintenances from '@/views/ReportMaintenances.vue'
-// import ReportAlquiler from '@/views/ReportAlquiler.vue'
-// import Rental from '@/views/Rental.vue'
-// import Alerts from '@/views/Alerts.vue'
+
 
 
 // const routes = [
