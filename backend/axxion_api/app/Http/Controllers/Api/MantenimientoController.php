@@ -37,12 +37,12 @@ class MantenimientoController extends Controller
             'fecha_inicio' => 'required|date',
             'fecha_fin_prevista' => 'required|date|after_or_equal:fecha_inicio',
             'fecha_fin_real' => 'nullable|date',
-            'tipo_mantenimiento' => 'required|string|in:PREVENTIVO,CORRECTIVO,PREDICTIVO,EMERGENCIA',
+            'tipo_mantenimiento' => 'required|string|in:Preventivo,Correctivo,Mejora',
             'descripcion_problema' => 'required|string|max:1000',
             'descripcion_trabajo_realizado' => 'nullable|string|max:1000',
             'costo_estimado' => 'nullable|numeric|min:0',
             'costo_real' => 'nullable|numeric|min:0',
-            'estado_mantenimiento' => 'required|string|in:PROGRAMADO,EN_PROCESO,COMPLETADO,CANCELADO,PAUSADO',
+            'estado_mantenimiento' => 'required|string|in:Programado,EnProceso,Finalizado,Cancelado',
             'responsable' => 'required|string|max:255',
         ]);
 
@@ -102,12 +102,12 @@ class MantenimientoController extends Controller
             'fecha_inicio' => 'sometimes|required|date',
             'fecha_fin_prevista' => 'sometimes|required|date|after_or_equal:fecha_inicio',
             'fecha_fin_real' => 'nullable|date',
-            'tipo_mantenimiento' => 'sometimes|required|string|in:PREVENTIVO,CORRECTIVO,PREDICTIVO,EMERGENCIA',
+            'tipo_mantenimiento' => 'sometimes|required|string|in:Preventivo,Correctivo,Mejora',
             'descripcion_problema' => 'sometimes|required|string|max:1000',
             'descripcion_trabajo_realizado' => 'nullable|string|max:1000',
             'costo_estimado' => 'nullable|numeric|min:0',
             'costo_real' => 'nullable|numeric|min:0',
-            'estado_mantenimiento' => 'sometimes|required|string|in:PROGRAMADO,EN_PROCESO,COMPLETADO,CANCELADO,PAUSADO',
+            'estado_mantenimiento' => 'sometimes|required|string|in:Programado,EnProceso,Finalizado,Cancelado',
             'responsable' => 'sometimes|required|string|max:255',
         ]);
 

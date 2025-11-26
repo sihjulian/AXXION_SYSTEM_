@@ -210,9 +210,6 @@ Route::middleware(['jwt'])->group(function () {
     // Generación de reportes y métricas del sistema.
     // ============================================
 
-    Route::get('/reportes/inventario', [ReporteController::class, 'inventario']);
-    Route::get('/reportes/usuarios', [ReporteController::class, 'usuarios']);
-    Route::get('/reportes/rentas', [ReporteController::class, 'rentas']);
     Route::get('/reportes/metrics', [ReporteController::class, 'metrics']);
     Route::get('/reportes/metricsAlq', [ReporteController::class, 'metricsAlq']);
 
@@ -250,7 +247,7 @@ Route::middleware(['jwt'])->group(function () {
     // ALERTAS (requiere autenticación)
     // Sistema de notificaciones sobre estados críticos (mantenimientos, rentas vencidas).
     // ============================================
-
+    Route::get('/alertas', [AlertaController::class, 'index']);
     // ============================================
     // SOLICITUDES (requiere autenticación)
     // Gestión de solicitudes iniciales de clientes.
@@ -259,7 +256,6 @@ Route::middleware(['jwt'])->group(function () {
     Route::get('/solicitud/{id}', [App\Http\Controllers\Api\SolicitudController::class, 'show']);
     Route::post('/solicitud', [App\Http\Controllers\Api\SolicitudController::class, 'store']);
 
-    Route::get('/alertas', [AlertaController::class, 'index']);
 
 });
 

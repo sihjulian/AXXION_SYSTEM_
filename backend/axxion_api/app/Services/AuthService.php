@@ -97,7 +97,7 @@ public function refresh(string $refreshToken): array
         'access_token' => $newAccessTokenData['token'],
         'token_type'   => 'Bearer',
         'expires_in'   => $newAccessTokenData['expires_in'],
-        'cookie'       => $newCookie, // <-- ¡Devuelve la cookie!
+        'cookie'       => $newCookie, 
         'user'         => $user,
     ];
 }
