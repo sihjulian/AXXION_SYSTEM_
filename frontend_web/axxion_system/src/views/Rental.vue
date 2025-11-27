@@ -192,7 +192,6 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRentalStore } from '@/stores/rentalStore';
@@ -202,7 +201,7 @@ import { FwbCard, FwbButton } from 'flowbite-vue'
 import RentalModal from '@/components/RentalModal.vue'
 import RentalService from '@/services/RentalService';
 import ClienteService from '@/services/ClienteService'
-import { useCartStore } from '@/stores/cart.js'; // Import Cart Store
+import { useCartStore } from '@/stores/CartStore'; // Import Cart Store
 
 const rentalStore = useRentalStore();
 const cartStore = useCartStore(); // Init Cart Store
@@ -252,8 +251,6 @@ const loadRentals = async () => {
     error.value = 'No se pudieron cargar las rentas';
   } finally {
     loading.value = false;
-import RentalModal from '@/components/RentalModal.vue';
-import { FwbInput, FwbButton, FwbAlert } from 'flowbite-vue';
 
 /**
  * Vista Rental.
@@ -442,14 +439,7 @@ const getStatusClass = (status) => {
   };
   return classes[status] || 'bg-gray-500 text-white';
 };
-</script>
 
-<style scoped>
-
-
-.rental-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
 const normalizePayload = (payload) => {
   return {
@@ -507,6 +497,8 @@ const saveModal = async (payloadFromModal) => {
       alert("No se pudo eliminar la renta.");
     }
   }
+}
+}
 };
 </script>
 
@@ -565,7 +557,6 @@ const saveModal = async (payloadFromModal) => {
     opacity: 1;
   }
 }
-</style>
 .rental-card:hover {
   transform: translateY(-8px);
 }

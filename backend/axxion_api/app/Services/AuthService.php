@@ -46,7 +46,7 @@ class AuthService
         if (!$user || !Hash::check($password, $user->password_hash)) {
             throw new \Exception('Credenciales invalidas');
         }
-
+        $user->load('roles');
         $accessTokenData = $this->generateAccessToken($user);
         $refreshToken = $this->generateRefreshToken();
 
@@ -72,38 +72,34 @@ public function refresh(string $refreshToken): array
     if (!$storedToken || $storedToken->isExpired()) {
         throw new \Exception('Refresh token inválido o expirado');
     }
-
     $user = $storedToken->user;
-
-    // --- INICIO DE LA CORRECCIÓN ---
-
-    // 1. Elimina el token antiguo para que no pueda ser reutilizado.
+    $user->load('roles');
+    // Elimina el token antiguo para que no pueda ser reutilizado.
     $storedToken->delete();
 
-    // 2. Genera un NUEVO Access Token.
+    // Genera un NUEVO Access Token.
     $newAccessTokenData = $this->generateAccessToken($user);
 
-    // 3. Genera un NUEVO Refresh Token.
+    // Genera un NUEVO Refresh Token.
     $newRefreshToken = $this->generateRefreshToken();
 
-    // 4. Guarda el hash del NUEVO refresh token en la BBDD.
+    // Guarda el hash del NUEVO refresh token en la BBDD.
     RefreshToken::createForUser($user, $newRefreshToken, [
-        'ip_address' => request()->ip(), // Opcional: añade metadata
+        'ip_address' => request()->ip(),
         'user_agent' => request()->userAgent()
     ]);
 
-    // 5. Crea la NUEVA cookie para el NUEVO refresh token.
+    // Crea la NUEVA cookie para el NUEVO refresh token.
     $newCookie = $this->createRefreshTokenCookie($newRefreshToken);
 
-    // 6. Devuelve todo junto.
+    // Devuelve todo junto.
     return [
         'access_token' => $newAccessTokenData['token'],
         'token_type'   => 'Bearer',
         'expires_in'   => $newAccessTokenData['expires_in'],
-        'cookie'       => $newCookie, // <-- ¡Devuelve la cookie!
+        'cookie'       => $newCookie, 
+        'user'         => $user,
     ];
-
-    // --- FIN DE LA CORRECCIÓN ---
 }
 
         public function logout(string $refreshToken): void
