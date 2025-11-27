@@ -28,11 +28,10 @@ export const useAuthStore = defineStore('auth', {
     async login(email, password) {
       try {
         const response = await axios.post('/auth/login', { email, password });
-      const authData = response.data.data;
-      // Usamos el objeto authData para asignar los valores
-      this.accessToken = authData.access_token;
-      this.user = authData.user;
-
+        const authData = response.data.data;
+        // Usamos el objeto authData para asignar los valores
+        this.accessToken = authData.access_token;
+        this.user = authData.user;
         
       } catch (error) {
         console.log(`[Store Action - UID: ${this.$id}] Limpiando estado por error.`);
