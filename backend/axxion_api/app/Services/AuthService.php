@@ -116,7 +116,7 @@ public function refresh(string $refreshToken): array
             self::REFRESH_TOKEN_EXPIRATION * 24 * 60, // minutos
             '/',
             null,
-            true, // secure (solo HTTPS en producción)
+            true, // secure (solo HTTPS)
             true, // httpOnly
             false,
             'strict' // sameSite
