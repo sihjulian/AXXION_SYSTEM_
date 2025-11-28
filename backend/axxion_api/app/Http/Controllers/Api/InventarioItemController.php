@@ -336,15 +336,43 @@ class InventarioItemController extends Controller
                           ->orderBy('fecha_inicio', 'desc');
                 },
                 'rentas' => function($query) {
-                    $query->whereIn('estado_renta', ['Programada', 'EnCurso'])
-                          ->with('cliente')
-                          ->orderBy('fecha_inicio', 'desc');
+                    // Incluir rentas activas: estados específicos O sin fecha de devolución
+                    $query->where(function($q) {
+                        $q->whereIn('estado_renta', ['Programada', 'EnCurso', 'Activa', 'Pendiente'])
+                          ->orWhereNull('fecha_devolucion_real');
+                    })
+                    ->with('cliente')
+                    ->orderBy('fecha_inicio', 'desc');
                 }
             ])->get();
 
             // Enriquecer cada item con información de renta activa
             $inventarioItems->each(function($item) {
+                Log::info('Processing inventory item:', [
+                    'item_id' => $item->id,
+                    'producto' => $item->producto ? $item->producto->nombre : 'null',
+                    'rentas_count' => $item->rentas->count(),
+                    'rentas' => $item->rentas->map(function($r) {
+                        return [
+                            'id' => $r->id,
+                            'estado' => $r->estado_renta,
+                            'cliente_id' => $r->cliente_id,
+                            'fecha_inicio' => $r->fecha_inicio,
+                            'fecha_fin' => $r->fecha_fin_prevista
+                        ];
+                    })
+                ]);
+                
                 $rentaActiva = $item->rentas->first();
+                
+                if ($rentaActiva) {
+                    Log::info('Found active rental for item ' . $item->id, [
+                        'rental_id' => $rentaActiva->id,
+                        'estado' => $rentaActiva->estado_renta,
+                        'cliente' => $rentaActiva->cliente ? $rentaActiva->cliente->nombre : 'null'
+                    ]);
+                }
+                
                 $item->renta_activa = $rentaActiva ? [
                     'id' => $rentaActiva->id,
                     'cliente_nombre' => $rentaActiva->cliente ? 
