@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\direccionController;
 use App\Http\Controllers\Api\entregaController;
 use App\Http\Controllers\Api\MantenimientoController;
 use App\Http\Controllers\Api\ReporteController;
+use App\Http\Controllers\Api\ReporteRentaController;
 use App\Http\Controllers\Api\AlertaController;
 use App\Http\Controllers\Api\InventarioItemController;
 use App\Http\Controllers\Api\AuthController;
@@ -212,6 +213,12 @@ Route::middleware(['jwt'])->group(function () {
 
     Route::get('/reportes/metrics', [ReporteController::class, 'metrics']);
     Route::get('/reportes/metricsAlq', [ReporteController::class, 'metricsAlq']);
+    Route::get('/reportes/resumenGeneral', [ReporteRentaController::class, 'resumenGeneral']);
+    Route::get('/reportes/obtenerRentasAtrasadas', [ReporteRentaController::class, 'obtenerRentasAtrasadas']);
+    Route::get('/reportes/ingresosPorMes', [ReporteRentaController::class, 'ingresosPorMes']);
+    Route::get('/reportes/topEquiposRentados', [ReporteRentaController::class, 'topEquiposRentados']);
+    Route::get('/reportes/estadoInventario', [ReporteRentaController::class, 'estadoInventario']);
+    Route::get('/reportes/roiPorEquipo', [ReporteRentaController::class, 'roiPorEquipo']);
 
     // ============================================
     // ALQUILER (requiere autenticación)

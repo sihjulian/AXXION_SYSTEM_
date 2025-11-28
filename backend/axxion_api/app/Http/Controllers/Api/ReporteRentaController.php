@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Renta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,7 @@ class ReporteRentaController extends Controller
     // REPORTE: Tablero Principal
     public function resumenGeneral() 
     {
+        try {
         // Calcular rentas activas
         $rentasActivas = Renta::where('estado_renta', 'EnCurso')->count();
         // Calcular rentas atrasadas
@@ -27,6 +29,15 @@ class ReporteRentaController extends Controller
             'alertas_atrasadas' => $rentasAtrasadas,
             'dinero_en_garantias' => $garantiasRetenidas,
         ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ocurrió un error en el servidor',
+                'error_detail' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
     }
     // REPORTE: Operativo 
     public function obtenerRentasAtrasadas()
@@ -41,7 +52,7 @@ class ReporteRentaController extends Controller
                 'cliente' => $renta->cliente->nombre,
                 'contacto' => $renta->cliente->telefono_principal,
                 'fecha_debio_entregar'=> $renta->fecha_fin_prevista->format('d/m/Y'),
-                'dias_retraso' => Carbon::now()->diffInDays($renta->fecha_fin_prevista),
+                'dias_retraso' => intval(abs(Carbon::now()->diffInDays($renta->fecha_fin_prevista))),
                 'monto_pendiente' => $renta->monto_total_renta
             ];
         });
@@ -50,38 +61,48 @@ class ReporteRentaController extends Controller
     // REPORTE: Financiero - Ingresos por Mes
     public function ingresosPorMes()
     {
+        try {
         // Usamos selectRaw para consultas de agregación
         $ingresos = Renta::selectRaw('
-        YEAR(fecha_inicio) as anio,
-        MONTH(fecha_inicio as mes,
+        YEAR(fecha_inicio) as año,
+        MONTH(fecha_inicio) as mes,
         SUM(monto_total_renta) as total
         ')
-        ->groupBy('anio', 'mes')
-        ->orderBy('anio', 'desc')
-        ->orderBy('mes', 'desc')
+        ->groupBy(DB::raw('YEAR(fecha_inicio)'), DB::raw('MONTH(fecha_inicio)'))
+        ->orderBy(DB::raw('YEAR(fecha_inicio)'), 'desc')
+        ->orderBy(DB::raw('MONTH(fecha_inicio)'), 'desc')
         ->limit(12)
         ->get();
         // Mapeamos para que el frontend
         $datosGrafico = $ingresos->map(function ($item) {
             return [
-                'etiqueta' => $item->mes . '/' . $item->anio,
-                'valor' => $item->total
+                'etiqueta' => $item->mes . '/' . $item->año,
+                'valor' => (float)$item->total
             ];
         });
         return response()->json($datosGrafico);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ocurrió un error en el servidor',
+                'error_detail' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
     }
     // REPORTE: Activos - Inventario más utilizado
     public function topEquiposRentados()
     {
         $ranking = DB::table('renta_inventario_item')
-            ->join('inventario_items', 'renta_inventario_item.inventario_item_id', '=', 'inventario_items.id')
-            ->join('productos', 'inventario_items.producto_id', '=', 'productos.id') 
+            ->join('inventario_item', 'renta_inventario_item.inventario_item_id', '=', 'inventario_item.id')
+            ->join('producto', 'inventario_item.producto_id', '=', 'producto.id') 
             ->select(
-                'productos.nombre', // Nombre legible del producto
+                'producto.nombre', // Nombre legible del producto
                 DB::raw('count(*) as total_rentas'), // Cuántas veces se ha alquilado
                 DB::raw('SUM(renta_inventario_item.precio_renta_item) as ingresos_generados') // Cuánto dinero ha traído
             )
-            ->groupBy('productos.id', 'productos.nombre')
+            ->groupBy('producto.id', 'producto.nombre')
             ->orderByDesc('total_rentas')
             ->limit(10)
             ->get();
@@ -92,7 +113,7 @@ class ReporteRentaController extends Controller
     public function estadoInventario()
     {
         // Esto cuenta cuántos ítems hay en cada estado: Disponible, Rentado, etc.
-        $estados = DB::table('inventario_items')
+        $estados = DB::table('inventario_item')
             ->select('estado_item', DB::raw('count(*) as total'))
             ->groupBy('estado_item')
             ->get();
@@ -107,33 +128,39 @@ class ReporteRentaController extends Controller
 
         return response()->json($data);
     }
-
-        public function roiPorEquipo()
+    // REPORTE: ROI (Retorno de Inversión) por Ítem Específico
+    public function roiPorEquipo()
     {
-        $analisis = DB::table('inventario_items')
-            ->join('renta_inventario_item', 'inventario_items.id', '=', 'renta_inventario_item.inventario_item_id')
+        $analisis = DB::table('inventario_item')
+            ->join('renta_inventario_item', 'inventario_item.id', '=', 'renta_inventario_item.inventario_item_id')
             ->select(
-                'inventario_items.numero_serie',
-                'inventario_items.costo_adquisicion',
+                'inventario_item.numero_serie',
+                'inventario_item.costo_adquisicion',
                 DB::raw('SUM(renta_inventario_item.precio_renta_item) as total_ingresos')
             )
-            ->whereNotNull('inventario_items.costo_adquisicion') // Ignoramos si no registraste el costo
-            ->groupBy('inventario_items.id', 'inventario_items.numero_serie', 'inventario_items.costo_adquisicion')
+            //  En la base de datos, ignoramos costos 0 o negativos para no traer basura
+            ->where('inventario_item.costo_adquisicion', '>', 0) 
+            ->groupBy('inventario_item.id', 'inventario_item.numero_serie', 'inventario_item.costo_adquisicion')
             ->get()
             ->map(function ($item) {
-                // Cálculo de Ingeniería Financiera simple
-                $gananciaNeta = $item->total_ingresos - $item->costo_adquisicion;
-                $porcentajeRecuperacion = ($item->total_ingresos / $item->costo_adquisicion) * 100;
-
+                // Convertimos a float para asegurar operaciones matemáticas
+                $costo = (float)$item->costo_adquisicion;
+                $ingresos = (float)$item->total_ingresos;
+                // VALIDACIÓN DE SEGURIDAD (Por si acaso se coló un 0.0001 o similar)
+                if ($costo <= 0) {
+                    $roi = 0;
+                } else {
+                    $roi = ($ingresos / $costo) * 100;
+                }
+                $gananciaNeta = $ingresos - $costo;
                 return [
                     'serie' => $item->numero_serie,
-                    'costo' => $item->costo_adquisicion,
-                    'ingreso_acumulado' => $item->total_ingresos,
-                    'es_rentable' => $gananciaNeta > 0, // Booleano: ¿Ya dio ganancia?
-                    'roi_porcentaje' => round($porcentajeRecuperacion, 2) . '%'
+                    'costo' => $costo,
+                    'ingreso_acumulado' => $ingresos,
+                    'es_rentable' => $gananciaNeta > 0,
+                    'roi_porcentaje' => round($roi, 2) . '%'
                 ];
             });
-
         return response()->json($analisis);
     }
 }
