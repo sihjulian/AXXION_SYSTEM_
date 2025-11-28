@@ -1,5 +1,4 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
+-- phpMyAdmin SQL Dump- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
@@ -27,16 +26,21 @@ SET time_zone = "+00:00";
 -- Estructura de tabla para la tabla `auditoria_inventario`
 --
 
-CREATE TABLE `auditoria_inventario` (
-  `id` int(11) NOT NULL,
-  `inventario_item_id` int(11) DEFAULT NULL,
-  `accion` varchar(50) DEFAULT NULL,
-  `campos_cambiados` text DEFAULT NULL,
-  `valores_anteriores` text DEFAULT NULL,
-  `valores_nuevos` text DEFAULT NULL,
-  `usuario` varchar(100) DEFAULT NULL,
-  `fecha_cambio` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `auditoria_inventario`
+--
+
+
+
+
+
+
+
+DROP DATABASE IF EXISTS sistemarenta;
+CREATE DATABASE IF NOT EXISTS `sistemarenta` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `sistemarenta`;
+
 
 -- --------------------------------------------------------
 
@@ -1038,7 +1042,16 @@ CREATE TABLE `vista_clientes_completa` (
 );
 
 -- --------------------------------------------------------
-
+CREATE TABLE `auditoria_inventario` (
+  `id` int(11) NOT NULL,
+  `inventario_item_id` int(11) DEFAULT NULL,
+  `accion` varchar(50) DEFAULT NULL,
+  `campos_cambiados` text DEFAULT NULL,
+  `valores_anteriores` text DEFAULT NULL,
+  `valores_nuevos` text DEFAULT NULL,
+  `usuario` varchar(100) DEFAULT NULL,
+  `fecha_cambio` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 --
 -- Estructura para la vista `vista_clientes_completa`
 --

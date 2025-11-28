@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+    // Le decimos a Laravel que aplique el middleware de CORS
+        $middleware->group('api/', [
+            \Illuminate\Http\Middleware\HandleCors::class,
+        ]);
         // Registrar middlewares personalizados
         $middleware->alias([
             'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
@@ -19,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role.admin' => \App\Http\Middleware\RoleAdminMiddleware::class,
             'role.auxiliar' => \App\Http\Middleware\RoleAuxiliarMiddleware::class,
             'role.tecnico' => \App\Http\Middleware\RoleTecnicoMiddleware::class,
+            'jwt' => \App\Http\Middleware\JwtMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
