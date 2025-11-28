@@ -17,7 +17,37 @@ class ProductoController extends Controller
     public function index()
     {
         try {
-            $productos = Producto::all();
+            // Eager load inventory items, their active rentals, and the client associated with those rentals
+            $productos = Producto::with(['inventarioItems.rentas' => function($query) {
+                $query->whereIn('estado_renta', ['Programada', 'EnCurso', 'Activa'])
+                      ->orderBy('fecha_inicio', 'desc');
+            }, 'inventarioItems.rentas.cliente'])->get();
+
+            // Process each product to attach 'renta_activa' if applicable
+            // This mimics the structure expected by the frontend EquipmentCard
+            $productos->each(function($producto) {
+                $producto->renta_activa = null;
+                
+                // Check if any inventory item has an active rental
+                foreach ($producto->inventarioItems as $item) {
+                    $activeRental = $item->rentas->first();
+                    if ($activeRental) {
+                        $producto->renta_activa = [
+                            'cliente_nombre' => $activeRental->cliente ? 
+                                trim($activeRental->cliente->nombre . ' ' . ($activeRental->cliente->apellido1 ?? '')) : 
+                                'Cliente Desconocido',
+                            'fecha_fin_prevista' => $activeRental->fecha_fin_prevista,
+                            'estado_renta' => $activeRental->estado_renta
+                        ];
+                        // Break after finding the first active rental (assuming one active rental per product type for display purposes, 
+                        // though in reality multiple items of the same product could be rented. 
+                        // The card likely shows generic product info, so showing *one* active rental might be ambiguous 
+                        // if there are multiple items. However, based on the request, we'll show at least one.)
+                        break; 
+                    }
+                }
+            });
+
             return response()->json($productos);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al obtener los productos: ' . $e->getMessage()], 500);
