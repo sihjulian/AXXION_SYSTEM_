@@ -551,6 +551,9 @@ const products = computed(() => {
       mantenimientos: item.mantenimientos || [],
       rentas: item.rentas || [],
       
+      // Información de renta activa (viene del backend)
+      renta_activa: item.renta_activa || null,
+      
       // Para compatibilidad con código existente
       images: producto.images || [],
       totalRevenue: 0 // Calcular desde rentas si es necesario

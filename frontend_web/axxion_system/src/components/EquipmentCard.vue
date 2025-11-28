@@ -73,7 +73,7 @@
       </div>
 
       <!-- Información de alquiler actual -->
-      <div v-if="(equipment.estado === 'alquilado' || equipment.status === 'rented') && getCurrentRental" class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+      <div v-if="getCurrentRental" class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
         <div class="flex items-center mb-2">
           <font-awesome-icon icon="fa-solid fa-user" class="w-4 h-4 mr-2 text-blue-500"/>
           <span class="text-sm font-medium text-blue-700 dark:text-blue-300">Cliente Actual</span>
@@ -191,7 +191,6 @@ const emit = defineEmits([
   'maintenance-equipment' // Iniciar flujo de mantenimiento
 ]);
 
-// Computed
 // Computed: Gestiona la imagen del equipo.
 // Si no hay imagen cargada, devuelve una por defecto basada en la categoría.
 const equipmentImage = computed(() => {
@@ -199,17 +198,8 @@ const equipmentImage = computed(() => {
     return props.equipment.images[0];
   }
   
-  // Imagen por defecto según la categoría
-  const defaultImages = {
-    laptop: '/images/defaults/laptop.jpg',
-    desktop: '/images/defaults/desktop.jpg',
-    projector: '/images/defaults/projector.jpg',
-    monitor: '/images/defaults/monitor.jpg',
-    accessory: '/images/defaults/accessory.jpg'
-  };
-  
-  const category = props.equipment.categoria || props.equipment.category;
-  return defaultImages[category] || '/images/defaults/equipment.jpg';
+  // Usar imagen por defecto desde assets
+  return new URL('@/assets/img/items.png', import.meta.url).href;
 });
 
 const getSpecifications = computed(() => {
@@ -220,8 +210,13 @@ const getSpecifications = computed(() => {
 // Computed: Identifica si el equipo está actualmente alquilado.
 // Intenta obtener la información de 'renta_activa' (backend) o buscar en el array de rentas.
 const getCurrentRental = computed(() => {
+  // Debug logging
+  console.log('Equipment data:', props.equipment);
+  console.log('renta_activa:', props.equipment.renta_activa);
+  
   // Primero verificar si viene renta_activa del backend
   if (props.equipment.renta_activa) {
+    console.log('Found renta_activa:', props.equipment.renta_activa);
     return {
       clientName: props.equipment.renta_activa.cliente_nombre,
       fecha_fin: props.equipment.renta_activa.fecha_fin_prevista,

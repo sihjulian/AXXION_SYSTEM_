@@ -32,17 +32,26 @@ class MantenimientoController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        // Normalizar a mayúsculas para permitir flexibilidad en el input
+        $data = $request->all();
+        if (isset($data['tipo_mantenimiento'])) {
+            $data['tipo_mantenimiento'] = strtoupper($data['tipo_mantenimiento']);
+        }
+        if (isset($data['estado_mantenimiento'])) {
+            $data['estado_mantenimiento'] = strtoupper($data['estado_mantenimiento']);
+        }
+
+        $validator = Validator::make($data, [
             'inventario_item_id' => 'required|exists:inventario_item,id',
             'fecha_inicio' => 'required|date',
             'fecha_fin_prevista' => 'required|date|after_or_equal:fecha_inicio',
             'fecha_fin_real' => 'nullable|date',
-            'tipo_mantenimiento' => 'required|string|in:Preventivo,Correctivo,Mejora',
+            'tipo_mantenimiento' => 'required|string|in:PREVENTIVO,CORRECTIVO,MEJORA,PREDICTIVO,EMERGENCIA',
             'descripcion_problema' => 'required|string|max:1000',
             'descripcion_trabajo_realizado' => 'nullable|string|max:1000',
             'costo_estimado' => 'nullable|numeric|min:0',
             'costo_real' => 'nullable|numeric|min:0',
-            'estado_mantenimiento' => 'required|string|in:Programado,EnProceso,Finalizado,Cancelado',
+            'estado_mantenimiento' => 'required|string|in:PROGRAMADO,EN_PROCESO,FINALIZADO,COMPLETADO,CANCELADO,PAUSADO',
             'responsable' => 'required|string|max:255',
         ]);
 
@@ -56,7 +65,7 @@ class MantenimientoController extends Controller
         try {
             DB::beginTransaction();
 
-            $mantenimiento = Mantenimiento::create($request->all());
+            $mantenimiento = Mantenimiento::create($data);
             $mantenimiento->load('inventarioItem');
 
             DB::commit();
@@ -97,17 +106,26 @@ class MantenimientoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
+        // Normalizar a mayúsculas para permitir flexibilidad en el input
+        $data = $request->all();
+        if (isset($data['tipo_mantenimiento'])) {
+            $data['tipo_mantenimiento'] = strtoupper($data['tipo_mantenimiento']);
+        }
+        if (isset($data['estado_mantenimiento'])) {
+            $data['estado_mantenimiento'] = strtoupper($data['estado_mantenimiento']);
+        }
+
+        $validator = Validator::make($data, [
             'inventario_item_id' => 'sometimes|required|exists:inventario_item,id',
             'fecha_inicio' => 'sometimes|required|date',
             'fecha_fin_prevista' => 'sometimes|required|date|after_or_equal:fecha_inicio',
             'fecha_fin_real' => 'nullable|date',
-            'tipo_mantenimiento' => 'sometimes|required|string|in:Preventivo,Correctivo,Mejora',
+            'tipo_mantenimiento' => 'sometimes|required|string|in:PREVENTIVO,CORRECTIVO,MEJORA,PREDICTIVO,EMERGENCIA',
             'descripcion_problema' => 'sometimes|required|string|max:1000',
             'descripcion_trabajo_realizado' => 'nullable|string|max:1000',
             'costo_estimado' => 'nullable|numeric|min:0',
             'costo_real' => 'nullable|numeric|min:0',
-            'estado_mantenimiento' => 'sometimes|required|string|in:Programado,EnProceso,Finalizado,Cancelado',
+            'estado_mantenimiento' => 'sometimes|required|string|in:PROGRAMADO,EN_PROCESO,FINALIZADO,COMPLETADO,CANCELADO,PAUSADO',
             'responsable' => 'sometimes|required|string|max:255',
         ]);
 
@@ -127,7 +145,7 @@ class MantenimientoController extends Controller
 
             DB::beginTransaction();
 
-            $mantenimiento->update($request->all());
+            $mantenimiento->update($data);
             $mantenimiento->load('inventarioItem');
 
             DB::commit();
