@@ -1,5 +1,4 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
+-- phpMyAdmin SQL Dump- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
@@ -27,29 +26,12 @@ SET time_zone = "+00:00";
 -- Estructura de tabla para la tabla `auditoria_inventario`
 --
 
-CREATE TABLE `auditoria_inventario` (
-  `id` int(11) NOT NULL,
-  `inventario_item_id` int(11) DEFAULT NULL,
-  `accion` varchar(50) DEFAULT NULL,
-  `campos_cambiados` text DEFAULT NULL,
-  `valores_anteriores` text DEFAULT NULL,
-  `valores_nuevos` text DEFAULT NULL,
-  `usuario` varchar(100) DEFAULT NULL,
-  `fecha_cambio` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `auditoria_inventario`
 --
 
-INSERT INTO `auditoria_inventario` (`id`, `inventario_item_id`, `accion`, `campos_cambiados`, `valores_anteriores`, `valores_nuevos`, `usuario`, `fecha_cambio`) VALUES
-(1, 22, 'UPDATE_SYNC', 'Sincronización desde producto', NULL, NULL, 'root@localhost', '2025-11-19 00:36:41'),
-(2, 22, 'UPDATE_SYNC', 'Sincronización desde producto', NULL, NULL, 'root@localhost', '2025-11-19 00:40:42'),
-(3, 22, 'UPDATE_SYNC', 'Sincronización desde producto', NULL, NULL, 'root@localhost', '2025-11-19 00:41:28'),
-(4, 19, 'UPDATE_SYNC', 'Sincronización desde producto', NULL, NULL, 'root@localhost', '2025-11-19 20:07:10'),
-(5, 21, 'UPDATE_SYNC', 'Sincronización desde producto', 'Estado: alquilado, Ubicación: test', 'Estado: fuera_de_servicio, Ubicación: test', 'root@localhost', '2025-11-19 20:25:35'),
-(6, 19, 'UPDATE_SYNC', 'Sincronización desde producto', NULL, NULL, 'root@localhost', '2025-11-19 20:26:06'),
-(7, 19, 'UPDATE_SYNC', 'Sincronización desde producto', NULL, NULL, 'root@localhost', '2025-11-19 20:37:43');
+
 
 
 
@@ -908,7 +890,16 @@ CREATE TABLE `vista_clientes_completa` (
 );
 
 -- --------------------------------------------------------
-
+CREATE TABLE `auditoria_inventario` (
+  `id` int(11) NOT NULL,
+  `inventario_item_id` int(11) DEFAULT NULL,
+  `accion` varchar(50) DEFAULT NULL,
+  `campos_cambiados` text DEFAULT NULL,
+  `valores_anteriores` text DEFAULT NULL,
+  `valores_nuevos` text DEFAULT NULL,
+  `usuario` varchar(100) DEFAULT NULL,
+  `fecha_cambio` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 --
 -- Estructura para la vista `vista_clientes_completa`
 --
