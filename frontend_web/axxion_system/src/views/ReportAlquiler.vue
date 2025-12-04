@@ -5,7 +5,7 @@
         <main class="container h-screen p-4 flex-1 overflow-y-auto">
             <headerP/>
             <section class="flex flex-col">
-                <h1><strong>Reportes de alquiler</strong></h1>
+                <h1 class="text-2xl"><strong>Reportes de alquiler</strong></h1>
                 <br>
                 <GraphAlq/>
             </section>
