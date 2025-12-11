@@ -64,7 +64,6 @@
             <h2 class="text-xl font-bold mb-4 text-red-600">
                 Rentas Atrasadas
             </h2>
-            
             <!-- Estado de Carga -->
             <div v-if="isLoading" class="flex justify-center p-4">
                 <span class="loader"></span>
