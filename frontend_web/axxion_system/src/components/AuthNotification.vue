@@ -15,6 +15,13 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 export default {
+  /**
+   * Componente AuthNotification.
+   * 
+   * Muestra notificaciones flotantes (toast) para feedback de autenticación y otras acciones.
+   * Soporta tipos: 'success', 'warning', 'error'.
+   * Se integra con los query params de la URL para mostrar mensajes al redirigir.
+   */
   name: 'AuthNotification',
   setup() {
     const route = useRoute();
@@ -22,6 +29,7 @@ export default {
     const message = ref('');
     const notificationType = ref('error');
 
+    // Computed para determinar el icono según el tipo de notificación
     const iconClass = computed(() => {
       switch (notificationType.value) {
         case 'success':
@@ -38,6 +46,12 @@ export default {
       showNotification.value = false;
     };
 
+    /**
+     * Muestra una notificación con un mensaje y tipo específicos.
+     * Se cierra automáticamente después de 5 segundos.
+     * @param {string} msg - El mensaje a mostrar.
+     * @param {string} type - El tipo de notificación ('error', 'success', 'warning').
+     */
     const showMessage = (msg, type = 'error') => {
       message.value = msg;
       notificationType.value = type;
@@ -49,7 +63,8 @@ export default {
       }, 5000);
     };
 
-    // Verificar si hay mensajes de error en la query
+    // Al montar, verifica si hay mensajes en los parámetros de la URL (query params)
+    // Esto es útil para mostrar errores o éxitos después de una redirección (ej. login fallido).
     onMounted(() => {
       if (route.query.error) {
         showMessage(route.query.error, 'error');

@@ -33,14 +33,31 @@
 import { ref, watch } from 'vue'
 import { FwbModal, FwbButton, FwbInput } from 'flowbite-vue'
 
+/**
+ * Componente CategoryModal.
+ * 
+ * Modal para gestionar las categorías de equipos.
+ * Permite agregar nuevas categorías, editar las existentes y confirmar su eliminación.
+ * Se adapta dinámicamente según el modo ('add', 'edit', 'delete').
+ */
+
+// Props
+// mode: Modo de operación del modal.
+// category: Objeto categoría a editar o eliminar (opcional).
 const props = defineProps({
   mode: { type: String, default: 'add' }, // 'add' | 'edit' | 'delete'
   category: { type: Object, default: null }
 })
 const emit = defineEmits(['close','save','delete'])
 
+// Estado local del formulario
 const local = ref({ nombre: '', descripcion: '', tipo_categoria: '' })
 
+/**
+ * Observa cambios en la categoría seleccionada o el modo.
+ * Si es modo edición, rellena el formulario con los datos de la categoría.
+ * Si es modo agregar, limpia el formulario.
+ */
 watch(() => [props.category, props.mode], () => {
   if (props.mode === 'edit' && props.category) {
     local.value = { ...props.category }
@@ -49,6 +66,7 @@ watch(() => [props.category, props.mode], () => {
   }
 }, { immediate: true })
 
+// Métodos de acción
 function onClose(){ emit('close') }
 function onSave(){ emit('save', { ...local.value }) }
 function onDelete(){ if(props.category?.id) emit('delete', props.category.id); else emit('close') }

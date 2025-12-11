@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Log;
 
 class detalleCotizacionController extends Controller
 {
+    /**
+     * Lista todos los detalles de cotizaciones.
+     */
         public function index()
         {
             try{
@@ -29,6 +32,12 @@ class detalleCotizacionController extends Controller
                 ], 500);
             }
         }
+    /**
+     * Agrega un item (detalle) a una cotización.
+     * 
+     * ANALOGÍA: Esta función es como agregar una línea específica al presupuesto: 
+     * '5 Sillas Modelo X a $10 cada una'.
+     */
         public function store(Request $request){
             $validator = Validator::make($request->all(),[
                 'cotizacion_id' => ['required', Rule::exists('cotizacion','id')],
@@ -72,6 +81,9 @@ class detalleCotizacionController extends Controller
             ];
             return response()->json($data, 200);
         }
+    /**
+     * Muestra un detalle específico.
+     */
         public function show($id){
             $detalleCotizacion = DetalleCotizacion::with('cotizacion', 'producto')->find($id);
             if(!$detalleCotizacion){
@@ -87,6 +99,9 @@ class detalleCotizacionController extends Controller
             ];
             return response()->json($data, 200);
         }
+    /**
+     * Elimina un detalle de cotización.
+     */
         public function destroy($id){
             $detalleCotizacion = DetalleCotizacion::find($id);
             if(!$detalleCotizacion){
@@ -103,6 +118,9 @@ class detalleCotizacionController extends Controller
             ];
             return response()->json($data, 200);
         }
+    /**
+     * Actualiza un detalle de cotización.
+     */
         public function update(Request $request, $id)
 {
     try {
@@ -164,6 +182,9 @@ class detalleCotizacionController extends Controller
         ], 500);
     }
 }
+    /**
+     * Actualización parcial de un detalle.
+     */
         public function updatePartial(Request $request, $id)
         {
             try {
