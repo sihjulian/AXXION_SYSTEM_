@@ -51,11 +51,29 @@
               Información del Cliente
             </h3>
             <div v-if="cotizacion.cliente">
-              <p class="font-medium text-gray-900 dark:text-white">
-                {{ cotizacion.cliente.nombre }} {{ cotizacion.cliente.apellido1 }}
+              <p class="font-medium text-gray-900 dark:text-white text-lg">
+                {{ cotizacion.cliente.nombre }} {{ cotizacion.cliente.nombre2 }} {{ cotizacion.cliente.apellido1 }} {{ cotizacion.cliente.apellido2 }}
               </p>
-              <p class="text-gray-600 dark:text-gray-300 text-sm">{{ cotizacion.cliente.email }}</p>
-              <p class="text-gray-600 dark:text-gray-300 text-sm">{{ cotizacion.cliente.telefono }}</p>
+              <div class="mt-2 space-y-1">
+                <p class="text-gray-600 dark:text-gray-300 text-sm">
+                  <span class="font-semibold">RFC:</span> {{ cotizacion.cliente.rfc || 'N/A' }}
+                </p>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">
+                  <span class="font-semibold">Email:</span> {{ cotizacion.cliente.correo_electronico || cotizacion.cliente.email }}
+                </p>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">
+                  <span class="font-semibold">Teléfono:</span> {{ cotizacion.cliente.telefono_principal || cotizacion.cliente.telefono }}
+                </p>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">
+                  <span class="font-semibold">Tipo:</span> {{ cotizacion.cliente.tipo_cliente || 'N/A' }}
+                </p>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">
+                  <span class="font-semibold">Estado:</span> 
+                  <span :class="{'text-green-600': cotizacion.cliente.estado_cliente === 'Activo', 'text-red-600': cotizacion.cliente.estado_cliente !== 'Activo'}">
+                    {{ cotizacion.cliente.estado_cliente || 'N/A' }}
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
 

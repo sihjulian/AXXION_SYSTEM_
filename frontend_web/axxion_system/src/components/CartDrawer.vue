@@ -84,12 +84,21 @@
                 <div v-if="cartStore.items.length > 0" class="mt-6 space-y-4">
                     <div>
                         <label for="cliente" class="block text-sm font-medium text-gray-700">Cliente</label>
-                        <select id="cliente" v-model="selectedClientId" class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
-                            <option value="" disabled>Seleccione un cliente</option>
-                            <option v-for="client in clients" :key="client.id" :value="client.id">
-                                {{ client.nombre }} {{ client.apellido1 }}
-                            </option>
-                        </select>
+                        <div class="flex gap-2">
+                            <select id="cliente" v-model="selectedClientId" class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                                <option value="" disabled>Seleccione un cliente</option>
+                                <option v-for="client in clients" :key="client.id" :value="client.id">
+                                    {{ client.nombre }} {{ client.apellido1 }}
+                                </option>
+                            </select>
+                            <button 
+                                @click="openClientModal"
+                                class="mt-1 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                title="Agregar Nuevo Cliente"
+                            >
+                                <font-awesome-icon icon="fa-solid fa-plus" />
+                            </button>
+                        </div>
                     </div>
                      <div>
                         <label for="fecha_inicio" class="block text-sm font-medium text-gray-700">Fecha Inicio</label>
@@ -126,6 +135,22 @@
       </div>
     </div>
   </div>
+  <!-- Client Creation Modal -->
+  <fwb-modal v-if="showClientModal" @close="closeClientModal" size="4xl">
+    <template #header>
+      <div class="flex items-center text-lg font-semibold text-gray-900 dark:text-white">
+        <font-awesome-icon icon="fa-solid fa-user-plus" class="mr-2 text-green-600" />
+        Agregar Nuevo Cliente
+      </div>
+    </template>
+    <template #body>
+      <ClientForm 
+        mode="add"
+        @success="handleClientSuccess"
+        @cancel="closeClientModal"
+      />
+    </template>
+  </fwb-modal>
 </template>
 
 <script setup>
@@ -135,7 +160,8 @@ import { useCartStore } from '@/stores/CartStore';
 import SolicitudService from '@/services/SolicitudService';
 import CotizacionService from '@/services/CotizacionService';
 import ClienteService from '@/services/ClienteService';
-import { FwbAlert } from 'flowbite-vue';
+import ClientForm from '@/components/ClientForm.vue'; // Import ClientForm
+import { FwbAlert, FwbModal } from 'flowbite-vue'; // Import FwbModal
 
 /**
  * Componente CartDrawer.
@@ -155,6 +181,34 @@ const selectedClientId = ref('');
 const fechaInicio = ref('');
 const fechaFin = ref('');
 const isProcessing = ref(false);
+const showClientModal = ref(false); // State for modal
+
+const openClientModal = () => {
+    showClientModal.value = true;
+};
+
+const closeClientModal = () => {
+    showClientModal.value = false;
+};
+
+const handleClientSuccess = async (newClient) => {
+    try {
+        // Reload clients to include the new one
+        const response = await ClienteService.getAll();
+        clients.value = response.cliente || response.data || response;
+        
+        // Auto-select the new client
+        if (newClient && newClient.id) {
+            selectedClientId.value = newClient.id;
+        }
+        
+        showAlert('success', 'Cliente creado y seleccionado correctamente.');
+        closeClientModal();
+    } catch (error) {
+        console.error("Error reloading clients", error);
+        showAlert('warning', 'Cliente creado, pero hubo un error al recargar la lista.');
+    }
+};
 
 // Estado para la alerta
 const alertState = ref({

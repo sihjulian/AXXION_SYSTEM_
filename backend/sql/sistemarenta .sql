@@ -2,7 +2,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-11-2025 a las 02:35:08
+-- Tiempo de generación: 24-11-2025 a las 22:02:15
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -62,9 +62,11 @@ CREATE TABLE `categoria` (
 --
 
 INSERT INTO `categoria` (`id`, `nombre`, `descripcion`, `tipo_categoria`, `created_at`, `updated_at`) VALUES
-(1, 'Equipos de Sonido', 'Altavoces, consolas, micrófonos y más.', 'Equipos', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(2, 'Iluminación', 'Luces para eventos, escenarios y fiestas.', 'Equipos', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(3, 'Video', 'Pantallas, proyectores y equipo de video.', 'Equipos', '2025-09-19 05:24:18', '2025-09-19 05:24:18');
+(1, 'Equipos de Sonido', 'Altavoces, consolas, micrófonos y más.', 'Equipos', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(2, 'Iluminación', 'Luces para eventos, escenarios y fiestas.', 'Equipos', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(3, 'Video', 'Pantallas, proyectores y equipo de video.', 'Equipos', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(5, 'Herramientas Test', 'Categoría para pruebas', 'Producto', '2025-11-23 21:05:50', '2025-11-23 21:05:50'),
+(6, 'w', 'w', 'w', '2025-11-24 00:00:54', '2025-11-24 00:00:54');
 
 -- --------------------------------------------------------
 
@@ -85,9 +87,11 @@ INSERT INTO `categoria_subcategoria` (`categoria_id`, `subcategoria_id`) VALUES
 (1, 1),
 (1, 2),
 (1, 3),
+(1, 10),
 (2, 4),
 (3, 5),
-(3, 8);
+(3, 8),
+(5, 9);
 
 -- --------------------------------------------------------
 
@@ -115,12 +119,12 @@ CREATE TABLE `cliente` (
 --
 
 INSERT INTO `cliente` (`id`, `nombre`, `nombre2`, `apellido1`, `apellido2`, `rfc`, `telefono_principal`, `correo_electronico`, `tipo_cliente`, `estado_cliente`, `created_at`, `updated_at`) VALUES
-(1, 'Carlos', 'Alberto', 'Sanchez', 'Ruiz', 'SARC850312XYZ', '5512345678', 'carlos.sanchez@email.com', 'Particular', 'Activo', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(2, 'Eventos', 'Grandes', 'SA de CV', '', 'EGR990115ABC', '5587654321', 'contacto@eventosgrandes.com', 'Empresa', 'Activo', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(3, 'Maria', 'Elena', 'García', 'Pérez', 'GAPM780520DEF', '5555667788', 'maria.garcia@email.com', 'Particular', 'Prospecto', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(4, 'Producciones', 'Audiovisuales', 'SA de CV', '', 'PAV120815GHI', '5544332211', 'contacto@prodav.com', 'Empresa', 'Activo', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(5, 'Luis', 'Fernando', 'Rodriguez', 'Morales', 'ROML850720JKL', '5599887766', 'luis.rodriguez@email.com', 'Particular', 'Activo', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(6, 'Eventos', 'Corporativos', 'Plus SA', '', 'ECP030910MNO', '5533445566', 'ventas@eventoscorp.com', 'Empresa', 'Prospecto', '2025-09-19 05:24:18', '2025-09-19 05:24:18');
+(1, 'Carlos', 'Alberto', 'Sanchez', 'Ruiz', 'SARC850312XYZ', '5512345678', 'carlos.sanchez@email.com', 'Particular', 'Activo', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(2, 'Eventos', 'Grandes', 'SA de CV', '', 'EGR990115ABC', '5587654321', 'contacto@eventosgrandes.com', 'Empresa', 'Activo', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(3, 'Maria', 'Elena', 'García', 'Pérez', 'GAPM780520DEF', '5555667788', 'maria.garcia@email.com', 'Particular', 'Prospecto', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(4, 'Producciones', 'Audiovisuales', 'SA de CV', '', 'PAV120815GHI', '5544332211', 'contacto@prodav.com', 'Empresa', 'Activo', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(5, 'Luis', 'Fernando', 'Rodriguez', 'Morales', 'ROML850720JKL', '5599887766', 'luis.rodriguez@email.com', 'Particular', 'Activo', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(6, 'Eventos', 'Corporativos', 'Plus SA', '', 'ECP030910MNO', '5533445566', 'ventas@eventoscorp.com', 'Empresa', 'Prospecto', '2025-09-19 10:24:18', '2025-09-19 10:24:18');
 
 -- --------------------------------------------------------
 
@@ -171,11 +175,31 @@ CREATE TABLE `cotizacion` (
 --
 
 INSERT INTO `cotizacion` (`id`, `cliente_id`, `solicitud_id`, `fecha_cotizacion`, `fecha_validez`, `monto_total`, `estado_cotizacion`, `terminos_condiciones`, `notas_internas`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, '2025-09-19 00:24:18', '2025-10-19', 1600.00, 'Enviada', 'Pago del 50% para reservar. No incluye IVA.', NULL, '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(2, 2, 2, '2025-09-19 00:24:18', '2025-10-15', 2500.00, 'Borrador', 'Sujeto a disponibilidad de equipo.', NULL, '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(3, 4, 3, '2025-09-18 15:00:00', '2025-10-18', 8500.00, 'Enviada', 'Pago 50% anticipo, 50% contra entrega. Incluye instalación y operador.', 'Cliente corporativo, descuento aplicado', '2025-09-19 05:24:19', '2025-09-19 05:24:19'),
-(4, 5, 4, '2025-09-17 11:00:00', '2025-10-17', 12000.00, 'Borrador', 'Precios sujetos a confirmación de fechas. Incluye montaje.', 'Evento en exterior, considerar carpa adicional', '2025-09-19 05:24:19', '2025-09-19 05:24:19'),
-(5, 1, 5, '2025-09-16 17:00:00', '2025-10-16', 2400.00, 'Aceptada', 'Pago de contado con 10% descuento.', 'Cliente frecuente', '2025-09-19 05:24:19', '2025-09-19 05:24:19');
+(3, 1, 4, '2025-11-22 19:37:25', '2025-12-07', 1.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 00:37:26', '2025-11-23 00:37:26'),
+(4, 1, 5, '2025-11-22 20:37:53', '2025-12-07', 1.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 01:37:54', '2025-11-23 01:37:54'),
+(6, 3, 6, '2025-11-22 21:22:03', '2025-12-07', 3.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 02:22:04', '2025-11-23 02:22:04'),
+(7, 1, 7, '2025-11-22 23:01:25', '2025-12-07', 30.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 04:01:26', '2025-11-23 04:01:26'),
+(8, 1, 8, '2025-11-23 14:35:32', '2025-12-08', 50000.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 19:35:33', '2025-11-23 19:35:33'),
+(9, 1, 9, '2025-11-23 15:00:50', '2025-12-08', 10000.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 20:00:51', '2025-11-23 20:00:51'),
+(10, 1, 10, '2025-11-23 15:28:25', '2025-12-08', 1.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 20:28:26', '2025-11-23 20:28:26'),
+(11, 2, 11, '2025-11-23 16:14:41', '2025-12-08', 1.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 21:14:42', '2025-11-23 21:14:42'),
+(12, 2, 12, '2025-11-23 16:25:59', '2025-12-08', 2.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 21:26:00', '2025-11-23 21:26:00'),
+(13, 1, 13, '2025-11-23 16:31:49', '2025-12-08', 33.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 21:31:51', '2025-11-23 21:31:51'),
+(14, 3, 14, '2025-11-23 16:38:26', '2025-12-08', 4.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 21:38:27', '2025-11-23 21:38:27'),
+(15, 1, 15, '2025-11-23 16:47:57', '2025-12-08', 11.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 21:47:58', '2025-11-23 21:47:58'),
+(16, 2, 16, '2025-11-23 17:00:48', '2025-12-08', 4.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 22:00:49', '2025-11-23 22:00:49'),
+(17, 3, 17, '2025-11-23 17:05:49', '2025-12-08', 15.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 22:05:50', '2025-11-23 22:05:50'),
+(18, 1, 18, '2025-11-23 17:11:20', '2025-12-08', 11.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 22:11:21', '2025-11-23 22:11:21'),
+(19, 1, 19, '2025-11-23 17:29:00', '2025-12-08', 4.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 22:29:01', '2025-11-23 22:29:01'),
+(20, 2, 20, '2025-11-23 17:35:06', '2025-12-08', 4.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 22:35:07', '2025-11-23 22:35:07'),
+(21, 2, 21, '2025-11-23 17:43:41', '2025-12-08', 11.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 22:43:43', '2025-11-23 22:43:43'),
+(22, 1, 22, '2025-11-23 18:59:24', '2025-12-08', 4.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-23 23:59:25', '2025-11-23 23:59:25'),
+(23, 5, 23, '2025-11-24 00:50:52', '2025-12-09', 11.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-24 05:50:53', '2025-11-24 05:50:53'),
+(24, 1, 24, '2025-11-24 18:25:07', '2025-12-09', 15000.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-24 23:25:08', '2025-11-24 23:25:08'),
+(25, 2, 25, '2025-11-24 18:41:42', '2025-12-09', 92000.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-24 23:41:43', '2025-11-24 23:41:43'),
+(26, 2, 26, '2025-11-24 18:44:26', '2025-12-09', 22000.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-24 23:44:27', '2025-11-24 23:44:27'),
+(27, 1, 27, '2025-11-24 19:27:58', '2025-12-09', 42000.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-25 00:27:59', '2025-11-25 00:27:59'),
+(28, 2, 28, '2025-11-24 19:43:57', '2025-12-09', 28000.00, 'Borrador', 'Términos estándar de alquiler.', 'Generado automáticamente.', '2025-11-25 00:43:59', '2025-11-25 00:43:59');
 
 -- --------------------------------------------------------
 
@@ -203,16 +227,34 @@ CREATE TABLE `detalle_cotizacion` (
 --
 
 INSERT INTO `detalle_cotizacion` (`id`, `cotizacion_id`, `producto_id`, `descripcion_item`, `cantidad`, `precio_unitario`, `descuento_porcentaje`, `impuestos_aplicables`, `notas`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'Altavoz autoamplificado 15\" QSC K12.2', 2, 800.00, 0.00, NULL, 'Para evento de 100 personas', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(2, 1, 3, 'Micrófono inalámbrico Shure QLX-D', 2, 600.00, 5.00, NULL, 'Descuento por cantidad', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(3, 2, 4, 'Proyector 5000 Lúmenes Epson PowerLite L510U', 1, 2000.00, 0.00, NULL, 'Para conferencia empresarial', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(4, 2, 8, 'Pantalla de proyección frontal 2x3m', 1, 500.00, 0.00, NULL, 'Incluye trípodes de soporte', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(5, 3, 1, 'Altavoz autoamplificado 15\" QSC K12.2', 4, 800.00, 10.00, NULL, 'Descuento por volumen', '2025-09-19 05:24:19', '2025-09-19 05:24:19'),
-(6, 3, 2, 'Consola de mezclas digital Behringer X32', 1, 1500.00, 10.00, NULL, 'Incluye operador técnico', '2025-09-19 05:24:19', '2025-09-19 05:24:19'),
-(7, 3, 10, 'Subwoofer QSC KS118', 2, 1000.00, 10.00, NULL, 'Para refuerzo de graves', '2025-09-19 05:24:19', '2025-09-19 05:24:19'),
-(8, 4, 6, 'Mesa redonda 1.8m', 15, 150.00, 5.00, NULL, 'Con manteles blancos', '2025-09-19 05:24:19', '2025-09-19 05:24:19'),
-(9, 4, 7, 'Silla Tiffany dorada', 150, 50.00, 8.00, NULL, 'Descuento por cantidad', '2025-09-19 05:24:19', '2025-09-19 05:24:19'),
-(10, 5, 5, 'Luz LED Par 64', 8, 300.00, 0.00, NULL, 'Colores personalizables', '2025-09-19 05:24:19', '2025-09-19 05:24:19');
+(1, 3, 2, 't', 1, 1.00, 0.00, NULL, NULL, '2025-11-23 00:37:26', '2025-11-23 00:37:26'),
+(2, 4, 2, 't', 1, 1.00, 0.00, NULL, NULL, '2025-11-23 01:37:54', '2025-11-23 01:37:54'),
+(11, 6, 19, '23', 1, 3.00, 0.00, NULL, NULL, '2025-11-23 02:22:04', '2025-11-23 02:22:04'),
+(12, 7, 20, 'Laptop Test', 1, 30.00, 0.00, NULL, NULL, '2025-11-23 04:01:26', '2025-11-23 04:01:26'),
+(13, 8, 21, 'Laptop Dell Inspiron 15 3000', 1, 50000.00, 0.00, NULL, NULL, '2025-11-23 19:35:33', '2025-11-23 19:35:33'),
+(14, 9, 22, 'test 1', 1, 10000.00, 0.00, NULL, NULL, '2025-11-23 20:00:51', '2025-11-23 20:00:51'),
+(15, 10, 23, 'test', 1, 1.00, 0.00, NULL, NULL, '2025-11-23 20:28:26', '2025-11-23 20:28:26'),
+(16, 11, 25, '1', 1, 1.00, 0.00, NULL, NULL, '2025-11-23 21:14:42', '2025-11-23 21:14:42'),
+(17, 12, 26, '2', 1, 2.00, 0.00, NULL, NULL, '2025-11-23 21:26:00', '2025-11-23 21:26:00'),
+(18, 13, 27, '33', 1, 33.00, 0.00, NULL, NULL, '2025-11-23 21:31:51', '2025-11-23 21:31:51'),
+(19, 14, 28, '4', 1, 4.00, 0.00, NULL, NULL, '2025-11-23 21:38:27', '2025-11-23 21:38:27'),
+(20, 15, 29, '123', 1, 11.00, 0.00, NULL, NULL, '2025-11-23 21:47:58', '2025-11-23 21:47:58'),
+(21, 16, 28, '4', 1, 4.00, 0.00, NULL, NULL, '2025-11-23 22:00:49', '2025-11-23 22:00:49'),
+(22, 17, 28, '4', 1, 4.00, 0.00, NULL, NULL, '2025-11-23 22:05:50', '2025-11-23 22:05:50'),
+(23, 17, 29, '123', 1, 11.00, 0.00, NULL, NULL, '2025-11-23 22:05:50', '2025-11-23 22:05:50'),
+(24, 18, 29, '123', 1, 11.00, 0.00, NULL, NULL, '2025-11-23 22:11:21', '2025-11-23 22:11:21'),
+(25, 19, 28, '4', 1, 4.00, 0.00, NULL, NULL, '2025-11-23 22:29:01', '2025-11-23 22:29:01'),
+(26, 20, 28, '4', 1, 4.00, 0.00, NULL, NULL, '2025-11-23 22:35:07', '2025-11-23 22:35:07'),
+(27, 21, 29, '123', 1, 11.00, 0.00, NULL, NULL, '2025-11-23 22:43:43', '2025-11-23 22:43:43'),
+(28, 22, 28, '4', 1, 4.00, 0.00, NULL, NULL, '2025-11-23 23:59:25', '2025-11-23 23:59:25'),
+(29, 23, 29, '123', 1, 11.00, 0.00, NULL, NULL, '2025-11-24 05:50:53', '2025-11-24 05:50:53'),
+(30, 24, 32, 'Escalera Telescópica Aluminio 5.8m', 1, 15000.00, 0.00, NULL, NULL, '2025-11-24 23:25:08', '2025-11-24 23:25:08'),
+(31, 25, 33, 'Sierra Circular DeWalt DWE575', 1, 22000.00, 0.00, NULL, NULL, '2025-11-24 23:41:43', '2025-11-24 23:41:43'),
+(32, 25, 34, 'Martillo Demoledor Hilti TE 500-AVR', 1, 42000.00, 0.00, NULL, NULL, '2025-11-24 23:41:43', '2025-11-24 23:41:43'),
+(33, 25, 35, 'Compresor de Aire Stanley D200/10/24', 1, 28000.00, 0.00, NULL, NULL, '2025-11-24 23:41:43', '2025-11-24 23:41:43'),
+(34, 26, 33, 'Sierra Circular DeWalt DWE575', 1, 22000.00, 0.00, NULL, NULL, '2025-11-24 23:44:27', '2025-11-24 23:44:27'),
+(35, 27, 34, 'Martillo Demoledor Hilti TE 500-AVR', 1, 42000.00, 0.00, NULL, NULL, '2025-11-25 00:27:59', '2025-11-25 00:27:59'),
+(36, 28, 35, 'Compresor de Aire Stanley D200/10/24', 1, 28000.00, 0.00, NULL, NULL, '2025-11-25 00:43:59', '2025-11-25 00:43:59');
 
 -- --------------------------------------------------------
 
@@ -258,12 +300,12 @@ CREATE TABLE `direccion` (
 --
 
 INSERT INTO `direccion` (`id`, `calle`, `numero_exterior`, `numero_interior`, `colonia`, `ciudad`, `estado_provincia`, `codigo_postal`, `pais`, `referencias`, `created_at`, `updated_at`) VALUES
-(1, 'Av. Siempre Viva', '742', NULL, 'Springfield', 'Ciudad de México', 'CDMX', '01234', 'México', 'Frente al Kwik-E-Mart', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(2, 'Calle Falsa', '123', NULL, 'Centro', 'Guadalajara', 'Jalisco', '44100', 'México', 'Edificio de ladrillo rojo', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(3, 'Blvd. de los Sueños Rotos', '45', NULL, 'Zona Hotelera', 'Cancún', 'Quintana Roo', '77500', 'México', 'Cerca de la playa', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(4, 'Av. Insurgentes Sur', '1234', 'Piso 5', 'Del Valle', 'Ciudad de México', 'CDMX', '03100', 'México', 'Torre empresarial, entrada por estacionamiento', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(5, 'Calle Morelos', '567', NULL, 'Centro Histórico', 'Puebla', 'Puebla', '72000', 'México', 'Edificio colonial, portón verde', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(6, 'Blvd. Kukulcán', '89', 'Local 12', 'Zona Hotelera', 'Cancún', 'Quintana Roo', '77500', 'México', 'Plaza comercial, segundo nivel', '2025-09-19 05:24:18', '2025-09-19 05:24:18');
+(1, 'Av. Siempre Viva', '742', NULL, 'Springfield', 'Ciudad de México', 'CDMX', '01234', 'México', 'Frente al Kwik-E-Mart', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(2, 'Calle Falsa', '123', NULL, 'Centro', 'Guadalajara', 'Jalisco', '44100', 'México', 'Edificio de ladrillo rojo', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(3, 'Blvd. de los Sueños Rotos', '45', NULL, 'Zona Hotelera', 'Cancún', 'Quintana Roo', '77500', 'México', 'Cerca de la playa', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(4, 'Av. Insurgentes Sur', '1234', 'Piso 5', 'Del Valle', 'Ciudad de México', 'CDMX', '03100', 'México', 'Torre empresarial, entrada por estacionamiento', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(5, 'Calle Morelos', '567', NULL, 'Centro Histórico', 'Puebla', 'Puebla', '72000', 'México', 'Edificio colonial, portón verde', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(6, 'Blvd. Kukulcán', '89', 'Local 12', 'Zona Hotelera', 'Cancún', 'Quintana Roo', '77500', 'México', 'Plaza comercial, segundo nivel', '2025-09-19 10:24:18', '2025-09-19 10:24:18');
 
 -- --------------------------------------------------------
 
@@ -308,8 +350,43 @@ CREATE TABLE `inventario_item` (
 --
 
 INSERT INTO `inventario_item` (`id`, `producto_id`, `numero_serie`, `estado_item`, `fecha_adquisicion`, `costo_adquisicion`, `ubicacion_fisica`, `notas`, `created_at`, `updated_at`) VALUES
-(19, 13, 'test', 'Disponible', '0001-01-01', 1.00, NULL, 'Actualizado desde producto: test - 2025-11-19 15:37:43', '2025-10-17 02:11:16', '2025-11-19 20:37:43'),
-(24, 18, 'TEST2', 'Disponible', '1111-01-01', 1.00, NULL, 'Item creado automáticamente desde producto: TEST2', '2025-11-19 23:36:37', '2025-11-19 23:36:37');
+(36, 29, 'xxxxxxxxxxxxxx', 'Rentado', NULL, 0.00, NULL, 'Item creado automáticamente desde producto: 123', '2025-11-23 16:47:34', '2025-11-24 19:29:05'),
+(39, 32, 'PM1122334455', 'EnMantenimiento', '2023-06-12', 620000.00, 'Bodega Central - Área F', 'Item creado automáticamente desde producto: Escalera Telescópica Aluminio 5.8m', '2025-11-24 01:28:41', '2025-11-25 00:29:19'),
+(40, 33, 'DW5544332211', 'Rentado', '2023-04-15', 650000.00, 'Bodega Central - Estante B2', 'Item creado automáticamente desde producto: Sierra Circular DeWalt DWE575', '2025-11-24 01:29:19', '2025-11-24 18:44:52'),
+(41, 34, 'HT7788990011', 'EnMantenimiento', '2023-01-10', 1850000.00, 'Bodega Central - Estante C1', 'Item creado automáticamente desde producto: Martillo Demoledor Hilti TE 500-AVR', '2025-11-24 01:29:57', '2025-11-25 00:44:42'),
+(42, 35, 'ST2233445566', 'Rentado', '2023-03-22', 850000.00, 'Bodega Central - Área D', 'Item creado automáticamente desde producto: Compresor de Aire Stanley D200/10/24', '2025-11-24 01:30:27', '2025-11-24 19:44:10');
+
+--
+-- Disparadores `inventario_item`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_inventario_item_after_update` AFTER UPDATE ON `inventario_item` FOR EACH ROW BEGIN
+    IF NEW.estado_item = 'EnMantenimiento' AND OLD.estado_item != 'EnMantenimiento' THEN
+        INSERT INTO `mantenimiento` (
+            `inventario_item_id`,
+            `fecha_inicio`,
+            `fecha_fin_prevista`,
+            `tipo_mantenimiento`,
+            `descripcion_problema`,
+            `estado_mantenimiento`,
+            `responsable`,
+            `created_at`,
+            `updated_at`
+        ) VALUES (
+            NEW.id,
+            NOW(),
+            DATE_ADD(NOW(), INTERVAL 3 DAY),
+            'CORRECTIVO',  
+            'Mantenimiento generado autom├íticamente por cambio de estado',
+            'PROGRAMADO',  
+            'Sistema',
+            NOW(),
+            NOW()
+        );
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -328,11 +405,44 @@ CREATE TABLE `mantenimiento` (
   `descripcion_trabajo_realizado` text DEFAULT NULL,
   `costo_estimado` decimal(10,2) DEFAULT NULL,
   `costo_real` decimal(10,2) DEFAULT NULL,
-  `estado_mantenimiento` enum('Programado','EnProceso','Finalizado','Cancelado') DEFAULT 'Programado',
+  `estado_mantenimiento` varchar(20) DEFAULT NULL,
   `responsable` varchar(150) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `mantenimiento`
+--
+
+INSERT INTO `mantenimiento` (`id`, `inventario_item_id`, `fecha_inicio`, `fecha_fin_prevista`, `fecha_fin_real`, `tipo_mantenimiento`, `descripcion_problema`, `descripcion_trabajo_realizado`, `costo_estimado`, `costo_real`, `estado_mantenimiento`, `responsable`, `created_at`, `updated_at`) VALUES
+(28, 39, '2025-11-24 00:00:00', '2025-11-27', NULL, 'Preventivo', 'Mantenimiento generado autom├íticamente por cambio de estado', NULL, NULL, NULL, 'PROGRAMADO', 'Sistema', '2025-11-24 19:29:19', '2025-11-25 00:29:50'),
+(29, 41, '2025-11-24 00:00:00', '2025-11-27', NULL, 'Preventivo', 'Mantenimiento generado autom├íticamente por cambio de estado', NULL, NULL, NULL, 'EN_PROCESO', 'Sistema', '2025-11-24 19:44:42', '2025-11-25 00:45:12');
+
+--
+-- Disparadores `mantenimiento`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_mantenimiento_after_delete` AFTER DELETE ON `mantenimiento` FOR EACH ROW BEGIN
+    
+    UPDATE `inventario_item`
+    SET `estado_item` = 'Disponible'
+    WHERE `id` = OLD.inventario_item_id;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_mantenimiento_after_update` AFTER UPDATE ON `mantenimiento` FOR EACH ROW BEGIN
+    
+    IF (NEW.estado_mantenimiento = 'Finalizado' OR NEW.estado_mantenimiento = 'COMPLETADO') 
+       AND (OLD.estado_mantenimiento != 'Finalizado' AND OLD.estado_mantenimiento != 'COMPLETADO') THEN
+        UPDATE `inventario_item`
+        SET `estado_item` = 'Disponible'
+        WHERE `id` = NEW.inventario_item_id;
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -382,22 +492,24 @@ CREATE TABLE `producto` (
 --
 
 INSERT INTO `producto` (`id`, `nombre`, `descripcion`, `marca`, `modelo`, `precio_referencia_renta`, `precio_alquiler_dia`, `precio_alquiler_semanal`, `precio_alquiler_mensual`, `precio_compra`, `valor_actual`, `fecha_compra`, `condicion`, `ubicacion`, `notas`, `sku`, `numero_serie`, `categoria`, `especificaciones`, `estado`, `created_at`, `updated_at`) VALUES
-(1, 'Altavoz autoamplificado 15\"', NULL, 'QSC', 'K12.2', NULL, 800.00, 4800.00, 18000.00, 25000.00, 22000.00, '2024-01-15', 'excelente', 'Bodega A-1', NULL, 'QSC-K122-001', 'QSCK122001', 'Iluminación', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'mantenimiento', '2025-09-19 05:24:18', '2025-10-11 06:49:55'),
-(2, 'Consola de mezclas digital', NULL, 'Behringer', 'X32', NULL, 1500.00, 9000.00, 33000.00, 60000.00, 55000.00, '2023-11-20', 'Excelente', 'Bodega B-2', NULL, 'BEH-X32-001', 'BEHX32001', 'Equipos de Sonido', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'mantenimiento', '2025-09-19 05:24:18', '2025-10-23 05:02:22'),
-(3, 'Micrófono inalámbrico de mano', NULL, 'Shure', 'QLX-D', NULL, 600.00, 3600.00, 13500.00, 18000.00, 16000.00, '2024-03-10', 'regular', 'Taller', NULL, 'SHU-QLXD-001', 'SHUQLXD001', 'Iluminación', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'mantenimiento', '2025-09-19 05:24:18', '2025-09-25 05:09:16'),
-(4, 'Proyector 5000 Lúmenes', 'Proyector láser de alta luminosidad.', 'Epson', 'PowerLite L510U', NULL, 2000.00, 12000.00, 45000.00, 85000.00, 80000.00, '2024-02-01', 'Excelente', 'Bodega C-1', NULL, 'EPS-L510U-001', 'EPSL510U001', 'Video', '{\"lumenes\": 5000, \"resolucion\": \"WUXGA\", \"tecnologia\": \"Láser\", \"vida_util\": \"20000h\"}', 'disponible', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(5, 'Luz LED Par 64', 'Reflector LED RGBW de 180W.', 'Chauvet', 'SlimPAR Pro H USB', NULL, 300.00, 1800.00, 6750.00, 8500.00, 7500.00, '2024-01-20', 'Excelente', 'Bodega D-1', NULL, 'CHA-SLIMPAR-001', 'CHASLIM001', 'Iluminación', '{\"potencia\": \"180W\", \"colores\": \"RGBW\", \"control\": \"DMX512\"}', 'disponible', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(6, 'Mesa redonda 1.8m', 'Mesa redonda para 10 personas.', 'Eventos Pro', 'MR-180', NULL, 150.00, 900.00, 3375.00, 3500.00, 3000.00, '2023-12-15', 'Bueno', 'Bodega E-1', NULL, 'EVP-MR180-001', 'EVPMR180001', 'Mobiliario', '{\"diametro\": \"1.8m\", \"capacidad\": \"10 personas\", \"material\": \"Madera\"}', 'disponible', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(7, 'Silla Tiffany dorada', 'Silla elegante para eventos.', 'Eventos Pro', 'ST-DORADA', NULL, 50.00, 300.00, 1125.00, 1200.00, 1000.00, '2023-10-10', 'Bueno', 'Bodega E-2', NULL, 'EVP-STDOR-001', 'EVPSTDOR001', 'Mobiliario', '{\"material\": \"Resina\", \"color\": \"Dorado\", \"apilable\": \"Sí\"}', 'disponible', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(8, 'Pantalla de proyección 2x3m', 'Pantalla frontal para proyector.', 'Da-Lite', 'Fast-Fold Deluxe', NULL, 500.00, 3000.00, 11250.00, 15000.00, 13500.00, '2024-01-25', 'Excelente', 'Bodega C-2', NULL, 'DAL-FFD23-001', 'DALFFD23001', 'Video', '{\"tamaño\": \"2x3m\", \"tipo\": \"Frontal\", \"superficie\": \"Matte White\"}', 'disponible', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(9, 'Carpa 6x6m', 'Carpa blanca para eventos exteriores.', 'Tent Pro', 'TP-66', NULL, 1200.00, 7200.00, 27000.00, 35000.00, 32000.00, '2023-09-05', 'Bueno', 'Patio exterior', NULL, 'TNT-TP66-001', 'TNTTP66001', 'Mobiliario', '{\"tamaño\": \"6x6m\", \"color\": \"Blanco\", \"resistente_agua\": \"Sí\"}', 'disponible', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(10, 'Altavoz subwoofer 18\"', 'Subwoofer activo de 18 pulgadas.', 'QSC', 'KS118', NULL, 1000.00, 6000.00, 22500.00, 35000.00, 32000.00, '2024-02-10', 'Excelente', 'Bodega A-2', NULL, 'QSC-KS118-001', 'QSCKS118001', 'Audio', '{\"potencia\": \"3600W\", \"pulgadas\": 18, \"tipo\": \"Subwoofer activo\"}', 'disponible', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(12, 'ejemplo', NULL, 'APPLE', 'E5000', NULL, 1.00, 1.00, 1.00, 1.00, 1.00, '2025-10-16', 'mala', 'unate', NULL, NULL, '34506ll', 'Equipos de Sonido', '{\"processor\":\"we\",\"ram\":\"we\",\"storage\":\"wewee\",\"graphics\":\"rtt\",\"screen\":\"yu\",\"os\":\"uuu\"}', 'disponible', '2025-10-17 07:00:02', '2025-10-17 07:00:02'),
-(13, 'test', 'Actualizado desde producto: test - 2025-11-19 15:26:06', 'TEST', 'test', NULL, 1.00, 1.00, 1.00, 1.00, 1.00, '0001-01-01', 'excelente', NULL, 'Actualizado desde producto: test - 2025-11-19 15:26:06', NULL, 'test', 'Video', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-10-17 07:11:16', '2025-11-20 01:37:43'),
-(14, 'TEST2', NULL, 'TEST2', 'TEST', NULL, 1.00, 0.00, 0.00, 0.00, 0.00, NULL, 'excelente', NULL, NULL, NULL, '11', 'Equipos de Sonido', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'alquilado', '2025-10-23 07:15:37', '2025-10-23 07:17:32'),
-(15, 'test 3', 'Item creado automáticamente desde producto: test 3', 'test', 'tesst 3', NULL, 0.01, 0.00, 0.00, 0.00, 0.00, NULL, 'excelente', 'test', 'Item creado automáticamente desde producto: test 3', NULL, '0003', 'Equipos de Sonido', '{\"processor\":\"test\",\"ram\":\"test\",\"storage\":\"test\",\"graphics\":\"test\",\"screen\":\"test\",\"os\":\"test\"}', 'fuera_de_servicio', '2025-11-16 23:29:48', '2025-11-20 01:25:35'),
-(16, '1', 'Actualizado desde producto: 1 - 2025-11-18 19:40:42', '1', '1', NULL, 11.00, 1.00, 1.00, 1.00, 1.00, NULL, 'excelente', NULL, 'Actualizado desde producto: 1 - 2025-11-18 19:40:42', NULL, '1', 'Iluminación', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'mantenimiento', '2025-11-19 04:47:23', '2025-11-19 05:41:28'),
-(18, 'TEST2', NULL, 'TEST2', 'vTEST2', NULL, 1.00, 1.00, 1.00, 1.00, 1.00, '1111-01-01', 'excelente', NULL, NULL, NULL, 'TEST2', 'Iluminación', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-20 04:36:37', '2025-11-20 04:36:37');
+(2, 't', 'Item creado automáticamente desde producto: t', 't', 't', NULL, 1.00, 0.00, 0.00, 0.00, 0.00, NULL, 'excelente', NULL, 'Item creado automáticamente desde producto: t', NULL, 't', 'Equipos de Sonido', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 00:26:27', '2025-11-23 01:39:40'),
+(19, '23', NULL, '3', '3', NULL, 3.00, 0.00, 0.00, 0.00, 0.00, NULL, 'excelente', NULL, NULL, NULL, '3', 'Equipos de Sonido', '{\"processor\":\"3\",\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 02:21:40', '2025-11-23 02:21:40'),
+(20, 'Laptop Test', 'Item creado automáticamente desde producto: Laptop Test', 'TestBrand', 'TestModel X1', NULL, 30.00, 180.00, 600.00, 0.00, 0.00, NULL, 'excelente', NULL, 'Item creado automáticamente desde producto: Laptop Test', NULL, 'SN-TEST-001', 'Equipos de Sonido', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 03:32:10', '2025-11-23 19:32:07'),
+(21, 'Laptop Dell Inspiron 15 3000', 'Actualizado desde producto: Laptop Dell Inspiron 15 3000 - 2025-11-23 09:24:51', 'Dell', 'Inspiron 15 3000', NULL, 50000.00, 300000.00, 0.00, 0.00, 0.00, NULL, 'excelente', 'Almacén Principal', 'Actualizado desde producto: Laptop Dell Inspiron 15 3000 - 2025-11-23 09:24:51', NULL, 'DL001234567', 'Equipos de Sonido', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 04:00:53', '2025-11-23 19:33:15'),
+(22, 'test 1', 'Item creado automáticamente desde producto: test 1', 'test 1', 'test 1', NULL, 10000.00, 0.00, 0.00, 0.00, 0.00, NULL, 'excelente', NULL, 'Item creado automáticamente desde producto: test 1', NULL, 'test 1', 'Equipos de Sonido', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 20:00:12', '2025-11-23 20:01:40'),
+(23, 'test', NULL, 'test', 'test', NULL, 1.00, 0.00, 0.00, 0.00, 0.00, NULL, 'excelente', NULL, NULL, NULL, 'test', 'Equipos de Sonido', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 20:27:53', '2025-11-23 20:27:53'),
+(24, 'Producto Prueba Flujo', NULL, 'Marca Test', 'Modelo Test', NULL, 100.00, 0.00, 0.00, 1000.00, 0.00, '2025-11-23', 'excelente', 'Bodega', NULL, NULL, 'SERIE-TEST-FLOW-001', 'Equipos de Sonido', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 20:58:27', '2025-11-23 20:58:27'),
+(25, '1', 'Item creado automáticamente desde producto: 1', '1', '1', NULL, 1.00, 0.00, 0.00, 0.00, 0.00, NULL, 'excelente', NULL, 'Item creado automáticamente desde producto: 1', NULL, '1', 'Herramientas Test', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 21:14:16', '2025-11-23 21:18:11'),
+(26, '2', NULL, '2', '2', NULL, 2.00, 0.00, 0.00, 0.00, 0.00, NULL, 'excelente', NULL, NULL, NULL, '2', 'Equipos de Sonido', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 21:25:34', '2025-11-23 21:25:34'),
+(27, '33', NULL, '33', '33', NULL, 33.00, 3.00, 0.00, 0.00, 0.00, NULL, 'excelente', NULL, NULL, NULL, '33', 'Equipos de Sonido', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 21:31:31', '2025-11-23 21:31:31'),
+(28, '4', 'Actualizado desde producto: 4 - 2025-11-23 19:36:40', '4', '4', NULL, 4.00, 0.00, 0.00, 0.00, 0.00, NULL, 'excelente', NULL, 'Actualizado desde producto: 4 - 2025-11-23 19:36:40', NULL, '4', 'Iluminación', '{\"processor\":\"4\",\"ram\":\"4\",\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 21:38:02', '2025-11-24 06:09:59'),
+(29, '123', NULL, '123', 'xxxxxx', NULL, 11.00, 0.00, 0.00, 0.00, 0.00, NULL, 'excelente', NULL, NULL, NULL, 'xxxxxxxxxxxxxx', 'Herramientas Test', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 21:47:34', '2025-11-23 21:47:34'),
+(30, '123', NULL, '134', '32', NULL, 2.00, 0.00, 0.00, 0.00, 0.00, NULL, 'excelente', NULL, NULL, NULL, '33223', 'Herramientas Test', '{\"processor\":null,\"ram\":null,\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-23 23:58:32', '2025-11-23 23:58:32'),
+(31, 't44', NULL, 't44', 't44', NULL, 444.00, 4444.00, 44.00, 0.00, 0.00, NULL, 'excelente', NULL, NULL, NULL, 't44', 'w', '{\"processor\":\"t\",\"ram\":\"t\",\"storage\":null,\"graphics\":null,\"screen\":null,\"os\":null}', 'disponible', '2025-11-24 05:34:50', '2025-11-24 05:34:50'),
+(32, 'Escalera Telescópica Aluminio 5.8m', 'Escalera telescópica multiposición en aluminio, se extiende hasta 5.8m.', 'Promart', 'ETL-58', 12000.00, 15000.00, 78000.00, 265000.00, 620000.00, 550000.00, '2023-06-12', 'Usado - Buen estado', 'Bodega Central - Área F', 'Verificar seguro de peldaños. Capacidad 150kg.', 'ESC-PROMART-001', 'PM1122334455', 'Equipos de Acceso', '[\"Altura m\\u00e1xima: 5.8m, Material: Aluminio, Capacidad: 150kg\"]', 'disponible', '2025-11-24 06:28:41', '2025-11-24 06:28:41'),
+(33, 'Sierra Circular DeWalt DWE575', 'Sierra circular de 7.25 pulgadas con motor de 1950W para cortes precisos.', 'DeWalt', 'DWE575', 18000.00, 22000.00, 115000.00, 390000.00, 650000.00, 550000.00, '2023-04-15', 'Usado - Excelente estado', 'Bodega Central - Estante B2', 'Incluye disco de corte premium y guía paralela.', 'SRC-DEWALT-001', 'DW5544332211', 'Herramientas Eléctricas', '[\"Potencia: 1950W, Disco: 7.25 pulgadas, Profundidad de corte: 65mm\"]', 'disponible', '2025-11-24 06:29:19', '2025-11-24 06:29:19'),
+(34, 'Martillo Demoledor Hilti TE 500-AVR', 'Martillo demoledor profesional de 1100W con sistema de reducción de vibración.', 'Hilti', 'TE 500-AVR', 35000.00, 42000.00, 220000.00, 750000.00, 1850000.00, 1600000.00, '2023-01-10', 'Usado - Buen estado', 'Bodega Central - Estante C1', 'Sistema anti-vibración. Incluye 3 cinceles y maletín.', 'MRT-HILTI-001', 'HT7788990011', 'Herramientas Eléctricas', '[\"Potencia: 1100W, Impactos: 2900 ipm, Peso: 5.8kg\"]', 'disponible', '2025-11-24 06:29:57', '2025-11-24 06:29:57'),
+(35, 'Compresor de Aire Stanley D200/10/24', 'Compresor portátil de 24 litros, ideal para herramientas neumáticas.', 'Stanley', 'D200/10/24', 22000.00, 28000.00, 145000.00, 490000.00, 850000.00, 720000.00, '2023-03-22', 'Usado - Buen estado', 'Bodega Central - Área D', 'Revisar nivel de aceite antes de cada uso. Incluye manguera.', 'CMP-STANLEY-001', 'ST2233445566', 'Equipos de Aire', '[\"Capacidad: 24L, Presi\\u00f3n: 8 bar, Potencia: 1.5HP\"]', 'disponible', '2025-11-24 06:30:27', '2025-11-24 06:30:27');
 
 --
 -- Disparadores `producto`
@@ -432,7 +544,7 @@ CREATE TRIGGER `trg_producto_after_insert` AFTER INSERT ON `producto` FOR EACH R
         NOW(),
         NOW()
     );
-END;
+END
 $$
 DELIMITER ;
 DELIMITER $$
@@ -470,7 +582,7 @@ CREATE TRIGGER `trg_producto_after_update` AFTER UPDATE ON `producto` FOR EACH R
         -- Registrar en auditoría
         
     END IF;
-END;
+END
 $$
 DELIMITER ;
 
@@ -484,22 +596,6 @@ CREATE TABLE `producto_subcategoria` (
   `producto_id` int(11) NOT NULL,
   `subcategoria_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Volcado de datos para la tabla `producto_subcategoria`
---
-
-INSERT INTO `producto_subcategoria` (`producto_id`, `subcategoria_id`) VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(4, 5),
-(5, 4),
-(6, 7),
-(7, 6),
-(8, 8),
-(9, 7),
-(10, 1);
 
 -- --------------------------------------------------------
 
@@ -524,10 +620,10 @@ CREATE TABLE `proveedor` (
 --
 
 INSERT INTO `proveedor` (`id`, `nombre_empresa`, `rfc`, `nombre_contacto`, `telefono_contacto`, `correo_contacto`, `estado_proveedor`, `created_at`, `updated_at`) VALUES
-(1, 'Audio Pro México', 'APM010203XYZ', 'Pedro Ramirez', '3312345678', 'pedro@audiopro.mx', 'Activo', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(2, 'Iluminación Espectacular', 'IES050607ABC', 'Laura Juarez', '8187654321', 'laura@iluminacion.com', 'Activo', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(3, 'Mobiliario Eventos MX', 'MEM080912PQR', 'Carmen Vega', '5577889900', 'carmen@mobiliariomx.com', 'Activo', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(4, 'Tech Video Solutions', 'TVS151218STU', 'Miguel Torres', '8199001122', 'miguel@techvideo.com', 'Activo', '2025-09-19 05:24:18', '2025-09-19 05:24:18');
+(1, 'Audio Pro México', 'APM010203XYZ', 'Pedro Ramirez', '3312345678', 'pedro@audiopro.mx', 'Activo', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(2, 'Iluminación Espectacular', 'IES050607ABC', 'Laura Juarez', '8187654321', 'laura@iluminacion.com', 'Activo', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(3, 'Mobiliario Eventos MX', 'MEM080912PQR', 'Carmen Vega', '5577889900', 'carmen@mobiliariomx.com', 'Activo', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(4, 'Tech Video Solutions', 'TVS151218STU', 'Miguel Torres', '8199001122', 'miguel@techvideo.com', 'Activo', '2025-09-19 10:24:18', '2025-09-19 10:24:18');
 
 -- --------------------------------------------------------
 
@@ -577,25 +673,11 @@ CREATE TABLE `renta` (
 --
 
 INSERT INTO `renta` (`id`, `cliente_id`, `cotizacion_id`, `fecha_inicio`, `fecha_fin_prevista`, `fecha_devolucion_real`, `estado_renta`, `monto_total_renta`, `deposito_garantia`, `notas`, `created_at`, `updated_at`) VALUES
-(3, 3, NULL, '2025-12-06 08:47:00', '2025-11-27 20:44:00', '2025-11-28 23:44:00', 'EnCurso', 1.00, 0.10, 'Renta generada desde el carrito', '2025-11-20 06:45:09', '2025-11-20 06:45:09'),
-(4, 2, NULL, '2025-11-26 20:51:00', '2025-11-19 08:51:00', '2025-11-27 22:54:00', 'EnCurso', 2.00, 0.20, 'Renta generada desde el carrito', '2025-11-20 06:51:17', '2025-11-20 06:51:17'),
-(5, 4, NULL, '2025-11-27 19:22:00', '2025-12-01 19:23:00', '2025-11-06 23:19:00', 'Programada', 1.00, 0.10, 'Renta generada desde el carrito', '2025-11-21 05:19:50', '2025-11-21 05:19:50'),
-(6, 3, NULL, '2025-12-05 19:23:00', '2025-11-19 19:24:00', NULL, 'Programada', 2.00, 0.20, 'Renta generada desde el carrito', '2025-11-21 05:20:45', '2025-11-21 05:20:45');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `renta_inventario_item`
---
-
-CREATE TABLE `renta_inventario_item` (
-  `renta_id` int(11) NOT NULL,
-  `inventario_item_id` int(11) NOT NULL,
-  `precio_renta_item` decimal(10,2) NOT NULL,
-  `condicion_salida` text DEFAULT NULL,
-  `condicion_regreso` text DEFAULT NULL,
-  `notas` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+(24, 5, NULL, '2025-11-24 00:51:00', '2025-12-09 00:00:00', NULL, 'EnCurso', 11.00, 0.00, 'Generado desde Cotización #23', '2025-11-24 05:51:01', '2025-11-25 00:29:05'),
+(25, 1, NULL, '2025-11-24 18:26:00', '2025-12-09 00:00:00', NULL, 'Finalizada', 15000.00, 0.00, 'Generado desde Cotización #24', '2025-11-24 23:26:48', '2025-11-25 00:29:19'),
+(26, 2, 26, '2025-11-24 18:44:51', '2025-12-09 00:00:00', NULL, 'Programada', 22000.00, 0.00, 'Generado desde Cotización #26', '2025-11-24 23:44:52', '2025-11-24 23:44:52'),
+(27, 1, NULL, '2025-11-24 19:28:00', '2025-12-09 00:00:00', NULL, 'Finalizada', 42000.00, 0.00, 'Generado desde Cotización #27', '2025-11-25 00:28:26', '2025-11-25 00:44:42'),
+(28, 2, 28, '2025-11-24 19:44:09', '2025-12-09 00:00:00', NULL, 'Programada', 28000.00, 0.00, 'Generado desde Cotización #28', '2025-11-25 00:44:10', '2025-11-25 00:44:10');
 
 --
 -- Disparadores `renta`
@@ -664,10 +746,9 @@ CREATE TRIGGER `trg_renta_after_insert` AFTER INSERT ON `renta` FOR EACH ROW BEG
         
         CLOSE cur_productos;
     END IF;
-END;
+END
 $$
 DELIMITER ;
-
 DELIMITER $$
 CREATE TRIGGER `trg_renta_after_update` AFTER UPDATE ON `renta` FOR EACH ROW BEGIN
     -- Si la renta cambia a estado Finalizada o Cancelada, liberar los items
@@ -696,10 +777,37 @@ CREATE TRIGGER `trg_renta_after_update` AFTER UPDATE ON `renta` FOR EACH ROW BEG
             WHERE rii.renta_id = NEW.id
         );
     END IF;
-END;
+END
 $$
 DELIMITER ;
 
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `renta_inventario_item`
+--
+
+CREATE TABLE `renta_inventario_item` (
+  `renta_id` int(11) NOT NULL,
+  `inventario_item_id` int(11) NOT NULL,
+  `precio_renta_item` decimal(10,2) NOT NULL,
+  `condicion_salida` text DEFAULT NULL,
+  `condicion_regreso` text DEFAULT NULL,
+  `notas` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `renta_inventario_item`
+--
+
+INSERT INTO `renta_inventario_item` (`renta_id`, `inventario_item_id`, `precio_renta_item`, `condicion_salida`, `condicion_regreso`, `notas`) VALUES
+(24, 36, 11.00, 'Buena', NULL, 'Asignado automáticamente desde renta ID: 24'),
+(25, 39, 15000.00, 'Buena', NULL, 'Asignado automáticamente desde renta ID: 25'),
+(26, 40, 22000.00, 'Buena', NULL, 'Asignado automáticamente desde renta ID: 26'),
+(27, 41, 42000.00, 'Buena', NULL, 'Asignado automáticamente desde renta ID: 27'),
+(28, 42, 28000.00, 'Buena', NULL, 'Asignado automáticamente desde renta ID: 28');
+
+-- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `rol`
@@ -719,10 +827,10 @@ CREATE TABLE `rol` (
 --
 
 INSERT INTO `rol` (`id`, `codigo`, `nombre`, `descripcion`, `created_at`, `updated_at`) VALUES
-(1, 'ADMIN', 'Administrador', 'Rol con todos los permisos en el sistema.', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(2, 'OPER', 'Operador', 'Rol para la gestión de inventario y rentas.', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(3, 'VENT', 'Ventas', 'Rol para la gestión de clientes y cotizaciones.', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(4, 'CLI', 'Cliente', 'Rol para clientes que acceden al portal.', '2025-09-19 05:24:18', '2025-09-19 05:24:18');
+(1, 'ADMIN', 'Administrador', 'Rol con todos los permisos en el sistema.', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(2, 'OPER', 'Operador', 'Rol para la gestión de inventario y rentas.', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(3, 'VENT', 'Ventas', 'Rol para la gestión de clientes y cotizaciones.', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(4, 'CLI', 'Cliente', 'Rol para clientes que acceden al portal.', '2025-09-19 10:24:18', '2025-09-19 10:24:18');
 
 -- --------------------------------------------------------
 
@@ -747,11 +855,34 @@ CREATE TABLE `solicitud` (
 --
 
 INSERT INTO `solicitud` (`id`, `cliente_id`, `fecha_solicitud`, `nombre_producto_alternativo`, `cantidad_solicitada`, `descripcion_necesidad`, `estado_solicitud`, `created_at`, `updated_at`) VALUES
-(1, 1, '2025-09-19 00:24:18', NULL, 1, 'Necesito cotización para un sistema de sonido para una fiesta de 100 personas.', 'Nueva', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(2, 2, '2025-09-19 00:24:18', NULL, 1, 'Requiero equipo de video para una conferencia, incluyendo pantalla y proyector.', 'EnProceso', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(3, 4, '2025-09-18 14:30:00', 'Sistema de sonido completo', 1, 'Necesito un sistema completo para una presentación de producto con 200 asistentes', 'Nueva', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(4, 5, '2025-09-17 10:15:00', 'Mobiliario para boda', 50, 'Requiero mesas y sillas para una boda de 150 personas en jardín', 'EnProceso', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(5, 1, '2025-09-16 16:45:00', 'Iluminación LED', 20, 'Luces de colores para fiesta de cumpleaños en casa', 'Atendida', '2025-09-19 05:24:18', '2025-09-19 05:24:18');
+(1, 1, '2025-11-22 19:31:46', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-27T14:27 a 2025-11-27T14:27', 'Nueva', '2025-11-23 00:31:47', '2025-11-23 00:31:47'),
+(2, 1, '2025-11-22 19:34:08', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-27T14:27 a 2025-11-27T14:27', 'Nueva', '2025-11-23 00:34:09', '2025-11-23 00:34:09'),
+(3, 1, '2025-11-22 19:36:04', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-22T14:35 a 2025-11-22T18:36', 'Nueva', '2025-11-23 00:36:05', '2025-11-23 00:36:05'),
+(4, 1, '2025-11-22 19:37:24', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-22T14:35 a 2025-11-22T18:36', 'Nueva', '2025-11-23 00:37:25', '2025-11-23 00:37:25'),
+(5, 1, '2025-11-22 20:37:52', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-28T15:37 a 2025-11-28T15:37', 'Nueva', '2025-11-23 01:37:53', '2025-11-23 01:37:53'),
+(6, 3, '2025-11-22 21:22:02', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-28T16:21 a 2025-11-27T16:21', 'Nueva', '2025-11-23 02:22:03', '2025-11-23 02:22:03'),
+(7, 1, '2025-11-22 23:01:23', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-01-20T10:00 a 2025-01-25T18:00', 'Nueva', '2025-11-23 04:01:25', '2025-11-23 04:01:25'),
+(8, 1, '2025-11-23 14:35:31', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-23T09:35 a 2025-12-01T09:35', 'Nueva', '2025-11-23 19:35:32', '2025-11-23 19:35:32'),
+(9, 1, '2025-11-23 15:00:49', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-24T10:00 a 2025-11-26T10:00', 'Nueva', '2025-11-23 20:00:50', '2025-11-23 20:00:50'),
+(10, 1, '2025-11-23 15:28:24', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-23T10:28 a 2025-11-23T10:28', 'Nueva', '2025-11-23 20:28:25', '2025-11-23 20:28:25'),
+(11, 2, '2025-11-23 16:14:40', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-21T11:14 a 2025-11-22T11:14', 'Nueva', '2025-11-23 21:14:41', '2025-11-23 21:14:41'),
+(12, 2, '2025-11-23 16:25:58', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-23T11:25 a 2025-12-01T11:25', 'Nueva', '2025-11-23 21:25:59', '2025-11-23 21:25:59'),
+(13, 1, '2025-11-23 16:31:49', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-25T11:31 a 2025-11-19T11:31', 'Nueva', '2025-11-23 21:31:49', '2025-11-23 21:31:49'),
+(14, 3, '2025-11-23 16:38:25', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-23T11:38 a 2025-11-25T05:38', 'Nueva', '2025-11-23 21:38:26', '2025-11-23 21:38:26'),
+(15, 1, '2025-11-23 16:47:56', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-24T11:47 a 2025-11-24T11:47', 'Nueva', '2025-11-23 21:47:57', '2025-11-23 21:47:57'),
+(16, 2, '2025-11-23 17:00:47', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-24T12:00 a 2025-11-26T12:00', 'Nueva', '2025-11-23 22:00:48', '2025-11-23 22:00:48'),
+(17, 3, '2025-11-23 17:05:48', NULL, 2, 'Solicitud generada desde carrito web. Fechas: 2025-11-23T18:05 a 2025-11-24T12:05', 'Nueva', '2025-11-23 22:05:49', '2025-11-23 22:05:49'),
+(18, 1, '2025-11-23 17:11:19', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-23T12:11 a 2025-11-24T12:11', 'Nueva', '2025-11-23 22:11:20', '2025-11-23 22:11:20'),
+(19, 1, '2025-11-23 17:28:59', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-23T12:28 a 2025-11-17T12:28', 'Nueva', '2025-11-23 22:29:00', '2025-11-23 22:29:00'),
+(20, 2, '2025-11-23 17:35:05', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-23T12:34 a 2025-11-23T12:35', 'Nueva', '2025-11-23 22:35:06', '2025-11-23 22:35:06'),
+(21, 2, '2025-11-23 17:43:40', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-24T12:43 a 2025-11-24T12:43', 'Nueva', '2025-11-23 22:43:41', '2025-11-23 22:43:41'),
+(22, 1, '2025-11-23 18:59:23', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-23T03:02 a 2025-11-24T13:59', 'Nueva', '2025-11-23 23:59:24', '2025-11-23 23:59:24'),
+(23, 5, '2025-11-24 00:50:51', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-26T19:50 a 2025-12-01T19:50', 'Nueva', '2025-11-24 05:50:52', '2025-11-24 05:50:52'),
+(24, 1, '2025-11-24 18:25:06', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-24T13:24 a 2025-12-03T13:25', 'Nueva', '2025-11-24 23:25:07', '2025-11-24 23:25:07'),
+(25, 2, '2025-11-24 18:41:41', NULL, 3, 'Solicitud generada desde carrito web. Fechas: 2025-11-24T13:41 a 2025-11-26T13:41', 'Nueva', '2025-11-24 23:41:42', '2025-11-24 23:41:42'),
+(26, 2, '2025-11-24 18:44:25', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-24T13:44 a 2025-11-24T13:44', 'Nueva', '2025-11-24 23:44:26', '2025-11-24 23:44:26'),
+(27, 1, '2025-11-24 19:27:57', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-25T14:27 a 2025-11-25T14:27', 'Nueva', '2025-11-25 00:27:58', '2025-11-25 00:27:58'),
+(28, 2, '2025-11-24 19:43:57', NULL, 1, 'Solicitud generada desde carrito web. Fechas: 2025-11-26T14:43 a 2025-11-25T14:43', 'Nueva', '2025-11-25 00:43:57', '2025-11-25 00:43:57');
 
 -- --------------------------------------------------------
 
@@ -769,14 +900,37 @@ CREATE TABLE `solicitud_producto` (
 --
 
 INSERT INTO `solicitud_producto` (`solicitud_id`, `producto_id`) VALUES
-(1, 1),
-(2, 4),
-(3, 1),
+(1, 2),
+(2, 2),
 (3, 2),
-(3, 10),
-(4, 6),
-(4, 7),
-(5, 5);
+(4, 2),
+(5, 2),
+(6, 19),
+(7, 20),
+(8, 21),
+(9, 22),
+(10, 23),
+(11, 25),
+(12, 26),
+(13, 27),
+(14, 28),
+(15, 29),
+(16, 28),
+(17, 28),
+(17, 29),
+(18, 29),
+(19, 28),
+(20, 28),
+(21, 29),
+(22, 28),
+(23, 29),
+(24, 32),
+(25, 33),
+(25, 34),
+(25, 35),
+(26, 33),
+(27, 34),
+(28, 35);
 
 -- --------------------------------------------------------
 
@@ -797,14 +951,16 @@ CREATE TABLE `subcategoria` (
 --
 
 INSERT INTO `subcategoria` (`id`, `nombre`, `descripcion`, `created_at`, `updated_at`) VALUES
-(1, 'Altavoces Activos', 'Altavoces con amplificador integrado.', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(2, 'Consolas Digitales', 'Mesas de mezcla de audio digitales.', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(3, 'Micrófonos Inalámbricos', 'Micrófonos sin cables para mayor movilidad.', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(4, 'Luces LED', 'Sistemas de iluminación base LED.', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(5, 'Proyectores HD', 'Proyectores de alta definición.', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(6, 'Sillas Plegables', 'Sillas para todo tipo de evento.', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(7, 'Mesas Redondas', 'Mesas para banquetes y eventos.', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(8, 'Pantallas LED', 'Pantallas modulares para video en gran formato.', '2025-09-19 05:24:18', '2025-09-19 05:24:18');
+(1, 'Altavoces Activos', 'Altavoces con amplificador integrado.', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(2, 'Consolas Digitales', 'Mesas de mezcla de audio digitales.', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(3, 'Micrófonos Inalámbricos', 'Micrófonos sin cables para mayor movilidad.', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(4, 'Luces LED', 'Sistemas de iluminación base LED.', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(5, 'Proyectores HD', 'Proyectores de alta definición.', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(6, 'Sillas Plegables', 'Sillas para todo tipo de evento.', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(7, 'Mesas Redondas', 'Mesas para banquetes y eventos.', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(8, 'Pantallas LED', 'Pantallas modulares para video en gran formato.', '2025-09-19 10:24:18', '2025-09-19 10:24:18'),
+(9, 'Taladros', 'Subcategoría para taladros', '2025-11-23 21:06:39', '2025-11-23 21:06:39'),
+(10, 'w', NULL, '2025-11-24 00:00:44', '2025-11-24 00:00:44');
 
 -- --------------------------------------------------------
 
@@ -833,10 +989,8 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id`, `nombre_usuario`, `nombre`, `nombre2`, `apellido1`, `apellido2`, `password_hash`, `email`, `telefono`, `departamento`, `estado`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'Admin', 'Principal', 'del Sistema', '', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@axxion.com', '1234567890', 'Administración', 'Activo', '2025-09-19 05:24:18', '2025-09-19 05:24:18'),
-(5, 'f', 'j', 'h', 'h', 'g', '$2y$12$ebWwh0Z07Wurit4kNHrah.6G5sJ3U.J4.lXxdILXn6.rmpgboOO2S', 'julian@example.com.co', '777', 'Tecnología', 'Activo', '2025-09-19 21:47:30', '2025-09-19 21:47:30'),
-(6, 'jjulain', 'andres', 'amdfres', 'aguilar', 'vargas', '$2y$12$IfQa.8uNlis1kMY/NDBjO.VNlmbcYU0cwNMN38Ds7Qardlid6QXGS', 'example@auxiliar.com', '1', 'Marketing', 'Activo', '2025-09-20 01:32:04', '2025-09-20 01:32:04'),
-(7, 'CRISTIAN', 'Cristian', 'Camilo', 'Cifuentes', 'Gaona', '$2y$12$RyfCB1swasINQhbInJsjV.cB/HCE.UdHNSKsbHsX6BSxQWKv0yK7G', 'c@example.com', '22161510', 'Ventas', 'Activo', '2025-11-07 20:20:43', '2025-11-07 20:20:43');
+(8, 'JULIAN', 'JULIAN', 'ANDRES', 'VARGAS', 'Gaona', '$2y$12$qRKCJCNc4N0cFNvkpUkAieNtjyZsQPeH3nBM.6fTaX/3qPYomJxOm', 'J@example.com', '22161510', 'Ventas', 'Activo', '2025-11-23 22:26:50', '2025-11-23 22:26:50'),
+(11, 'c', 'c', 'c', 'c', 'c', '$2y$12$UQIK5gx8wZt9W3zrj21KVOti/A/RHRaPlAyGd6M3LJIlMKWd3g3ge', 'c@c.com', 'c', 'Tecnología', 'Activo', '2025-11-24 06:08:57', '2025-11-24 06:08:57');
 
 -- --------------------------------------------------------
 
@@ -854,10 +1008,8 @@ CREATE TABLE `usuario_rol` (
 --
 
 INSERT INTO `usuario_rol` (`usuario_id`, `rol_id`) VALUES
-(1, 1),
-(5, 1),
-(6, 2),
-(7, 1);
+(8, 1),
+(11, 1);
 
 -- --------------------------------------------------------
 
@@ -905,7 +1057,7 @@ CREATE TABLE `auditoria_inventario` (
 --
 DROP TABLE IF EXISTS `vista_clientes_completa`;
 
-CREATE VIEW `vista_clientes_completa`  AS SELECT `c`.`id` AS `id`, `c`.`nombre` AS `nombre`, `c`.`nombre2` AS `nombre2`, `c`.`apellido1` AS `apellido1`, `c`.`apellido2` AS `apellido2`, `c`.`rfc` AS `rfc`, `c`.`telefono_principal` AS `telefono_principal`, `c`.`correo_electronico` AS `correo_electronico`, `c`.`tipo_cliente` AS `tipo_cliente`, `c`.`estado_cliente` AS `estado_cliente`, `d`.`calle` AS `calle`, `d`.`numero_exterior` AS `numero_exterior`, `d`.`numero_interior` AS `numero_interior`, `d`.`colonia` AS `colonia`, `d`.`ciudad` AS `ciudad`, `d`.`estado_provincia` AS `estado_provincia`, `d`.`codigo_postal` AS `codigo_postal`, `d`.`pais` AS `pais`, `d`.`referencias` AS `referencias`, `c`.`created_at` AS `created_at`, `c`.`updated_at` AS `updated_at` FROM ((`cliente` `c` left join `cliente_direccion` `cd` on(`c`.`id` = `cd`.`cliente_id` and `cd`.`es_principal` = 1)) left join `direccion` `d` on(`cd`.`direccion_id` = `d`.`id`)) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_clientes_completa`  AS SELECT `c`.`id` AS `id`, `c`.`nombre` AS `nombre`, `c`.`nombre2` AS `nombre2`, `c`.`apellido1` AS `apellido1`, `c`.`apellido2` AS `apellido2`, `c`.`rfc` AS `rfc`, `c`.`telefono_principal` AS `telefono_principal`, `c`.`correo_electronico` AS `correo_electronico`, `c`.`tipo_cliente` AS `tipo_cliente`, `c`.`estado_cliente` AS `estado_cliente`, `d`.`calle` AS `calle`, `d`.`numero_exterior` AS `numero_exterior`, `d`.`numero_interior` AS `numero_interior`, `d`.`colonia` AS `colonia`, `d`.`ciudad` AS `ciudad`, `d`.`estado_provincia` AS `estado_provincia`, `d`.`codigo_postal` AS `codigo_postal`, `d`.`pais` AS `pais`, `d`.`referencias` AS `referencias`, `c`.`created_at` AS `created_at`, `c`.`updated_at` AS `updated_at` FROM ((`cliente` `c` left join `cliente_direccion` `cd` on(`c`.`id` = `cd`.`cliente_id` and `cd`.`es_principal` = 1)) left join `direccion` `d` on(`cd`.`direccion_id` = `d`.`id`)) ;
 
 --
 -- Índices para tablas volcadas
@@ -953,7 +1105,7 @@ ALTER TABLE `cliente_direccion`
 --
 ALTER TABLE `cotizacion`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_cliente_id` (`cliente_id`),
+  ADD KEY `fk_cotizacion_cliente` (`cliente_id`),
   ADD KEY `fk_cotizacion_solicitud` (`solicitud_id`);
 
 --
@@ -961,7 +1113,7 @@ ALTER TABLE `cotizacion`
 --
 ALTER TABLE `detalle_cotizacion`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_cotizacion_id` (`cotizacion_id`),
+  ADD KEY `fk_detalle_cotizacion_cotizacion` (`cotizacion_id`),
   ADD KEY `fk_detalle_cotizacion_producto` (`producto_id`);
 
 --
@@ -1010,9 +1162,7 @@ ALTER TABLE `migrations`
 -- Indices de la tabla `producto`
 --
 ALTER TABLE `producto`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `sku` (`sku`),
-  ADD UNIQUE KEY `numero_serie` (`numero_serie`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `producto_subcategoria`
@@ -1041,7 +1191,7 @@ ALTER TABLE `proveedor_direccion`
 --
 ALTER TABLE `renta`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_cliente_id` (`cliente_id`),
+  ADD KEY `fk_renta_cliente` (`cliente_id`),
   ADD KEY `fk_renta_cotizacion` (`cotizacion_id`);
 
 --
@@ -1063,7 +1213,7 @@ ALTER TABLE `rol`
 --
 ALTER TABLE `solicitud`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_cliente_id` (`cliente_id`);
+  ADD KEY `fk_solicitud_cliente` (`cliente_id`);
 
 --
 -- Indices de la tabla `solicitud_producto`
@@ -1108,7 +1258,7 @@ ALTER TABLE `auditoria_inventario`
 -- AUTO_INCREMENT de la tabla `categoria`
 --
 ALTER TABLE `categoria`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `cliente`
@@ -1120,13 +1270,13 @@ ALTER TABLE `cliente`
 -- AUTO_INCREMENT de la tabla `cotizacion`
 --
 ALTER TABLE `cotizacion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_cotizacion`
 --
 ALTER TABLE `detalle_cotizacion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT de la tabla `devolucion`
@@ -1150,13 +1300,13 @@ ALTER TABLE `entrega`
 -- AUTO_INCREMENT de la tabla `inventario_item`
 --
 ALTER TABLE `inventario_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT de la tabla `mantenimiento`
 --
 ALTER TABLE `mantenimiento`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT de la tabla `migrations`
@@ -1168,7 +1318,7 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT de la tabla `producto`
 --
 ALTER TABLE `producto`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT de la tabla `proveedor`
@@ -1180,7 +1330,7 @@ ALTER TABLE `proveedor`
 -- AUTO_INCREMENT de la tabla `renta`
 --
 ALTER TABLE `renta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT de la tabla `rol`
@@ -1192,19 +1342,19 @@ ALTER TABLE `rol`
 -- AUTO_INCREMENT de la tabla `solicitud`
 --
 ALTER TABLE `solicitud`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT de la tabla `subcategoria`
 --
 ALTER TABLE `subcategoria`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Restricciones para tablas volcadas
@@ -1285,13 +1435,6 @@ ALTER TABLE `renta`
   ADD CONSTRAINT `fk_renta_cotizacion` FOREIGN KEY (`cotizacion_id`) REFERENCES `cotizacion` (`id`);
 
 --
--- Filtros para la tabla `renta_inventario_item`
---
-ALTER TABLE `renta_inventario_item`
-  ADD CONSTRAINT `fk_rii_inventario_item` FOREIGN KEY (`inventario_item_id`) REFERENCES `inventario_item` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_rii_renta` FOREIGN KEY (`renta_id`) REFERENCES `renta` (`id`) ON DELETE CASCADE;
-
---
 -- Filtros para la tabla `solicitud`
 --
 ALTER TABLE `solicitud`
@@ -1315,49 +1458,3 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
---
--- Trigger para crear mantenimiento automático al cambiar estado de item
---
-DELIMITER //
-CREATE TRIGGER `trg_inventario_item_after_update` AFTER UPDATE ON `inventario_item` FOR EACH ROW BEGIN
-    -- Si cambia a EnMantenimiento, crear registro en mantenimiento
-    IF NEW.estado_item = 'EnMantenimiento' AND OLD.estado_item != 'EnMantenimiento' THEN
-        INSERT INTO `mantenimiento` (
-            `inventario_item_id`,
-            `fecha_inicio`,
-            `fecha_fin_prevista`,
-            `tipo_mantenimiento`,
-            `descripcion_problema`,
-            `estado_mantenimiento`,
-            `responsable`,
-            `created_at`,
-            `updated_at`
-        ) VALUES (
-            NEW.id,
-            NOW(),
-            DATE_ADD(NOW(), INTERVAL 3 DAY),
-            'Correctivo',
-            'Mantenimiento generado automáticamente por cambio de estado',
-            'Programado',
-            'Sistema',
-            NOW(),
-            NOW()
-        );
-    END IF;
-END//
-DELIMITER ;
-
---
--- Trigger para liberar item cuando finaliza mantenimiento
---
-DELIMITER //
-CREATE TRIGGER `trg_mantenimiento_after_update` AFTER UPDATE ON `mantenimiento` FOR EACH ROW BEGIN
-    -- Si cambia a Finalizado, poner item como Disponible
-    IF NEW.estado_mantenimiento = 'Finalizado' AND OLD.estado_mantenimiento != 'Finalizado' THEN
-        UPDATE `inventario_item`
-        SET `estado_item` = 'Disponible'
-        WHERE `id` = NEW.inventario_item_id;
-    END IF;
-END//
-DELIMITER ;

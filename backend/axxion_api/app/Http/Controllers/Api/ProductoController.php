@@ -17,9 +17,55 @@ class ProductoController extends Controller
     public function index()
     {
         try {
-            $productos = Producto::all();
+            // Eager load inventory items, their active rentals, and the client associated with those rentals
+            $productos = Producto::with(['inventarioItems.rentas' => function($query) {
+                $query->whereIn('estado_renta', ['Programada', 'EnCurso', 'Activa'])
+                      ->orderBy('fecha_inicio', 'desc');
+            }, 'inventarioItems.rentas.cliente'])->get();
+
+            // Process each product to attach 'renta_activa' if applicable
+            // This mimics the structure expected by the frontend EquipmentCard
+            $productos->each(function($producto) {
+                $producto->renta_activa = null;
+                
+                // Check if any inventory item has an active rental
+                foreach ($producto->inventarioItems as $item) {
+                    Log::info('Checking inventory item:', [
+                        'item_id' => $item->id,
+                        'rentas_count' => $item->rentas->count()
+                    ]);
+                    
+                    $activeRental = $item->rentas->first();
+                    if ($activeRental) {
+                        Log::info('Found active rental:', [
+                            'rental_id' => $activeRental->id,
+                            'estado' => $activeRental->estado_renta,
+                            'cliente' => $activeRental->cliente ? $activeRental->cliente->nombre : 'null'
+                        ]);
+                        
+                        $producto->renta_activa = [
+                            'cliente_nombre' => $activeRental->cliente ? 
+                                trim($activeRental->cliente->nombre . ' ' . ($activeRental->cliente->apellido1 ?? '')) : 
+                                'Cliente Desconocido',
+                            'fecha_fin_prevista' => $activeRental->fecha_fin_prevista,
+                            'estado_renta' => $activeRental->estado_renta
+                        ];
+                        break; 
+                    }
+                }
+                
+                if ($producto->renta_activa) {
+                    Log::info('Product with active rental:', [
+                        'producto_id' => $producto->id,
+                        'producto_nombre' => $producto->nombre,
+                        'renta_activa' => $producto->renta_activa
+                    ]);
+                }
+            });
+
             return response()->json($productos);
         } catch (\Exception $e) {
+            Log::error('Error in ProductoController::index: ' . $e->getMessage());
             return response()->json(['error' => 'Error al obtener los productos: ' . $e->getMessage()], 500);
         }
     }
